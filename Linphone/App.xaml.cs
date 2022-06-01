@@ -47,7 +47,6 @@ namespace Linphone
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
             SettingsManager.InstallConfigFile();
-            acceptCall = false;
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -135,7 +134,6 @@ namespace Linphone
             LinphoneManager.Instance.InitLinphoneCore();
             LinphoneManager.Instance.CallListener = this;
             LinphoneManager.Instance.CoreDispatcher = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().CoreWindow.Dispatcher;
-            
 
             rootFrame = Window.Current.Content as Frame;
 

@@ -40,11 +40,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Video"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="تصویر"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>
@@ -53,11 +54,14 @@
         <Button 
             x:Name="camera"
             Grid.Row="1"
+            IsEnabled="false"
             Grid.Column="1"
             BorderThickness="0"
             Style="{StaticResource CallButton}"
             Click="camera_Click_1"
-            IsEnabled="{Binding CameraButtonEnabled}">
+            >
+            <!--IsEnabled="{Binding CameraButtonEnabled}"-->
+
             <Button.ContentTemplate>
                 <DataTemplate>
                     <Grid>
@@ -70,11 +74,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Toggle camera"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="تعویض دوربین"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </Button.ContentTemplate>
@@ -99,11 +104,13 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Stats"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        
+                        <TextBlock Text="اطلاعات شبکه"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>
@@ -160,11 +167,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Pause"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="مکث"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>
@@ -189,11 +197,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Micro"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="میکروفون"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>
@@ -218,11 +227,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Speaker"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="بلندگو"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>
@@ -235,6 +245,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="2"
             BorderThickness="0"
+            Background="#FFFF2828"
             Click="hangUp_Click"
             ClickMode="Release">
             <Button.ContentTemplate>
@@ -249,11 +260,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Hang Up"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="پایان تماس"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </Button.ContentTemplate>
@@ -278,11 +290,12 @@
                                 <CompositeTransform ScaleX=".75" ScaleY=".75"/>
                             </FontIcon.RenderTransform>
                         </FontIcon>
-                        <TextBlock Text="Dialpad"
-                        Grid.Row="1"
-                        Margin="0,4,0,0"
-                        LineHeight="14"
-                        HorizontalAlignment="Center" />
+                        <TextBlock Text="صفحه کلید"
+                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                   Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   LineHeight="14"
+                                   HorizontalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ToggleButton.ContentTemplate>

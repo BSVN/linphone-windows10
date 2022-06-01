@@ -52,8 +52,8 @@
 
             <TextBlock
                 x:Name="Status"
-                Text="Incoming Call"
-                x:Uid="IncomingCall"
+                Text="تماس ورودی"
+                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                 Style="{StaticResource ListItemStyle}"
                 HorizontalAlignment="Center"
                 Margin="12"
@@ -96,6 +96,7 @@
                     Style="{StaticResource ButtonStyle}"
                     Grid.Row="0"
                     Grid.Column="0"
+                    Background="#FFFF2828"
                     BorderThickness="0"
                     Click="Decline_Click"
                     ClickMode="Release">
@@ -112,7 +113,8 @@
                                     </FontIcon.RenderTransform>
                                 </FontIcon>
                                 <TextBlock
-                                    Text="Decline"
+                                    Text="رد تماس"
+                                    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"                                    
                                     Grid.Row="1"
                                     LineHeight="14"
                                     Style="{StaticResource TextStyle}"
@@ -126,6 +128,7 @@
                     x:Name="Answer"
                     Grid.Row="0"
                     Grid.Column="1"
+                    Background="#FF00AD03"
                     Style="{StaticResource AccentLongButtonStyle}"
                     BorderThickness="0"
                     Click="Answer_Click"
@@ -143,7 +146,8 @@
                                 </FontIcon.RenderTransform>
                             </FontIcon>
                                     <TextBlock
-                                Text="Answer"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                Text="پاسخ"
                                 Grid.Row="1"
                                 LineHeight="14"
                                 Style="{StaticResource TextStyle}"

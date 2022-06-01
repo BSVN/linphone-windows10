@@ -23,53 +23,99 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Input;
 using System.ComponentModel;
 using System.Collections.Generic;
+using Microsoft.UI.Xaml.Controls;
+using System.Threading.Tasks;
+using Microsoft.Web.WebView2.Core;
+using Windows.Storage;
+using System.Net.Http;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
 
-    public sealed partial class Dialer : Page, INotifyPropertyChanged {
+    public sealed partial class Dialer : Page, INotifyPropertyChanged
+    {
+        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+        public static string BrowserCurrentUrlOffset = null;
+        public static string BrowserBaseUrl = null;
+        public static bool IsIncomingCall = true;
+        public static string CallerId = null;
+        public static string CalleeId = null;
+        public static Guid CallId = default;
+        public static bool HasUnfinishedCall = false;
+        private HttpClient httpClient;
 
-        public Dialer() {
+        public Dialer()
+        {
+            //localSettings.Values["test setting"] = "a device specific setting";
+            //Windows.Storage.ApplicationData.Current.LocalSettings.Pa
             this.InitializeComponent();
+            httpClient = new HttpClient();
             DataContext = this;
             ContactsManager contactsManager = ContactsManager.Instance;
-            addressBox.KeyDown += (sender, args) => {
-                if (args.Key == Windows.System.VirtualKey.Enter) {
+            addressBox.KeyDown += (sender, args) =>
+            {
+                if (args.Key == Windows.System.VirtualKey.Enter)
+                {
                     call_Click(null, null);
                 }
             };
         }
 
+        /// <summary>
+        /// Raises right after page unloading 
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+            base.OnNavigatingFrom(e); 
+        }
+
         private int unreadMessageCount;
-        public int UnreadMessageCount {
-            get {
+        public int UnreadMessageCount
+        {
+            get
+            {
                 return unreadMessageCount;
             }
 
-            set {
+            set
+            {
                 unreadMessageCount = value;
-                if (unreadMessageCount > 0) {
+                if (unreadMessageCount > 0)
+                {
                     unreadMessageText.Visibility = Visibility.Visible;
-                } else {
+                }
+                else
+                {
                     unreadMessageText.Visibility = Visibility.Collapsed;
                 }
 
-                if (PropertyChanged != null) {
+                if (PropertyChanged != null)
+                {
                     PropertyChanged(this, new PropertyChangedEventArgs("UnreadMessageCount"));
                 }
             }
         }
 
         private int missedCallCount;
-        public int MissedCallCount {
-            get {
+        public int MissedCallCount
+        {
+            get
+            {
                 return missedCallCount;
             }
 
-            set {
+            set
+            {
                 missedCallCount = value;
-                if (missedCallCount > 0) {
+                if (missedCallCount > 0)
+                {
                     MissedCallText.Visibility = Visibility.Visible;
-                } else {
+                }
+                else
+                {
                     MissedCallText.Visibility = Visibility.Collapsed;
                 }
 
@@ -79,7 +125,8 @@ namespace Linphone.Views {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void LogUploadProgressIndication(int offset, int total) {
+        private void LogUploadProgressIndication(int offset, int total)
+        {
             /* base.UIDispatcher.BeginInvoke(() =>
              {
                  BugReportUploadProgressBar.Maximum = total;
@@ -90,16 +137,18 @@ namespace Linphone.Views {
              });*/
         }
 
-        private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message) {
+        private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
+        {
             status.RefreshStatus();
         }
 
-        private void MessageReceived(ChatRoom room, ChatMessage message) {
-
+        private void MessageReceived(ChatRoom room, ChatMessage message)
+        {
             UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
             base.OnNavigatedTo(e);
 
             LinphoneManager.Instance.CoreDispatcher = Dispatcher;
@@ -145,53 +194,78 @@ namespace Linphone.Views {
                     }
                 }*/
 
-            if (LinphoneManager.Instance.Core.CallsNb > 0) {
+            if (LinphoneManager.Instance.Core.CallsNb > 0)
+            {
                 Call call = LinphoneManager.Instance.Core.CurrentCall;
                 List<String> parameters = new List<String>();
                 parameters.Add(call.RemoteAddress.AsStringUriOnly());
                 Frame.Navigate(typeof(Views.InCall), parameters);
             }
 
-            if (LinphoneManager.Instance.GetUnreadMessageCount() > 0) {
+            if (LinphoneManager.Instance.GetUnreadMessageCount() > 0)
+            {
                 UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
             }
 
-            if (LinphoneManager.Instance.Core.MissedCallsCount > 0) {
+            if (LinphoneManager.Instance.Core.MissedCallsCount > 0)
+            {
                 MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
             }
 
-            if (e.Parameter is String && (e.Parameter as String)?.Length > 0 && e.NavigationMode != NavigationMode.Back) {
+            if (e.Parameter is String && (e.Parameter as String)?.Length > 0 && e.NavigationMode != NavigationMode.Back)
+            {
                 String arguments = e.Parameter as String;
                 addressBox.Text = arguments;
-                try {
+                try
+                {
                     Address address = LinphoneManager.Instance.Core.InterpretUrl(e.Parameter as String);
                     String sipAddressToCall = address.AsStringUriOnly();
                     addressBox.Text = sipAddressToCall;
-                } catch (Exception exception) {
+                }
+                catch (Exception exception)
+                {
                 }
             }
         }
 
-        private void CallStateChanged(Call call, CallState state) {
+        private void CallStateChanged(Call call, CallState state)
+        {
             MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
         }
 
-        protected override void OnNavigatedFrom(NavigationEventArgs nee) {
+        protected override void OnNavigatedFrom(NavigationEventArgs nee)
+        {
             base.OnNavigatedFrom(nee);
             // LinphoneManager.Instance.LogUploadProgressIndicationEH -= LogUploadProgressIndication;
             // BugReportUploadPopup.Visibility = Visibility.Collapsed;
         }
 
-        private void call_Click(object sender, RoutedEventArgs e) {
-            if (addressBox.Text.Length > 0) {
+        private async void call_Click(object sender, RoutedEventArgs e)
+        {
+            if (HasUnfinishedCall)
+            {
+                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/{Dialer.CallId}");
+                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
+                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
+                    return;
+                else
+                    HasUnfinishedCall = false;
+            }
+
+            if (addressBox.Text.Length > 0)
+            {
+                IsIncomingCall = false;
                 LinphoneManager.Instance.NewOutgoingCall(addressBox.Text);
-            } else {
+            }
+            else
+            {
                 string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
                 addressBox.Text = lastDialedNumber == null ? "" : lastDialedNumber;
             }
         }
 
-        private void numpad_Click(object sender, RoutedEventArgs e) {
+        private void numpad_Click(object sender, RoutedEventArgs e)
+        {
             Button button = sender as Button;
             String tag = button.Tag as String;
             LinphoneManager.Instance.Core.PlayDtmf(Convert.ToSByte(tag.ToCharArray()[0]), 1000);
@@ -199,56 +273,89 @@ namespace Linphone.Views {
             addressBox.Text += tag;
         }
 
-        private void VoicemailClick(object sender, RoutedEventArgs e) {
+        private void VoicemailClick(object sender, RoutedEventArgs e)
+        {
 
         }
 
-        private void zero_Hold(object sender, RoutedEventArgs e) {
+        private void zero_Hold(object sender, RoutedEventArgs e)
+        {
             if (addressBox.Text.Length > 0)
                 addressBox.Text = addressBox.Text.Substring(0, addressBox.Text.Length - 1);
             addressBox.Text += "+";
         }
 
-        private void chat_Click(object sender, RoutedEventArgs e) {
+        private void chat_Click(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.Chats), null);
         }
 
-        private void history_Click(object sender, RoutedEventArgs e) {
+        private void history_Click(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.History), null);
         }
 
-        private void contacts_Click(object sender, RoutedEventArgs e) {
+        private void contacts_Click(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.ContactList), null);
         }
 
-        private void settings_Click(object sender, RoutedEventArgs e) {
-            Frame.Navigate(typeof(Views.Settings), null);
+        private async void settings_Click(object sender, RoutedEventArgs e)
+        {
+            var result = await AdminPasswordDialog.ShowAsync();
+            if (AdminPassword.Password == "Noei@Sip#")
+            {
+                Frame.Navigate(typeof(Views.Settings), null);
+            }
         }
 
-        private void about_Click(object sender, RoutedEventArgs e) {
+        private void about_Click(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.About), null);
         }
 
-        private void disconnect_Click(object sender, RoutedEventArgs e) {
+        private void disconnect_Click(object sender, RoutedEventArgs e)
+        {
             EnableRegister(false);
         }
 
-        private void connect_Click(object sender, EventArgs e) {
+        private void connect_Click(object sender, EventArgs e)
+        {
             EnableRegister(true);
         }
 
-        private void EnableRegister(bool enable) {
+        private void EnableRegister(bool enable)
+        {
             Core lc = LinphoneManager.Instance.Core;
             ProxyConfig cfg = lc.DefaultProxyConfig;
-            if (cfg != null) {
+            if (cfg != null)
+            {
                 cfg.Edit();
                 cfg.RegisterEnabled = enable;
                 cfg.Done();
             }
         }
 
-        private void status_Tapped(object sender, TappedRoutedEventArgs e) {
+        private void status_Tapped(object sender, TappedRoutedEventArgs e)
+        {
             LinphoneManager.Instance.Core.RefreshRegisters();
+        }
+
+        private void Browser_Loaded(object sender, RoutedEventArgs e)
+        {            
+            if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
+            {
+                object settingValue = localSettings.Values["PanelUrl"];
+                BrowserBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
+                Browser.Source = new Uri($"{BrowserBaseUrl}{BrowserCurrentUrlOffset}");
+            }
+            else
+            {
+                object settingValue = localSettings.Values["PanelUrl"];
+                string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
+                Browser.Source = new Uri(loadingUrl);
+                BrowserBaseUrl = loadingUrl;
+            }
         }
     }
 }
