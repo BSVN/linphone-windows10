@@ -109,11 +109,29 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <Content Include="Assets\LargeTile.scale-100.png" />
+    <Content Include="Assets\LargeTile.scale-125.png" />
+    <Content Include="Assets\LargeTile.scale-150.png" />
+    <Content Include="Assets\LargeTile.scale-200.png" />
+    <Content Include="Assets\LargeTile.scale-400.png" />
     <Content Include="Assets\linphonerc" />
     <Content Include="Assets\linphonerc-factory" />
     <Content Include="Assets\avatar.png" />
     <Content Include="Assets\avatar2.png" />
     <Content Include="Assets\linphone_user.png" />
+    <Content Include="Assets\SmallTile.scale-100.png" />
+    <Content Include="Assets\SmallTile.scale-125.png" />
+    <Content Include="Assets\SmallTile.scale-150.png" />
+    <Content Include="Assets\SmallTile.scale-200.png" />
+    <Content Include="Assets\SmallTile.scale-400.png" />
+    <Content Include="Assets\SplashScreen.scale-100.png" />
+    <Content Include="Assets\SplashScreen.scale-125.png" />
+    <Content Include="Assets\SplashScreen.scale-150.png" />
+    <Content Include="Assets\SplashScreen.scale-400.png" />
+    <Content Include="Assets\Square150x150Logo.scale-100.png" />
+    <Content Include="Assets\Square150x150Logo.scale-125.png" />
+    <Content Include="Assets\Square150x150Logo.scale-150.png" />
+    <Content Include="Assets\Square150x150Logo.scale-400.png" />
     <Content Include="Assets\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
     <Content Include="Assets\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
     <Content Include="Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
@@ -133,6 +151,15 @@
     <Content Include="Assets\Square44x44Logo.targetsize-256.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-32.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-48.png" />
+    <Content Include="Assets\StoreLogo.scale-100.png" />
+    <Content Include="Assets\StoreLogo.scale-125.png" />
+    <Content Include="Assets\StoreLogo.scale-150.png" />
+    <Content Include="Assets\StoreLogo.scale-400.png" />
+    <Content Include="Assets\WideTile.scale-100.png" />
+    <Content Include="Assets\WideTile.scale-125.png" />
+    <Content Include="Assets\WideTile.scale-150.png" />
+    <Content Include="Assets\WideTile.scale-200.png" />
+    <Content Include="Assets\WideTile.scale-400.png" />
     <Content Include="WindowsPhoneReservedAppInfo.xml" />
   </ItemGroup>
   <ItemGroup>
