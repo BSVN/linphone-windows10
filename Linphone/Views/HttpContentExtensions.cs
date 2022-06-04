@@ -1,6 +1,7 @@
 ﻿/*
 HttpContentExtensions.cs
-Copyright (C) 2022 Resa alongside of Belledonne Communications, Grenoble, France
+Copyright (C) 2022  Resaa Corporation.
+Copyright (C) 2016  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
