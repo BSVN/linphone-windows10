@@ -5,10 +5,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:Model="using:Linphone.Model"
+    FlowDirection="RightToLeft"
     d:DesignHeight="30" d:DesignWidth="480">
-
+    
     <StackPanel x:Name="LayoutRoot" Background="Transparent" Orientation="Horizontal" Padding="5,5,5,5" VerticalAlignment="Center">
         <Image x:Name="StatusLed" Height="15" Width="15" Stretch="Uniform" Margin="10,0,5,0" VerticalAlignment="Center" ></Image>
-        <TextBlock x:Name="StatusText" Style="{StaticResource StatusBarTextStyle}" VerticalAlignment="Center"></TextBlock>
+        <TextBlock x:Name="StatusText" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Style="{StaticResource StatusBarTextStyle}" VerticalAlignment="Center"></TextBlock>
     </StackPanel>
 </UserControl>

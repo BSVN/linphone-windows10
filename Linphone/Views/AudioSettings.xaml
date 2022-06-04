@@ -6,13 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:linphone="clr-namespace:Linphone"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    FlowDirection="RightToLeft"
+    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
     mc:Ignorable="d">
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot">
         <!--Pivot Control-->
-        <Pivot Title="AudioSettings" x:Uid="AudioSettings">
-            <PivotItem Header="CodecsMenu" x:Uid="CodecsMenu">
+        <Pivot Title="تنظیمات صدا" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb">
+            <PivotItem Header="کُدک ها" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb">
                 <ScrollViewer>
                     <ScrollViewer.Content>
                         <Grid x:Name="ContentPanel">
@@ -35,55 +37,72 @@
                             <ToggleSwitch  
                                 Grid.Row="0"
                                 x:Name="OPUS"
-                                x:Uid="OpusCodec">
+                                x:Uid="OpusCodec"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="2"
                                 x:Name="Speex16" 
-                                x:Uid="Speex16Codec">
+                                x:Uid="Speex16Codec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="3"
                                 x:Name="Speex8" 
-                                x:Uid="Speex8Codec">
+                                x:Uid="Speex8Codec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="4"
                                 x:Name="PCMU" 
-                                x:Uid="PCMUCodec">
+                                x:Uid="PCMUCodec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="5"
                                 x:Name="PCMA" 
-                                x:Uid="PCMACodec">
+                                x:Uid="PCMACodec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="6"
                                 x:Name="G729" 
-                                x:Uid="G729Codec">
+                                x:Uid="G729Codec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="7"
                                 x:Name="GSM" 
-                                x:Uid="GSMCodec">
+                                x:Uid="GSMCodec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="8"
                                 x:Name="AMRWB" 
-                                x:Uid="AMRWBCodec">
+                                x:Uid="AMRWBCodec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
 
                             <ToggleSwitch
                                 Grid.Row="9"
                                 x:Name="AMRNB" 
-                                x:Uid="AMRNBCodec">
+                                x:Uid="AMRNBCodec"
+                                FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                OffContent="غیر فعال" OnContent="فعال">
                             </ToggleSwitch>
                             
                         </Grid>

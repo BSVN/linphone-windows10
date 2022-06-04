@@ -11,9 +11,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="ContentPanel" Grid.Row="0" Margin="12,0,12,0">
-
-        </Grid>
+        <Grid x:Name="ContentPanel" Grid.Row="0" Margin="12,0,12,0"></Grid>
     </Grid>
 
 </Page>
