@@ -329,6 +329,7 @@
 
         <webui:WebView2 x:Name="Browser" 
                         Grid.Column="1"
+                        NavigationCompleted="Browser_NavigationCompleted"
                         Loaded="Browser_Loaded"/>
     </Grid>
 </Page>

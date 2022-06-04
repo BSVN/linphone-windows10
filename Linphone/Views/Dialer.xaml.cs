@@ -29,6 +29,7 @@ using Microsoft.Web.WebView2.Core;
 using Windows.Storage;
 using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
+using System.Diagnostics;
 
 namespace Linphone.Views
 {
@@ -38,17 +39,23 @@ namespace Linphone.Views
         ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         public static string BrowserCurrentUrlOffset = null;
         public static string BrowserBaseUrl = null;
-        public static bool IsIncomingCall = true;
+
+        public static bool IsIncomingCall { get; set; } = false;
+
         public static string CallerId = null;
+
         public static string CalleeId = null;
+
         public static Guid CallId = default;
+
+        public static bool IsLoggedIn = false;
+
         public static bool HasUnfinishedCall = false;
+
         private HttpClient httpClient;
 
         public Dialer()
         {
-            //localSettings.Values["test setting"] = "a device specific setting";
-            //Windows.Storage.ApplicationData.Current.LocalSettings.Pa
             this.InitializeComponent();
             httpClient = new HttpClient();
             DataContext = this;
@@ -68,7 +75,9 @@ namespace Linphone.Views
         /// <param name="e"></param>
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+            if (Browser.Source.OriginalString.Length > BrowserBaseUrl.Length)
+                BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+
             base.OnNavigatingFrom(e); 
         }
 
@@ -244,7 +253,7 @@ namespace Linphone.Views
         {
             if (HasUnfinishedCall)
             {
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/{Dialer.CallId}");
+                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/{Dialer.CallId}");
                 var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
                 if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
                     return;
@@ -338,7 +347,8 @@ namespace Linphone.Views
 
         private void status_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            LinphoneManager.Instance.Core.RefreshRegisters();
+            if (IsLoggedIn)
+                LinphoneManager.Instance.Core.RefreshRegisters();
         }
 
         private void Browser_Loaded(object sender, RoutedEventArgs e)
@@ -355,6 +365,45 @@ namespace Linphone.Views
                 string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
                 Browser.Source = new Uri(loadingUrl);
                 BrowserBaseUrl = loadingUrl;
+            }
+        }
+
+        private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+        {
+            if (sender.Source.AbsolutePath == "/Account/Login")
+            {
+                IsLoggedIn = false;
+                DisableRegisteration();
+            }
+            else if (sender.Source.AbsolutePath.Contains("Dashboard"))
+            {
+                IsLoggedIn = true;
+                EnableRegister(true);
+            }
+        }
+
+        private static void DisableRegisteration()
+        {
+            Core lc = LinphoneManager.Instance.Core;
+            ProxyConfig cfg = lc.DefaultProxyConfig;
+            if (cfg != null)
+            {
+                cfg.Edit();
+                cfg.RegisterEnabled = false;
+                cfg.Done();
+
+                //Wait for unregister to complete
+                int timeout = 2000;
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (true)
+                {
+                    if (stopwatch.ElapsedMilliseconds >= timeout || cfg.State == RegistrationState.Cleared || cfg.State == RegistrationState.None)
+                    {
+                        break;
+                    }
+                    LinphoneManager.Instance.Core.Iterate();
+                    System.Threading.Tasks.Task.Delay(100);
+                }
             }
         }
     }

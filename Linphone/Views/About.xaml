@@ -60,7 +60,7 @@
                 Margin="0,5,0,0">
                 <Hyperlink NavigateUri="https://resaa.net/" Foreground="#FFFF5E00">https://resaa.net/</Hyperlink>
             </TextBlock>
-
+            
             <TextBlock
                 TextAlignment="Center"
                 FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
@@ -68,7 +68,7 @@
                     قدرت گرفته از LinPhone <LineBreak/>
                     شرکت رسالت سلامت ایرانیان
             </TextBlock>
-                
+
         </StackPanel>
     </Grid>
 

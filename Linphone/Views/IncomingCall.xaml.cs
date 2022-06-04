@@ -91,10 +91,17 @@ namespace Linphone.Views
             if ((nee.Parameter as String).Contains("sip"))
             {
                 _callingNumber = (nee.Parameter as String);
+
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
+                Dialer.CallId = default;
+                Dialer.CallerId = address.Username;
+                Dialer.CalleeId = UserId;
+
                 if (_callingNumber.StartsWith("sip:"))
                 {
                     _callingNumber = _callingNumber.Substring(4);
                 }
+
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
                 Contact.Text = _callingNumber;
 
@@ -104,18 +111,20 @@ namespace Linphone.Views
                     //cm.ContactFound += cm_ContactFound;
                     //cm.FindContact(_callingNumber);
                 }
-                
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                
-                Dialer.CallerId = address.Username;
-                Dialer.CalleeId = UserId;
 
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/InitiateIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
-                if (result != null)
+                try
                 {
-                    Dialer.IsIncomingCall = true;
-                    Dialer.CallId = result.Result.Data.Id;
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                    if (result != null)
+                    {
+                        Dialer.IsIncomingCall = true;
+                        Dialer.CallId = result.Result.Data.Id;
+                    }
+                }
+                catch
+                {
+
                 }
             }
         }
@@ -145,9 +154,16 @@ namespace Linphone.Views
             {
                 if (Dialer.CallId != default)
                 {
-                    Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/AcceptIncoming/{Dialer.CallId}");
-                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                    try
+                    {
+                        Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
+                        var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{Dialer.CallId}");
+                        var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 List<string> parameters = new List<string>();
@@ -163,13 +179,20 @@ namespace Linphone.Views
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
-            Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-            var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
-            var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
-            if (result != null)
+            try
             {
-                Dialer.IsIncomingCall = true;
-                Dialer.CallId = default;
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
+                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
+                if (result != null)
+                {
+                    Dialer.IsIncomingCall = true;
+                    Dialer.CallId = default;
+                }
+            }
+            catch
+            {
+
             }
 
             LinphoneManager.Instance.EndCurrentCall();

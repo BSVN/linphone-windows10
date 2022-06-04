@@ -185,19 +185,6 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
         }
 
         private async void buttons_HangUpClick(object sender) {            
-
-            if (Dialer.IsIncomingCall)
-            {
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/Calls/TerminateIncoming/{Dialer.CallId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                {
-                    var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-                    Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-                    Dialer.HasUnfinishedCall = true;
-                }
-            }
-
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion

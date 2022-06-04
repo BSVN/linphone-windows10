@@ -6,7 +6,9 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
     {
         public Guid Id { get; set; }
 
-        public string CustomerPhoneNumber { get; set; }
+        public string CallerPhoneNumber { get; set; }
+
+        public string CalleePhoneNumber { get; set; }
 
         public string OperatorFullName { get; set; }
 
@@ -14,7 +16,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
 
         public CallState State { get; set; }
 
-        public DateTime StartAt { get; set; }
+        public DateTime StartedAt { get; set; }
 
         public DateTime FinishedAt { get; set; }
 
