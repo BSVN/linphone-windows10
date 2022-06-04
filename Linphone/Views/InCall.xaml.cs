@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone;
 using Linphone.Model;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -184,7 +185,8 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             statsVisible = areStatsVisible;
         }
 
-        private async void buttons_HangUpClick(object sender) {            
+        private async void buttons_HangUpClick(object sender) {              
+            Dialer.IsCallTerminatedByAgent = true;
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion
@@ -199,8 +201,6 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             if (parameters == null)
                 return;
 
-            //http://localhost:9011/Agents?customerPhoneNumber=09193620380
-
             if (parameters.Count >= 1 && parameters[0].Contains("sip")) {
                 String calledNumber = parameters[0];
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(calledNumber);
@@ -209,6 +209,8 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
 
                 var browserSource = localSettings.Values["PanelUrl"] == null ? "Http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
                 browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}{Dialer.BrowserCurrentUrlOffset}";
+                Log.Information($"In call with browser source: {browserSource}.");
+
                 Browser.Source = new Uri(browserSource);
 
                 if (calledNumber != null && calledNumber.Length > 0) {

@@ -26,6 +26,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using BelledonneCommunications.Linphone.Presentation.Dto;
+using Serilog;
+using System.Threading.Tasks;
 
 namespace Linphone.Views
 {
@@ -96,6 +98,7 @@ namespace Linphone.Views
                 Dialer.CallId = default;
                 Dialer.CallerId = address.Username;
                 Dialer.CalleeId = UserId;
+                Dialer.IsIncomingCallAnswered = false;
 
                 if (_callingNumber.StartsWith("sip:"))
                 {
@@ -112,6 +115,7 @@ namespace Linphone.Views
                     //cm.FindContact(_callingNumber);
                 }
 
+                Log.Debug("Initiate a new call.");
                 try
                 {
                     HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
@@ -124,8 +128,10 @@ namespace Linphone.Views
                 }
                 catch
                 {
-
+                    Log.Debug("Exception in iniating a new call.");
                 }
+
+                Log.Debug("Call Initiation finished.");
             }
         }
 
@@ -152,17 +158,30 @@ namespace Linphone.Views
         {
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
+                Dialer.IsIncomingCallAnswered = true;
+
                 if (Dialer.CallId != default)
                 {
                     try
                     {
                         Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                        var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{Dialer.CallId}");
-                        var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                        Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{Dialer.CallId}");
+                        task.ContinueWith(P =>
+                        {
+                            if (task.Exception != null)
+                            {
+                                Log.Error(task.Exception, "Exception during Accepting an incoming call.");
+                            }
+                            else
+                            {
+                                var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                                Log.Information("Accept incoming call response payload {Payload}.", result.SerializeToJson());
+                            }
+                        });
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Log.Error(ex, "Answer click event exception.");
                     }
                 }
 
@@ -182,17 +201,26 @@ namespace Linphone.Views
             try
             {
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
-                if (result != null)
+                Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                task.ContinueWith(P =>
                 {
-                    Dialer.IsIncomingCall = true;
-                    Dialer.CallId = default;
-                }
-            }
-            catch
-            {
+                    if (task.Exception != null)
+                    {
+                        Log.Error(task.Exception, "Exception during submit a missed incoming call.");
+                    }
+                    else
+                    {
+                        var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
+                        Log.Information("Accept missed incoming call response payload {Payload}.", result.SerializeToJson());
+                    }
+                });
 
+                Dialer.IsIncomingCall = false;
+                Dialer.CallId = default;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception during declining a call.");
             }
 
             LinphoneManager.Instance.EndCurrentCall();

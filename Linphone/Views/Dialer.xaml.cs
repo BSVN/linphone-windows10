@@ -41,6 +41,10 @@ namespace Linphone.Views
         public static string BrowserBaseUrl = null;
 
         public static bool IsIncomingCall { get; set; } = false;
+        
+        public static bool IsIncomingCallAnswered { get; set; } = false;
+
+        public static bool IsCallTerminatedByAgent { get; set; } = false;
 
         public static string CallerId = null;
 
@@ -49,8 +53,6 @@ namespace Linphone.Views
         public static Guid CallId = default;
 
         public static bool IsLoggedIn = false;
-
-        public static bool HasUnfinishedCall = false;
 
         private HttpClient httpClient;
 
@@ -251,15 +253,15 @@ namespace Linphone.Views
 
         private async void call_Click(object sender, RoutedEventArgs e)
         {
-            if (HasUnfinishedCall)
-            {
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/{Dialer.CallId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
-                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                    return;
-                else
-                    HasUnfinishedCall = false;
-            }
+            //if (HasUnfinishedCall)
+            //{
+            //    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/{Dialer.CallId}");
+            //    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
+            //    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
+            //        return;
+            //    else
+            //        HasUnfinishedCall = false;
+            //}
 
             if (addressBox.Text.Length > 0)
             {

@@ -30,6 +30,7 @@ using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using BelledonneCommunications.Linphone;
 using Serilog;
+using System.Threading.Tasks;
 
 namespace Linphone
 {
@@ -53,7 +54,7 @@ namespace Linphone
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
-            
+
             SettingsManager.InstallConfigFile();
             Logger.ConfigureLogger();
             Log.Logger.Error("Here is the usage.");
@@ -79,8 +80,9 @@ namespace Linphone
         {
             Debug.WriteLine("[CallListener] Call ended, can go back ? " + rootFrame.CanGoBack);
 
-            if (Dialer.IsIncomingCall && Dialer.CallId != default)
+            if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && Dialer.IsCallTerminatedByAgent)
             {
+                bool StayThere = false;
                 try
                 {
                     var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
@@ -89,13 +91,80 @@ namespace Linphone
                     {
                         var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
                         Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-                        Dialer.HasUnfinishedCall = true;
+                        StayThere = true;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Dialer.HasUnfinishedCall = false;
+                    Log.Error(ex, "Exception during call termination at the end.");
                 }
+
+                if (!StayThere)
+                {
+                    Dialer.CallId = default;
+                    Dialer.IsIncomingCallAnswered = false;
+                    Dialer.CallerId = default;
+                    Dialer.CalleeId = default;
+                    Dialer.IsCallTerminatedByAgent = false;
+                }
+            }
+            else if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && !Dialer.IsCallTerminatedByAgent)
+            {
+                bool StayThere = false;
+
+                try
+                {
+                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
+                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
+                    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
+                    {
+                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
+                        Dialer.BrowserCurrentUrlOffset = dialerNewSource;
+                        StayThere = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Exception during call termination at the end.");
+                }
+
+                if (!StayThere)
+                {
+                    Dialer.CallId = default;
+                    Dialer.IsIncomingCallAnswered = false;
+                    Dialer.CallerId = default;
+                    Dialer.CalleeId = default;
+                    Dialer.IsCallTerminatedByAgent = false;
+                }
+            }
+            else if (Dialer.IsIncomingCall && Dialer.CallId != default && !Dialer.IsIncomingCallAnswered)
+            {
+                try
+                {
+                    Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
+                    task.ContinueWith(P =>
+                    {
+                        if (task.Exception != null)
+                        {
+                            Log.Error(task.Exception, "Exception during submitting call termination by customer.");
+                        }
+                        else
+                        {
+                            var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
+                            Log.Information("Call termination by customer submited {Payload}.", result.SerializeToJson());
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Exception during call termination by customer.");
+                }
+
+                Dialer.CallId = default;
+                Dialer.IsIncomingCallAnswered = false;
+                Dialer.CallerId = default;
+                Dialer.CalleeId = default;
+                Dialer.IsCallTerminatedByAgent = false;
             }
 
             if (rootFrame.CanGoBack)

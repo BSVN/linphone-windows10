@@ -38,4 +38,12 @@ namespace Linphone.Views
             return JsonSerializer.Deserialize<T>(await content.ReadAsStringAsync(), options);
         }
     }
+
+    public static class ObjectExtensions
+    {
+        public static string SerializeToJson(this object obj)
+        {
+            return System.Text.Json.JsonSerializer.Serialize(obj);
+        }
+    }
 }
