@@ -10,11 +10,11 @@
             <ResourceDictionary.MergedDictionaries>
 		        <!--<XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>-->
                 <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml"></ResourceDictionary>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light" Source="ms-appx:///Styles/Light.xaml"></ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>    
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-
 </Application>

@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Linphone")]
-[assembly: AssemblyDescription("Open source SIP phone for Windows 10")]
+[assembly: AssemblyTitle("Yar")]
+[assembly: AssemblyDescription("سامانه پشتیبانی کالا برگ الکترونیکی")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Belledonne Communications")]
-[assembly: AssemblyProduct("Linphone")]
-[assembly: AssemblyCopyright("Copyright © 2015-2020 Belledonne Communications")]
-[assembly: AssemblyTrademark("Linphone")]
+[assembly: AssemblyCompany("Resalat Salamat Iraninan")]
+[assembly: AssemblyProduct("Yar")]
+[assembly: AssemblyCopyright("Copyright © 2022 Resalat Salamat Iranian")]
+[assembly: AssemblyTrademark("Resalat Salamat Iranian")]
 [assembly: AssemblyCulture("")]
 
 // Version information for an assembly consists of the following four values:

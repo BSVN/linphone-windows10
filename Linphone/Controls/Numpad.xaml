@@ -120,7 +120,7 @@
                             Click="numpad_Click"
                             Tag="8">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="8" Style="{StaticResource DialpadNumberStyle}"/>
+                <TextBlock FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="8" Style="{StaticResource DialpadNumberStyle}"/>
                     <TextBlock Text="TUV" Style="{StaticResource DialpadLetterStyle}"/>
                 </StackPanel>
             </Button>

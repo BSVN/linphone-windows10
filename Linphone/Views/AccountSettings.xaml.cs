@@ -18,6 +18,7 @@ using Linphone;
 using Linphone.Model;
 using System.Collections.Generic;
 using Windows.ApplicationModel.Resources;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -27,6 +28,7 @@ namespace Linphone.Views {
 
     public partial class AccountSettings : Page {
         private SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
+        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
         private bool saveSettingsOnLeave = false;
         private bool linphoneAccount = false;
@@ -37,7 +39,7 @@ namespace Linphone.Views {
         public AccountSettings() {
             this.InitializeComponent();
             SystemNavigationManager.GetForCurrentView().BackRequested += back_Click;
-
+            
             _settings.Load();
             Username.Text = (_settings.Username != null) ? _settings.Username : "";
             UserId.Text = (_settings.UserId != null) ? _settings.UserId : "";
@@ -47,6 +49,7 @@ namespace Linphone.Views {
             OutboundProxy.IsOn = (_settings.OutboundProxy != null) ? (bool)_settings.OutboundProxy : false;
             DisplayName.Text = (_settings.DisplayName != null) ? _settings.DisplayName : "";
             Expires.Text = (_settings.Expires != null) ? _settings.Expires : "";
+            PanelUrl.Text = localSettings.Values["PanelUrl"] == null ? "http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
 
             List<string> transports = new List<string>
             {
@@ -68,6 +71,8 @@ namespace Linphone.Views {
                 }
                 Domain.Text = Domain.Text.Split(':')[0];
             }
+            
+            localSettings.Values["PanelUrl"] = PanelUrl.Text;
 
             _settings.Username = Username.Text;
             _settings.UserId = UserId.Text;
