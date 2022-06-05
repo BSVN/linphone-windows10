@@ -96,7 +96,7 @@ namespace Linphone.Views
 
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
                 Dialer.CallId = default;
-                Dialer.CallerId = address.Username;
+                Dialer.CallerId = address.GetCanonicalPhoneNumber();
                 Dialer.CalleeId = UserId;
                 Dialer.IsIncomingCallAnswered = false;
 
@@ -118,7 +118,7 @@ namespace Linphone.Views
                 Log.Debug("Initiate a new call.");
                 try
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
                     var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
                     if (result != null)
                     {

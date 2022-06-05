@@ -1,5 +1,6 @@
 ﻿/*
 AdvancedSettings.xaml.cs
+Copyright (C) 2022 Resaa Corporation.
 Copyright (C) 2015  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,10 +28,10 @@ using Windows.UI.Core;
 namespace Linphone.Views {
 
     public partial class AdvancedSettings : Page {
-        private CallSettingsManager _callSettings = new CallSettingsManager();
-        private NetworkSettingsManager _networkSettings = new NetworkSettingsManager();
-        private ChatSettingsManager _chatSettings = new ChatSettingsManager();
-        private ApplicationSettingsManager _settings = new ApplicationSettingsManager();
+        private readonly CallSettingsManager _callSettings = new CallSettingsManager();
+        private readonly NetworkSettingsManager _networkSettings = new NetworkSettingsManager();
+        private readonly ChatSettingsManager _chatSettings = new ChatSettingsManager();
+        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
         private bool saveSettingsOnLeave = true;
 
         public AdvancedSettings() {
@@ -62,7 +63,9 @@ namespace Linphone.Views {
             mediaEncryption.ItemsSource = mediaEncryptions;
             mediaEncryption.SelectedItem = _networkSettings.MEncryption;
 
-            ICE.IsOn = LinphoneManager.Instance.Core.NatPolicy.IceEnabled;
+			RedisConnectionString.Text = _settings.RedisConnectionString ?? "";
+
+			ICE.IsOn = LinphoneManager.Instance.Core.NatPolicy.IceEnabled;
 
             Stun.Text = _networkSettings.StunServer;
 
@@ -91,7 +94,7 @@ namespace Linphone.Views {
             _callSettings.SendDTFMsSIPInfo = sipInfo.IsOn;
             _callSettings.Save();
 
-            if (mediaEncryption.SelectedItem != null)
+			if (mediaEncryption.SelectedItem != null)
                 _networkSettings.MEncryption = mediaEncryption.SelectedItem.ToString();
             _networkSettings.FWPolicy = ICE.IsOn;
             _networkSettings.StunServer = Stun.Text;
@@ -108,6 +111,7 @@ namespace Linphone.Views {
             //_chatSettings.ScaleDownSentPictures = resizeDown.IsOn;
             _chatSettings.Save();
 
+			_settings.RedisConnectionString = RedisConnectionString.Text;
             _settings.DebugEnabled = (bool)Debug.IsOn;
             _settings.Save();
 
