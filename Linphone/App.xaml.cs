@@ -107,6 +107,7 @@ namespace Linphone
                     Dialer.CallerId = default;
                     Dialer.CalleeId = default;
                     Dialer.IsCallTerminatedByAgent = false;
+                    Dialer.BrowserCurrentUrlOffset = "";
                 }
             }
             else if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && !Dialer.IsCallTerminatedByAgent)
@@ -136,6 +137,7 @@ namespace Linphone
                     Dialer.CallerId = default;
                     Dialer.CalleeId = default;
                     Dialer.IsCallTerminatedByAgent = false;
+                    Dialer.BrowserCurrentUrlOffset = "";
                 }
             }
             else if (Dialer.IsIncomingCall && Dialer.CallId != default && !Dialer.IsIncomingCallAnswered)

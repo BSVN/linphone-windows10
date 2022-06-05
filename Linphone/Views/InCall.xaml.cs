@@ -208,7 +208,7 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
                 Contact.Text = calledNumber;
 
                 var browserSource = localSettings.Values["PanelUrl"] == null ? "Http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
-                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}{Dialer.BrowserCurrentUrlOffset}";
+                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}";
                 Log.Information($"In call with browser source: {browserSource}.");
 
                 Browser.Source = new Uri(browserSource);
