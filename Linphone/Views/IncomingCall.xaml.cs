@@ -44,7 +44,7 @@ namespace Linphone.Views
 
             SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
             _settings.Load();
-            UserId = _settings.UserId;
+            UserId = _settings.Username;
 
             httpClient = new HttpClient();
 
