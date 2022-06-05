@@ -32,7 +32,7 @@ namespace Linphone.Model {
 		public static string GetCanonicalPhoneNumber(this Address address)
 		{
 			string phoneNumber = address?.Username ?? throw new ArgumentNullException(nameof(address));
-            if (phoneNumber.Length == 14 && phoneNumber.StartsWith("98"))
+            if (phoneNumber.Length == 12 && phoneNumber.StartsWith("98"))
                 phoneNumber = phoneNumber.Substring(2);
 			return phoneNumber.StartsWith('0') ? phoneNumber : (phoneNumber.StartsWith('9') ? "0" + phoneNumber : "0" + phoneNumber.TrimStart('+').TrimStart(' ').Substring(2));
 		}
