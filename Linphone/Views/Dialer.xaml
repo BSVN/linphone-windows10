@@ -246,6 +246,35 @@
                             </DataTemplate>
                         </Button.ContentTemplate>
                     </Button>
+					<Button x:Name="Callback" Style="{StaticResource AccentLongButtonStyle}" Click="Callback_Click">
+						<Button.Background>
+                            <!-- TODO: Please use StaticResouces and Style -->
+							<SolidColorBrush Color="#FF9990D6"/>
+						</Button.Background>
+						<Button.ContentTemplate>
+							<DataTemplate>
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="*" />
+									</Grid.RowDefinitions>
+									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
+										<FontIcon.RenderTransform>
+											<CompositeTransform ScaleX=".75" ScaleY=".75"/>
+										</FontIcon.RenderTransform>
+									</FontIcon>
+									<TextBlock x:Name="call"
+                                           Text="پاسخ گویی به صف درخواست تماس"
+                                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                           Grid.Row="1"
+                                           Margin="0,4,0,0"
+                                           LineHeight="14"
+                                           Style="{StaticResource TextStyle}"
+                                           HorizontalAlignment="Center" />
+								</Grid>
+							</DataTemplate>
+						</Button.ContentTemplate>
+					</Button>
                 </StackPanel>
 
                 <Grid x:Name="BugReportUploadPopup"

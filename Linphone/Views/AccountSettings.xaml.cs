@@ -1,5 +1,6 @@
 ﻿/*
 AccountSettings.xaml.cs
+Copyright (C) 2022 Resaa Corporation.
 Copyright (C) 2015  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -41,14 +42,16 @@ namespace Linphone.Views {
             SystemNavigationManager.GetForCurrentView().BackRequested += back_Click;
             
             _settings.Load();
-            Username.Text = (_settings.Username != null) ? _settings.Username : "";
-            UserId.Text = (_settings.UserId != null) ? _settings.UserId : "";
-            Password.Password = (_settings.Password != null) ? _settings.Password : "";
-            Domain.Text = (_settings.Domain != null) ? _settings.Domain : "";
-            Proxy.Text = (_settings.Proxy != null) ? _settings.Proxy : "";
+            Username.Text = _settings.Username ?? "";
+            UserId.Text = _settings.UserId ?? "";
+            Password.Password = _settings.Password ?? "";
+            Domain.Text = _settings.Domain ?? "";
+            Proxy.Text = _settings.Proxy ?? "";
             OutboundProxy.IsOn = (_settings.OutboundProxy != null) ? (bool)_settings.OutboundProxy : false;
-            DisplayName.Text = (_settings.DisplayName != null) ? _settings.DisplayName : "";
-            Expires.Text = (_settings.Expires != null) ? _settings.Expires : "";
+            DisplayName.Text = _settings.DisplayName ?? "";
+            Expires.Text = _settings.Expires ?? "";
+
+            // TOOD: Plesae use _settings instead of localSettings
             PanelUrl.Text = localSettings.Values["PanelUrl"] == null ? "http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
 
             List<string> transports = new List<string>
