@@ -27,6 +27,14 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace Linphone.Model {
+    public static class AddressExtentions
+	{
+		public static string GetCanonicalPhoneNumber(this Address address)
+		{
+			string phoneNumber = address?.Username ?? throw new ArgumentNullException(nameof(address));
+			return phoneNumber.StartsWith('0') ? phoneNumber : (phoneNumber.StartsWith('9') ? "0" + phoneNumber : "0" + phoneNumber.TrimStart('+').TrimStart(' ').Substring(2));
+		}
+	}
     public class Utils {
         private const int LOCAL_IMAGES_QUALITY = 100;
         private const int THUMBNAIL_WIDTH = 420;

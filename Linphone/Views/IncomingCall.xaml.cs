@@ -94,7 +94,7 @@ namespace Linphone.Views
 
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
                 Dialer.CallId = default;
-                Dialer.CallerId = address.Username;
+                Dialer.CallerId = address.GetCanonicalPhoneNumber();
                 Dialer.CalleeId = UserId;
 
                 if (_callingNumber.StartsWith("sip:"))
@@ -114,7 +114,7 @@ namespace Linphone.Views
 
                 try
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
                     var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
                     if (result != null)
                     {
@@ -182,7 +182,7 @@ namespace Linphone.Views
             try
             {
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
                 var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
                 if (result != null)
                 {

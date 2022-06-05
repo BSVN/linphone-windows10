@@ -206,11 +206,9 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(calledNumber);
                 calledNumber = String.Format("{0}@{1}", address.Username, address.Domain);
                 Contact.Text = calledNumber;
-                string phoneNumber = address.Username;
-                string canonicalUserNumber = phoneNumber.StartsWith('0') ? phoneNumber : (phoneNumber.StartsWith('9') ? "0" + phoneNumber : "0" + phoneNumber.TrimStart('+').TrimStart(' ').Substring(2));
 
                 var browserSource = localSettings.Values["PanelUrl"] == null ? "Http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
-                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={canonicalUserNumber}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}{Dialer.BrowserCurrentUrlOffset}";
+                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.GetCanonicalPhoneNumber()}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}{Dialer.BrowserCurrentUrlOffset}";
                 Browser.Source = new Uri(browserSource);
 
                 if (calledNumber != null && calledNumber.Length > 0) {
