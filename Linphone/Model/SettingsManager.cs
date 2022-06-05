@@ -1,5 +1,6 @@
 ﻿/*
 SettingsManager.cs
+Copyright (C) 2022 Resaa Corporation.
 Copyright (C) 2015  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -133,12 +134,13 @@ namespace Linphone.Model {
         private const String LogLevelKeyName = "LogLevel";
         private const string VideoActiveWhenGoingToBackgroundKeyName = "VideoActiveWhenGoingToBackground";
         private const string VideoAutoAcceptWhenGoingToBackgroundKeyName = "VideoAutoAcceptWhenGoingToBackground";
-        #endregion
+		private const string RedisConnectionStringKeyName = "RedisConnectionString";
+		#endregion
 
-        /// <summary>
-        /// Public constructor.
-        /// </summary>
-        public ApplicationSettingsManager() {
+		/// <summary>
+		/// Public constructor.
+		/// </summary>
+		public ApplicationSettingsManager() {
             if (LinphoneManager.Instance.Core == null) {
                 Config = LinphoneManager.Instance.Core.CreateConfig(LinphoneManager.Instance.GetConfigPath());
             } else {
@@ -154,7 +156,8 @@ namespace Linphone.Model {
             LogLevelSetting = (LogCollectionState)(Config.GetInt(ApplicationSection, LogLevelKeyName, (int)LogCollectionState.Disabled));
             dict[VideoActiveWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoActiveWhenGoingToBackgroundKeyName, 0).ToString();
             dict[VideoAutoAcceptWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoAutoAcceptWhenGoingToBackgroundKeyName, 1).ToString();
-        }
+			dict[RedisConnectionStringKeyName] = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
+		}
 
         /// <summary>
         /// Save the application settings.
@@ -176,6 +179,10 @@ namespace Linphone.Model {
             if (ValueChanged(VideoAutoAcceptWhenGoingToBackgroundKeyName)) {
                 Config.SetInt(ApplicationSection, VideoAutoAcceptWhenGoingToBackgroundKeyName, Convert.ToInt32(GetNew(VideoAutoAcceptWhenGoingToBackgroundKeyName)));
             }
+            if (ValueChanged(RedisConnectionStringKeyName))
+			{
+                Config.SetString(ApplicationSection, RedisConnectionStringKeyName, GetNew(RedisConnectionStringKeyName));
+			}
         }
         #endregion
 
@@ -232,6 +239,21 @@ namespace Linphone.Model {
                 Set(VideoAutoAcceptWhenGoingToBackgroundKeyName, value.ToString());
             }
         }
+
+        /// <summary>
+        /// Specify redis location that application need to connect it.
+        /// </summary>
+		public string RedisConnectionString
+		{
+			get
+			{
+				return Get(RedisConnectionStringKeyName);
+			}
+			set
+			{
+				Set(RedisConnectionStringKeyName, value);
+			}
+		}
         #endregion
     }
 

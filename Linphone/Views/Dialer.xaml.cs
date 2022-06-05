@@ -1,5 +1,6 @@
 ﻿/*
 Dialer.xaml.cs
+Copyright (C) 2022 Resaa Corporation.
 Copyright (C) 2015  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,13 +31,17 @@ using Windows.Storage;
 using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Diagnostics;
+using StackExchange.Redis;
+using Windows.UI.Popups;
 
 namespace Linphone.Views
 {
 
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
+        // TODO: Please remove it, and use _settings
         ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+
         public static string BrowserCurrentUrlOffset = null;
         public static string BrowserBaseUrl = null;
 
@@ -52,13 +57,17 @@ namespace Linphone.Views
 
         public static bool HasUnfinishedCall = false;
 
-        private HttpClient httpClient;
+        private readonly HttpClient httpClient;
+        private ConnectionMultiplexer connectionMultiplexer;
+		private IDatabase database;
+        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
 
-        public Dialer()
+		public Dialer()
         {
             this.InitializeComponent();
             httpClient = new HttpClient();
-            DataContext = this;
+
+			DataContext = this;
             ContactsManager contactsManager = ContactsManager.Instance;
             addressBox.KeyDown += (sender, args) =>
             {
@@ -108,12 +117,51 @@ namespace Linphone.Views
             }
         }
 
-        private int missedCallCount;
-        public int MissedCallCount
-        {
-            get
-            {
-                return missedCallCount;
+		private ConnectionMultiplexer RedisConnectionMultiplexer
+		{
+			get
+			{
+				if (connectionMultiplexer == null)
+				{
+					_settings.Load();
+					try
+					{
+						connectionMultiplexer = ConnectionMultiplexer.Connect((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
+					}
+					catch (RedisConnectionException e)
+					{
+						Debug.WriteLine(e.Message);
+						var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
+						messageDialog.Commands.Add(new UICommand("باشه"));
+						messageDialog.DefaultCommandIndex = 0;
+						messageDialog.CancelCommandIndex = 0;
+						messageDialog.ShowAsync();
+					}
+				}
+
+				return connectionMultiplexer;
+			}
+		}
+
+		private IDatabase Database
+		{
+			get
+			{
+				if (database == null)
+				{
+					database = RedisConnectionMultiplexer?.GetDatabase();
+				}
+
+				return database;
+			}
+		}
+
+		private int missedCallCount;
+		public int MissedCallCount
+		{
+			get
+			{
+				return missedCallCount;
             }
 
             set
@@ -392,7 +440,7 @@ namespace Linphone.Views
                 cfg.RegisterEnabled = false;
                 cfg.Done();
 
-                //Wait for unregister to complete
+                // Wait for unregister to complete
                 int timeout = 2000;
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 while (true)
@@ -406,5 +454,27 @@ namespace Linphone.Views
                 }
             }
         }
-    }
+
+		private void Callback_Click(object sender, RoutedEventArgs e)
+		{
+            const string QUEUE_NAME = "cbq";
+
+            if (Database == null)
+                return;
+
+			while (true)
+			{
+                SortedSetEntry? callback = Database.SortedSetPop(QUEUE_NAME);
+                if (callback == null || !callback.HasValue)
+                    break;
+
+				Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+
+                // Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
+                LinphoneManager.Instance.NewOutgoingCall("0" + callback.Value.Element);
+
+                break;
+			}
+		}
+	}
 }
