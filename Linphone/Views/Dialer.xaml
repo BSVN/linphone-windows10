@@ -246,7 +246,10 @@
                             </DataTemplate>
                         </Button.ContentTemplate>
                     </Button>
-					<Button x:Name="Callback" Style="{StaticResource AccentLongButtonStyle}" Click="Callback_Click">
+					<Button x:Name="Callback" 
+                            Visibility="Collapsed"
+                            Style="{StaticResource AccentLongButtonStyle}" 
+                            Click="Callback_Click">
 						<Button.Background>
                             <!-- TODO: Please use StaticResouces and Style -->
 							<SolidColorBrush Color="#FF9990D6"/>

@@ -40,9 +40,10 @@ namespace Linphone.Views
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
         // TODO: Please remove it, and use _settings
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         public static string BrowserCurrentUrlOffset = null;
+
         public static string BrowserBaseUrl = null;
 
         public static bool IsIncomingCall { get; set; } = false;
@@ -65,7 +66,6 @@ namespace Linphone.Views
         private ConnectionMultiplexer connectionMultiplexer;
 		private IDatabase database;
         private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
-        private HttpClient httpClient;
 
 		public Dialer()
         {
