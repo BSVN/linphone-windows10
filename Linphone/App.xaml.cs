@@ -58,6 +58,7 @@ namespace Linphone
             SettingsManager.InstallConfigFile();
             Logger.ConfigureLogger();
             Log.Logger.Error("Here is the usage.");
+            acceptCall = false;
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
