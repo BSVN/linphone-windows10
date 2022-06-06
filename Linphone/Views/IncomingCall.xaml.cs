@@ -164,7 +164,6 @@ namespace Linphone.Views
                 {
                     try
                     {
-                        Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
                         Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{Dialer.CallId}");
                         task.ContinueWith(P =>
                         {
@@ -201,7 +200,7 @@ namespace Linphone.Views
             try
             {
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.Username}&OperatorSoftPhoneNumber={UserId}");
+                Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
                 task.ContinueWith(P =>
                 {
                     if (task.Exception != null)
