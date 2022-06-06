@@ -193,6 +193,7 @@
     <Compile Include="Controls\TextBoxChatBubble.xaml.cs">
       <DependentUpon>TextBoxChatBubble.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Core\CoreHttpClient.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Model\AlphaKeyGroup.cs" />
     <Compile Include="Model\ContactItem.cs" />
