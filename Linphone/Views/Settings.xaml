@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:linphone="clr-namespace:Linphone"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    FlowDirection="RightToLeft"
     mc:Ignorable="d">
 
     <Grid x:Name="LayoutRoot" Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
@@ -16,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="12,12,12,0">
-            <TextBlock x:Uid="SettingsMenu" Text="SETTINGS" Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="تنظیمات" Style="{StaticResource HeaderTextStyle}"/>
         </StackPanel>
 
 
@@ -27,26 +28,31 @@
                     <TextBlock
                         HorizontalAlignment="Left"
                         Style="{StaticResource ListItemHeaderStyle}"
-                        x:Uid="AccountMenu"/>
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        Text="حساب کاربری SIP"
+                        />
 
                     <TextBlock
                         HorizontalAlignment="Left"
                         Style="{StaticResource ListItemStyle}"
-                        x:Uid="AccountMenuSubtitle"/>
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        Text="تنظیمات حساب کاربری"/>
                 </StackPanel>
             </ListViewItem>
 
             <ListViewItem Tapped="audio_Click_1" >
                 <StackPanel Orientation="Vertical"  Margin="0,12,0,0">
                     <TextBlock
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                         HorizontalAlignment="Left"
                         Style="{ThemeResource ListItemHeaderStyle}"
-                        x:Uid="AudioSettingsMenu"/>
+                        Text="تنظیمات صدا"/>
 
                     <TextBlock
                         HorizontalAlignment="Left"
+                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                         Style="{ThemeResource ListItemStyle}"
-                        x:Uid="AudioSettingsMenuSubtitle"/>
+                        Text="تنظیمات کُدک و خنثی کننده اکو"/>
                 </StackPanel>
             </ListViewItem>
 
@@ -55,12 +61,14 @@
                     <TextBlock
                             Style="{ThemeResource ListItemHeaderStyle}"
                             HorizontalAlignment="Left"
-                            x:Uid="VideoSettingsMenu"/>
+                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"    
+                            Text="تنظیمات ویدئو"/>
 
                     <TextBlock
                             Style="{ThemeResource ListItemStyle}"
                             HorizontalAlignment="Left"
-                            x:Uid="VideoSettingsMenuSubtitle"/>
+                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                            Text="تنظیمات سیاست ها و کُدک ویدئو"/>
                 </StackPanel>
             </ListViewItem>
 
@@ -69,12 +77,14 @@
                     <TextBlock
                         HorizontalAlignment="Left"
                         Style="{ThemeResource ListItemHeaderStyle}"
-                        x:Uid="AdvancedSettingsMenu"/>
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        Text="تنظیمات پیشرفته"/>
 
                     <TextBlock
                         HorizontalAlignment="Left"
                         Style="{ThemeResource ListItemStyle}"
-                        x:Uid="AdvancedSettingsMenuSubtitle"/>
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        Text="حالت خطایابی، رمزنگاری رسانه، سیاست های فایروال"/>
                 </StackPanel>
             </ListViewItem>
 

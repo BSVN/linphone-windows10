@@ -43,20 +43,20 @@ namespace Linphone.Controls {
 
             if (state == RegistrationState.Ok) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_connected.png"));
-                StatusText.Text = ResourceLoader.GetForCurrentView().GetString("Registered");
+                StatusText.Text = "شماره ثبت شده است";
             } else if (state == RegistrationState.Progress) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_inprogress.png"));
-                StatusText.Text = ResourceLoader.GetForCurrentView().GetString("RegistrationInProgress");
+                StatusText.Text = "درحال ثبت شماره";
             } else if (state == RegistrationState.Failed) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_error.png"));
                 if (LinphoneManager.Instance.Core.DefaultProxyConfig.Error == Reason.Forbidden) {
-                    StatusText.Text = ResourceLoader.GetForCurrentView().GetString("RegistrationFailedForbidden");
+                    StatusText.Text = "منع در ثبت شماره";
                 } else {
-                    StatusText.Text = ResourceLoader.GetForCurrentView().GetString("RegistrationFailed");
+                    StatusText.Text = "شکست در ثبت شماره";
                 }
             } else {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_disconnected.png"));
-                StatusText.Text = ResourceLoader.GetForCurrentView().GetString("Disconnected");
+                StatusText.Text = "عدم اتصال";
             }
 
         }

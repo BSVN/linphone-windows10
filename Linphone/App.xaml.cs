@@ -25,7 +25,11 @@ using Linphone.Model;
 using System.Diagnostics;
 using Windows.UI.Core;
 using System.Collections.Generic;
-using PCLAppConfig;
+using Linphone.Views;
+using System.Net.Http;
+using BelledonneCommunications.Linphone.Presentation.Dto;
+using BelledonneCommunications.Linphone;
+using Serilog;
 
 namespace Linphone
 {
@@ -37,6 +41,7 @@ namespace Linphone
         Frame rootFrame;
         bool acceptCall;
         String sipAddress;
+        HttpClient httpClient;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -44,6 +49,7 @@ namespace Linphone
         /// </summary>
         public App()
         {
+            httpClient = new HttpClient();
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
@@ -51,11 +57,14 @@ namespace Linphone
             ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
 
             SettingsManager.InstallConfigFile();
-            acceptCall = false;
+            Logger.ConfigureLogger();
+            Log.Logger.Error("Here is the usage.");
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
+            Log.Logger.Error(e.Exception, "Catched Exception.");
+
             e.Handled = true;
         }
 
@@ -65,13 +74,31 @@ namespace Linphone
             {
                 rootFrame.GoBack();
                 e.Handled = true;
-            }    
+            }
         }
 
-        public void CallEnded(Call call)
+        public async void CallEnded(Call call)
         {
             Debug.WriteLine("[CallListener] Call ended, can go back ? " + rootFrame.CanGoBack);
-            
+
+            if (Dialer.IsIncomingCall && Dialer.CallId != default)
+            {
+                try
+                {
+                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
+                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
+                    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
+                    {
+                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
+                        Dialer.BrowserCurrentUrlOffset = dialerNewSource;
+                        Dialer.HasUnfinishedCall = true;
+                    }
+                }
+                catch
+                {
+                    Dialer.HasUnfinishedCall = false;
+                }
+            }
 
             if (rootFrame.CanGoBack)
             {
@@ -109,8 +136,8 @@ namespace Linphone
         public void PauseStateChanged(Call call, bool isCallPaused, bool isCallPausedByRemote)
         {
             Debug.WriteLine("Pausestatechanged");
-           // if (this.PauseListener != null)
-           //     this.PauseListener.PauseStateChanged(call, isCallPaused, isCallPausedByRemote);
+            // if (this.PauseListener != null)
+            //     this.PauseListener.PauseStateChanged(call, isCallPaused, isCallPausedByRemote);
         }
 
         /// <summary>
@@ -124,7 +151,7 @@ namespace Linphone
         }
 
         private void Initialize(IActivatedEventArgs e, String args)
-        {       
+        {
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -139,7 +166,6 @@ namespace Linphone
             LinphoneManager.Instance.InitLinphoneCore();
             LinphoneManager.Instance.CallListener = this;
             LinphoneManager.Instance.CoreDispatcher = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().CoreWindow.Dispatcher;
-            
 
             rootFrame = Window.Current.Content as Frame;
 
@@ -173,21 +199,24 @@ namespace Linphone
                         rootFrame.Navigate(typeof(Views.Chat), sipAddr);
                     }
                     else
-                    {                    
+                    {
                         if (args.StartsWith("answer"))
                         {
                             acceptCall = true;
                             sipAddress = args.Split('=')[1];
                         }
                         rootFrame.Navigate(typeof(Views.Dialer), null);
-                    }   
+                    }
                 }
                 else
                 {
                     rootFrame.Navigate(typeof(Views.Dialer), args);
                 }
             }
+
             Window.Current.Activate();
+
+            DisableRegisteration();
         }
 
         protected override void OnActivated(IActivatedEventArgs args)
@@ -221,13 +250,41 @@ namespace Linphone
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
+
             //TODO: Save application state and stop any background activity
+            DisableRegisteration();
+
             deferral.Complete();
+        }
+
+        private static void DisableRegisteration()
+        {
+            Core lc = LinphoneManager.Instance.Core;
+            ProxyConfig cfg = lc.DefaultProxyConfig;
+            if (cfg != null)
+            {
+                cfg.Edit();
+                cfg.RegisterEnabled = false;
+                cfg.Done();
+
+                //Wait for unregister to complete
+                int timeout = 2000;
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (true)
+                {
+                    if (stopwatch.ElapsedMilliseconds >= timeout || cfg.State == RegistrationState.Cleared || cfg.State == RegistrationState.None)
+                    {
+                        break;
+                    }
+                    LinphoneManager.Instance.Core.Iterate();
+                    System.Threading.Tasks.Task.Delay(100);
+                }
+            }
         }
 
         public void CallIncoming(Call call)
         {
-            if(acceptCall)
+            if (acceptCall)
             {
                 if (sipAddress != "")
                 {
@@ -241,7 +298,8 @@ namespace Linphone
                         acceptCall = false;
                     }
                 }
-            } else
+            }
+            else
             {
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }

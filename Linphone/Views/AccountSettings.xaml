@@ -5,7 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:linphone="clr-namespace:Linphone"
+    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    FlowDirection="RightToLeft"
     mc:Ignorable="d">
     
     <Grid x:Name="LayoutRoot">
@@ -16,7 +18,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="12,12,12,0">
-            <TextBlock Text="ACCOUNT" x:Uid="AccountMenu" Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Text="حساب کاربری (تلفن)" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Style="{StaticResource HeaderTextStyle}"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
@@ -34,11 +36,19 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                
+
                 <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,10,0,0">
+                    <TextBlock Text="آدرس پنل">
+                    </TextBlock>
+                    <TextBox x:Name="PanelUrl">
+                    </TextBox>
+                </StackPanel>
+                
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,10,0,0">
                     <TextBlock
-                        Text="Username" x:Uid="SIPUsername">
+                        Text="نام کاربری">
                     </TextBlock>
                     <TextBox
                         x:Name="Username">
@@ -52,9 +62,9 @@
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,10,0,0">
+                <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,10,0,0">
                     <TextBlock
-                        Text="User Id" x:Uid="SIPUserId">
+                        Text="کد کاربر (در SIP)">
                     </TextBlock>
                     <TextBox
                         x:Name="UserId">
@@ -68,18 +78,18 @@
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,10,0,0">
+                <StackPanel Orientation="Vertical" Grid.Row="3" Margin="0,10,0,0">
                     <TextBlock
-                        Text="Password" x:Uid="SIPPassword">
+                        Text="رمز عبور (در SIP)">
                     </TextBlock>
                     <PasswordBox
                         x:Name="Password">
                     </PasswordBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical" Grid.Row="3" Margin="0,10,0,0">
+                <StackPanel Orientation="Vertical" Grid.Row="4" Margin="0,10,0,0">
                     <TextBlock
-                        Text="Domain" x:Uid="SIPDomain">
+                        Text="دامین">
                     </TextBlock>
                     <TextBox
                         x:Name="Domain">
@@ -94,44 +104,48 @@
                 </StackPanel>
 
                 <ComboBox
-                    Grid.Row="4"
+                    Grid.Row="5"
                     x:Name="Transport"
-                    Header="Transport"
+                    Header="پروتکل ارتباطی"
+                    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                     Margin="0,10,0,0"
-                    x:Uid="TransportSettings"
                     ItemsSource="{Binding Transports}">
                 </ComboBox>
                 
-                <StackPanel Orientation="Vertical" Grid.Row="5" Margin="0,10,0,0">
+                <StackPanel Orientation="Vertical" Grid.Row="6" Margin="0,10,0,0">
                     <TextBlock
-                         Text="Proxy" x:Uid="SIPProxy">
+                         Text="پراکسی">
                     </TextBlock>
                     <TextBox
                         x:Name="Proxy">
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical" Grid.Row="6" Margin="0,10,0,0">
-                    <ToggleSwitch  
-                        x:Name="OutboundProxy" x:Uid="SIPOutboundProxy" Header="Outbound Proxy">
-                    </ToggleSwitch>
-                </StackPanel>
-
                 <StackPanel Orientation="Vertical" Grid.Row="7" Margin="0,10,0,0">
                     <ToggleSwitch  
-                        x:Name="IceSwitch" x:Uid="ICESwitch" Header="ICE">
+                        x:Name="OutboundProxy" Header="پراکسی کانال خروجی" 
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        OffContent="غیر فعال" OnContent="فعال">
                     </ToggleSwitch>
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" Grid.Row="8" Margin="0,10,0,0">
-                    <ToggleSwitch
-                        x:Name="AVPF" x:Uid="AVPF" Header="AVPF">
+                    <ToggleSwitch  
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        x:Name="IceSwitch" Header="ICE" OffContent="غیر فعال" OnContent="فعال">
                     </ToggleSwitch>
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" Grid.Row="9" Margin="0,10,0,0">
+                    <ToggleSwitch
+                        FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                        x:Name="AVPF" Header="AVPF" OffContent="غیر فعال" OnContent="فعال">
+                    </ToggleSwitch>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Grid.Row="10" Margin="0,10,0,0">
                     <TextBlock
-                       Text="Expire" x:Uid="Expire">
+                       Text="انقضا">
                     </TextBlock>
                     <TextBox
                         x:Name="Expires">
@@ -145,9 +159,9 @@
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical" Grid.Row="10" Margin="0,10,0,0">
+                <StackPanel Orientation="Vertical" Grid.Row="11" Margin="0,10,0,0">
                     <TextBlock
-                        Text="DisplayName" x:Uid="DisplayName">
+                        Text="نام نمایشی">
                     </TextBlock>
                     <TextBox
                         x:Name="DisplayName">
@@ -165,7 +179,7 @@
 
         <CommandBar Grid.Row="2" VerticalAlignment="Bottom">
             <AppBarButton Icon="Delete" Label="Delete" Click="delete_Click_1" />
-            <AppBarButton Label="Linphone" Click="linphone_Click_1">
+            <AppBarButton Label="تلفن رسا" Click="linphone_Click_1">
                 <AppBarButton.Content>
                     <Grid>
                         <Image Source="/Assets/linphone_user.png"/>

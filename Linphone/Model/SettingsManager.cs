@@ -15,7 +15,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 using Linphone;
-using PCLAppConfig;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -405,7 +404,10 @@ namespace Linphone.Model {
                     lc.DefaultProxyConfig = cfg;
                     LinphoneManager.Instance.AddPushInformationsToContactParams();
                     cfg.AvpfMode = (avpf) ? AVPFMode.Enabled : AVPFMode.Disabled;
-                    cfg.RegisterEnabled = true;
+                    
+                    if (Dialer.IsLoggedIn)
+                        cfg.RegisterEnabled = true;
+                    
                     cfg.Done();
                 }
             }
