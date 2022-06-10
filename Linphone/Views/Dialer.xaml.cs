@@ -472,7 +472,11 @@ namespace Linphone.Views
 
                 // Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
                 LinphoneManager.Instance.NewOutgoingCall("0" + callback.Value.Element);
-
+                Call call = LinphoneManager.Instance.GetCurrentCall();
+                if (call == null)
+                    break;
+                if (call.State == CallState.End)
+                    Debug.WriteLine($"Call to {call.ToAddress} is ended");
                 break;
 			}
 		}

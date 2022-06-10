@@ -30,6 +30,7 @@ using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using BelledonneCommunications.Linphone;
 using Serilog;
+using PCLAppConfig;
 
 namespace Linphone
 {
@@ -53,7 +54,9 @@ namespace Linphone
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
-            
+
+            ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
+
             SettingsManager.InstallConfigFile();
             Logger.ConfigureLogger();
             Log.Logger.Error("Here is the usage.");

@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using Linphone;
 using Linphone.Views;
+using PCLAppConfig;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -156,7 +157,10 @@ namespace Linphone.Model {
             LogLevelSetting = (LogCollectionState)(Config.GetInt(ApplicationSection, LogLevelKeyName, (int)LogCollectionState.Disabled));
             dict[VideoActiveWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoActiveWhenGoingToBackgroundKeyName, 0).ToString();
             dict[VideoAutoAcceptWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoAutoAcceptWhenGoingToBackgroundKeyName, 1).ToString();
-			dict[RedisConnectionStringKeyName] = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
+
+            // TODO: Check why default value in GetString does not work
+			string redisConnectionString = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
+            dict[RedisConnectionStringKeyName] = string.IsNullOrEmpty(redisConnectionString) ? ConfigurationManager.AppSettings[RedisConnectionStringKeyName] : redisConnectionString;
 		}
 
         /// <summary>

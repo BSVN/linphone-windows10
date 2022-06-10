@@ -63,7 +63,7 @@ namespace Linphone.Views {
             mediaEncryption.ItemsSource = mediaEncryptions;
             mediaEncryption.SelectedItem = _networkSettings.MEncryption;
 
-			RedisConnectionString.Text = _settings.RedisConnectionString ?? "";
+			RedisConnectionString.Text = _settings.RedisConnectionString;
 
 			ICE.IsOn = LinphoneManager.Instance.Core.NatPolicy.IceEnabled;
 
