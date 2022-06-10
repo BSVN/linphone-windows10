@@ -53,7 +53,9 @@ namespace Linphone
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
-            
+
+            ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
+
             SettingsManager.InstallConfigFile();
             Logger.ConfigureLogger();
             Log.Logger.Error("Here is the usage.");
