@@ -27,7 +27,8 @@ namespace BelledonneCommunications.Linphone.Core
             object settingValue = localSettings.Values["PanelUrl"];
             string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9011" : settingValue as string;
 
-            _coreClient = new CoreHttpClient();
+            _coreClient = new CoreHttpClient(panelBaseUrl);
+
             CallContext = new CallContext();
             AgentProfile = new PhoneProfile(panelBaseUrl);
         }
@@ -208,6 +209,8 @@ namespace BelledonneCommunications.Linphone.Core
         public string SipPhoneNumber { get; set; }
 
         public string BrowsingHistory { get; set; }
+
+        public bool IsLoggedIn { get; set; }
     }
 
     internal class CallContext

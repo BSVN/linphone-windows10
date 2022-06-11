@@ -308,7 +308,6 @@ namespace Linphone.Views
 
             if (addressBox.Text.Length > 0)
             {
-                IsIncomingCall = false;
                 LinphoneManager.Instance.NewOutgoingCall(addressBox.Text);
             }
             else
@@ -392,32 +391,32 @@ namespace Linphone.Views
 
         private void status_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (IsLoggedIn)
+            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                 LinphoneManager.Instance.Core.RefreshRegisters();
         }
 
         private void Browser_Loaded(object sender, RoutedEventArgs e)
         {            
-            if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
-            {
-                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{BrowserCurrentUrlOffset}");
-            }
-            else
-            {
+            //if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
+            //{
+            //    Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{BrowserCurrentUrlOffset}");
+            //}
+            //else
+            //{
                 Browser.Source = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
-            }
+            //}
         }
 
         private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
-                IsLoggedIn = false;
+                CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
             }
             else if (sender.Source.AbsolutePath.Contains("Dashboard"))
             {
-                IsLoggedIn = true;
+                CallFlowControl.Instance.AgentProfile.IsLoggedIn = true;
                 EnableRegister(true);
             }
         }

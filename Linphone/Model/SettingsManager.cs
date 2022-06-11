@@ -15,6 +15,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Core;
 using Linphone;
 using Linphone.Views;
 using System;
@@ -427,7 +428,7 @@ namespace Linphone.Model {
                     LinphoneManager.Instance.AddPushInformationsToContactParams();
                     cfg.AvpfMode = (avpf) ? AVPFMode.Enabled : AVPFMode.Disabled;
                     
-                    if (Dialer.IsLoggedIn)
+                    if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                         cfg.RegisterEnabled = true;
                     
                     cfg.Done();

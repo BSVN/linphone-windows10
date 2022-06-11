@@ -9,9 +9,12 @@ namespace BelledonneCommunications.Linphone.Core
 {
     internal class CoreHttpClient
     {
-        internal CoreHttpClient()
+        internal CoreHttpClient(string baseUrl)
         {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(baseUrl)
+            };
         }
 
         /// <summary>
@@ -26,7 +29,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 Log.Information("Send incoming call initation from {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
+                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Calls/InitiateIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
                 CallsCommandServiceInitiateIncomingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
 
                 Log.Information("Call initiation successfully done with call id: {CallId}.", response.Data?.Id);
@@ -55,7 +58,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 Log.Information("Send a fire and forget call to accept the call with id: {CallId}.", callId);
 
-                Task<HttpResponseMessage> task = _httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{callId}");
+                Task<HttpResponseMessage> task = _httpClient.GetAsync($"/api/Calls/AcceptIncoming/{callId}");
 
                 task.ContinueWith(P =>
                 {
@@ -88,7 +91,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 Log.Information("Initiate a fire and forget call to submit a missed call form {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
 
-                Task<HttpResponseMessage> task = _httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
+                Task<HttpResponseMessage> task = _httpClient.GetAsync($"/api/Calls/MissedIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
 
                 task.ContinueWith(P =>
                 {
