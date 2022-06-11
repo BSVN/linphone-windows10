@@ -38,6 +38,7 @@
     </Application>
   </Applications>
   <Capabilities>
+    <rescap:Capability Name="broadFileSystemAccess" />
     <Capability Name="internetClient" />
     <Capability Name="codeGeneration" />
     <uap:Capability Name="contacts" />
