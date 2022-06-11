@@ -33,6 +33,8 @@ using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Diagnostics;
 using StackExchange.Redis;
 using Windows.UI.Popups;
+using System.IO;
+using BelledonneCommunications.Linphone.Core;
 
 namespace Linphone.Views
 {
@@ -42,38 +44,19 @@ namespace Linphone.Views
         // TODO: Please remove it, and use _settings
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
-        public static string BrowserCurrentUrlOffset = null;
-
-        public static string BrowserBaseUrl = null;
-
-        public static bool IsIncomingCall { get; set; } = false;
-        
-        public static bool IsIncomingCallAnswered { get; set; } = false;
-
-        public static bool IsCallTerminatedByAgent { get; set; } = false;
-
-        public static string CallerId = null;
-
-        public static string CalleeId = null;
-
-        public static Guid CallId = default;
-
-        public static bool IsLoggedIn = false;
-
-        public static bool HasUnfinishedCall = false;
-
-        private readonly HttpClient httpClient;
         private ConnectionMultiplexer connectionMultiplexer;
+
 		private IDatabase database;
+
         private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
 
 		public Dialer()
         {
             this.InitializeComponent();
-            httpClient = new HttpClient();
-
 			DataContext = this;
+            
             ContactsManager contactsManager = ContactsManager.Instance;
+            
             addressBox.KeyDown += (sender, args) =>
             {
                 if (args.Key == Windows.System.VirtualKey.Enter)
@@ -81,7 +64,16 @@ namespace Linphone.Views
                     call_Click(null, null);
                 }
             };
+
+            //CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions();
+            //StorageFolder localFolder = Windows.ApplicationModel.Package.Current.InstalledLocation;
+
+            //string path = Path.Combine(localFolder.Path, "Assets\\FixedRuntime\\102.0.1245.33_x64");
+            //CoreWebView2Environment env = CoreWebView2Environment.CreateWithOptionsAsync(path, "", options).GetResults();
+
+            //Browser.EnsureCoreWebView2Async().GetResults();
         }
+
 
         /// <summary>
         /// Raises right after page unloading 
@@ -89,8 +81,8 @@ namespace Linphone.Views
         /// <param name="e"></param>
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            if (Browser.Source.OriginalString.Length > BrowserBaseUrl.Length)
-                BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+            //if (Browser.Source.OriginalString.Length > BrowserBaseUrl.Length)
+            //    BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
 
             base.OnNavigatingFrom(e); 
         }
@@ -408,16 +400,11 @@ namespace Linphone.Views
         {            
             if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
             {
-                object settingValue = localSettings.Values["PanelUrl"];
-                BrowserBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                Browser.Source = new Uri($"{BrowserBaseUrl}{BrowserCurrentUrlOffset}");
+                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{BrowserCurrentUrlOffset}");
             }
             else
             {
-                object settingValue = localSettings.Values["PanelUrl"];
-                string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                Browser.Source = new Uri(loadingUrl);
-                BrowserBaseUrl = loadingUrl;
+                Browser.Source = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
             }
         }
 

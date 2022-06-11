@@ -14,6 +14,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone;
 using Linphone.Model;
@@ -42,9 +43,6 @@ using Windows.UI.Xaml.Navigation;
 namespace Linphone.Views {
     public partial class InCall : Page {
         private DispatcherTimer oneSecondTimer;
-        private HttpClient httpClient;
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-
         private Timer fadeTimer;
         private Boolean askingVideo;
         private Call pausedCall;
@@ -61,7 +59,6 @@ namespace Linphone.Views {
 
         public InCall() {
             this.InitializeComponent();
-            httpClient = new HttpClient();
             this.DataContext = new InCallModel();
             askingVideo = false;
             //------------------------------------------------------------------------
@@ -185,8 +182,8 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             statsVisible = areStatsVisible;
         }
 
-        private async void buttons_HangUpClick(object sender) {              
-            Dialer.IsCallTerminatedByAgent = true;
+        private async void buttons_HangUpClick(object sender) {
+            CallFlowControl.Instance.HangUpByAgent();
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion
@@ -207,11 +204,7 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
                 calledNumber = String.Format("{0}@{1}", address.Username, address.Domain);
                 Contact.Text = calledNumber;
 
-                var browserSource = localSettings.Values["PanelUrl"] == null ? "Http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
-                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.Username}&IsIncomingCall=true&CallId={Dialer.CallId}";
-                Log.Information($"In call with browser source: {browserSource}.");
-
-                Browser.Source = new Uri(browserSource);
+                Browser.Source = CallFlowControl.Instance.BuildInCallUri();
 
                 if (calledNumber != null && calledNumber.Length > 0) {
                     // ContactManager cm = ContactManager.Instance;

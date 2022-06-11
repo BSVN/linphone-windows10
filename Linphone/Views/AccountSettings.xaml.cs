@@ -15,6 +15,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Core;
 using Linphone;
 using Linphone.Model;
 using System.Collections.Generic;
@@ -51,8 +52,7 @@ namespace Linphone.Views {
             DisplayName.Text = _settings.DisplayName ?? "";
             Expires.Text = _settings.Expires ?? "";
 
-            // TOOD: Plesae use _settings instead of localSettings
-            PanelUrl.Text = localSettings.Values["PanelUrl"] == null ? "http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
+            PanelUrl.Text = CallFlowControl.Instance.AgentProfile.PanelBaseUrl;
 
             List<string> transports = new List<string>
             {

@@ -2,44 +2,34 @@
 using Linphone.Views;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BelledonneCommunications.Linphone.Core
 {
-    //Todo[Noei]: Use a singleton patterned settings sensitive on changes (Notably: Dialer.BrowserBaseUrl). 
-    //Todo[Noei]: All http methods on this class should be revised to the appropriate verbs.
     internal class CoreHttpClient
     {
-        private static CoreHttpClient _instance = new CoreHttpClient();
-
-        public static CoreHttpClient Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
-
-        private CoreHttpClient()
+        internal CoreHttpClient()
         {
             _httpClient = new HttpClient();
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="callerNumber"></param>
+        /// <param name="calleeNumber"></param>
+        /// <returns></returns>
         public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerNumber, string calleeNumber)
         {
             try
             {
-                Log.Information("Start Initiating an incoming call from {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
+                Log.Information("Send incoming call initation from {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
 
                 HttpResponseMessage responseMessage = await _httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
                 CallsCommandServiceInitiateIncomingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
 
-                Log.Information("Incoming call has been initiated with call id: {CallId}.", response.Data?.Id);
+                Log.Information("Call initiation successfully done with call id: {CallId}.", response.Data?.Id);
 
                 return response;
             }
@@ -59,11 +49,11 @@ namespace BelledonneCommunications.Linphone.Core
         /// Timing is not a premise as long as we doubted on application crashing reason.
         /// </remarks>
         /// <param name="callId">Call id</param>
-        public void AcceptIncomingCall(Guid callId)
+        public void AcceptIncomingCallAsync(Guid callId)
         {
             try
             {
-                Log.Information("Initiate a fire and forget call to accept the call with id: {CallId}.", callId);
+                Log.Information("Send a fire and forget call to accept the call with id: {CallId}.", callId);
 
                 Task<HttpResponseMessage> task = _httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{callId}");
 
@@ -92,7 +82,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// </summary>
         /// <param name="callerNumber">Caller PhoneNumber.</param>
         /// <param name="calleeNumber">Callee PhoneNumber</param>
-        public void SubmitMissedCall(string callerNumber, string calleeNumber)
+        public void SubmitMissedCallAsync(string callerNumber, string calleeNumber)
         {
             try
             {

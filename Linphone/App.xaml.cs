@@ -32,6 +32,7 @@ using BelledonneCommunications.Linphone;
 using Serilog;
 using System.Threading.Tasks;
 using BelledonneCommunications.Linphone.Core;
+using Microsoft.Web.WebView2.Core;
 
 namespace Linphone
 {
@@ -57,6 +58,12 @@ namespace Linphone
             this.Suspending += OnSuspending;
 
             SettingsManager.InstallConfigFile();
+            //System.IO.Path.Combine(Environment.CurrentDirectory, @"FixedRuntime\102.0.1245.33_x64")
+            //CoreWebView2Environment.CreateWithOptionsAsync(@"FixedRuntime\102.0.1245.33_x64", @"FixedRuntime\102.0.1245.33_x64\UserData", new CoreWebView2EnvironmentOptions()
+            //{
+
+            //}).GetResults();
+
             Logger.ConfigureLogger();
             Log.Logger.Error("Here is the usage.");
             acceptCall = false;
@@ -82,94 +89,7 @@ namespace Linphone
         {
             Debug.WriteLine("[CallListener] Call ended, can go back ? " + rootFrame.CanGoBack);
 
-            if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && Dialer.IsCallTerminatedByAgent)
-            {
-                bool StayThere = false;
-                try
-                {
-                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
-                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-                    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                    {
-                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-                        Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-                        StayThere = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Exception during call termination at the end.");
-                }
-
-                if (!StayThere)
-                {
-                    Dialer.CallId = default;
-                    Dialer.IsIncomingCallAnswered = false;
-                    Dialer.CallerId = default;
-                    Dialer.CalleeId = default;
-                    Dialer.IsCallTerminatedByAgent = false;
-                    Dialer.BrowserCurrentUrlOffset = "";
-                }
-            }
-            else if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && !Dialer.IsCallTerminatedByAgent)
-            {
-                bool StayThere = false;
-
-                try
-                {
-                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
-                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-                    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                    {
-                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-                        Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-                        StayThere = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Exception during call termination at the end.");
-                }
-
-                if (!StayThere)
-                {
-                    Dialer.CallId = default;
-                    Dialer.IsIncomingCallAnswered = false;
-                    Dialer.CallerId = default;
-                    Dialer.CalleeId = default;
-                    Dialer.IsCallTerminatedByAgent = false;
-                    Dialer.BrowserCurrentUrlOffset = "";
-                }
-            }
-            else if (Dialer.IsIncomingCall && Dialer.CallId != default && !Dialer.IsIncomingCallAnswered)
-            {
-                try
-                {
-                    Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
-                    task.ContinueWith(P =>
-                    {
-                        if (task.Exception != null)
-                        {
-                            Log.Error(task.Exception, "Exception during submitting call termination by customer.");
-                        }
-                        else
-                        {
-                            var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-                            Log.Information("Call termination by customer submited {Payload}.", result.SerializeToJson());
-                        }
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Exception during call termination by customer.");
-                }
-
-                Dialer.CallId = default;
-                Dialer.IsIncomingCallAnswered = false;
-                Dialer.CallerId = default;
-                Dialer.CalleeId = default;
-                Dialer.IsCallTerminatedByAgent = false;
-            }
+            CallFlowControl.Instance.TerminateCall();
 
             if (rootFrame.CanGoBack)
             {
@@ -364,7 +284,7 @@ namespace Linphone
                     if (addr != null && addr.AsStringUriOnly().Equals(call.RemoteAddress.AsStringUriOnly()))
                     {
                         call.Accept();
-                        List<String> parameters = new List<String>();
+                        List<string> parameters = new List<string>();
                         parameters.Add(call.RemoteAddress.AsString());
                         rootFrame.Navigate(typeof(Views.InCall), parameters);
                         acceptCall = false;
@@ -373,36 +293,8 @@ namespace Linphone
             }
             else
             {
-                // Typically incoming calls are routed to this section. 
-                SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
-                _settings.Load();
-                string Username = _settings.Username;
-
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(call.RemoteAddress.AsString());
-
-                // Todo[Noei]: this section should be managed as a method or something more clear than these garbages.
-                Dialer.CallId = default;
-                Dialer.CallerId = address.GetCanonicalPhoneNumber();
-                Dialer.CalleeId = Username;
-                Dialer.IsIncomingCallAnswered = false;
-
-                try
-                {
-                    CallsCommandServiceInitiateIncomingResponse response =
-                        CoreHttpClient.Instance.InitiateIncomingCallAsync(callerNumber: address.GetCanonicalPhoneNumber(),
-                                                                                calleeNumber: Username).Result;
-                    if (response != null)
-                    {
-                        Dialer.IsIncomingCall = true;
-                        Dialer.CallId = response.Data.Id;
-                    }
-                }
-                catch
-                {
-                    Log.Debug("Failed to establish a new call.");
-                    // Todo[Noei]: we can hang up this call and submit a missed call.
-                }
-
+                CallFlowControl.Instance.InitiateIncomingCall(address.GetCanonicalPhoneNumber());
 
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }

@@ -17,17 +17,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using System;
 using Linphone.Model;
 using Windows.UI.Xaml.Controls;
-using System.ComponentModel;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml;
 using Windows.UI.Core;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using BelledonneCommunications.Linphone.Presentation.Dto;
-using Serilog;
-using System.Threading.Tasks;
 using BelledonneCommunications.Linphone.Core;
 
 namespace Linphone.Views
@@ -35,9 +28,7 @@ namespace Linphone.Views
     public partial class IncomingCall : Page
     {
         private string _callerNumber;
-        private string _canonicalCallerPhoneNumber;
-        private string _sipPhoneUsername;
-        
+
         public IncomingCall()
         {
             this.InitializeComponent();
@@ -87,9 +78,6 @@ namespace Linphone.Views
             if ((nee.Parameter as String).Contains("sip"))
             {
                 _callerNumber = (nee.Parameter as String);
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callerNumber);
-                _canonicalCallerPhoneNumber = address.GetCanonicalPhoneNumber();
-
                 if (_callerNumber.StartsWith("sip:"))
                 {
                     _callerNumber = _callerNumber.Substring(4);
@@ -130,19 +118,7 @@ namespace Linphone.Views
         {
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
-                Dialer.IsIncomingCallAnswered = true;
-
-                if (Dialer.CallId != default)
-                {
-                    try
-                    {
-                        CoreHttpClient.Instance.AcceptIncomingCall(Dialer.CallId);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Failure in accepting the incoming call.");
-                    }
-                }
+                CallFlowControl.Instance.AgentAcceptedIncomingCall();
 
                 List<string> parameters = new List<string>();
                 parameters.Add(_callerNumber);
@@ -157,18 +133,8 @@ namespace Linphone.Views
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-
-                Dialer.IsIncomingCall = false;
-                Dialer.CallId = default;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Exception during declining a call.");
-            }
-
             LinphoneManager.Instance.EndCurrentCall();
+            
             if (Frame.CanGoBack)
             {
                 Frame.GoBack();
