@@ -31,6 +31,7 @@ using BelledonneCommunications.Linphone.Presentation.Dto;
 using BelledonneCommunications.Linphone;
 using Serilog;
 using System.Threading.Tasks;
+using BelledonneCommunications.Linphone.Core;
 
 namespace Linphone
 {
@@ -352,10 +353,11 @@ namespace Linphone
             }
         }
 
-        public void CallIncoming(Call call)
+        public async void CallIncoming(Call call)
         {
             if (acceptCall)
             {
+                // Related arguments should be set for routing incoming call to this section. 
                 if (sipAddress != "")
                 {
                     Address addr = LinphoneManager.Instance.Core.InterpretUrl(sipAddress);
@@ -371,6 +373,37 @@ namespace Linphone
             }
             else
             {
+                // Typically incoming calls are routed to this section. 
+                SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
+                _settings.Load();
+                string Username = _settings.Username;
+
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(call.RemoteAddress.AsString());
+
+                // Todo[Noei]: this section should be managed as a method or something more clear than these garbages.
+                Dialer.CallId = default;
+                Dialer.CallerId = address.GetCanonicalPhoneNumber();
+                Dialer.CalleeId = Username;
+                Dialer.IsIncomingCallAnswered = false;
+
+                try
+                {
+                    CallsCommandServiceInitiateIncomingResponse response =
+                        CoreHttpClient.Instance.InitiateIncomingCallAsync(callerNumber: address.GetCanonicalPhoneNumber(),
+                                                                                calleeNumber: Username).Result;
+                    if (response != null)
+                    {
+                        Dialer.IsIncomingCall = true;
+                        Dialer.CallId = response.Data.Id;
+                    }
+                }
+                catch
+                {
+                    Log.Debug("Failed to establish a new call.");
+                    // Todo[Noei]: we can hang up this call and submit a missed call.
+                }
+
+
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }
         }

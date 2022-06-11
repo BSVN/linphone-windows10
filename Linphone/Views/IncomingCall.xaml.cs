@@ -28,25 +28,19 @@ using System.Text;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using Serilog;
 using System.Threading.Tasks;
+using BelledonneCommunications.Linphone.Core;
 
 namespace Linphone.Views
 {
-
     public partial class IncomingCall : Page
     {
-        private String _callingNumber;
-        private HttpClient httpClient;
-        private string UserId;
-
+        private string _callerNumber;
+        private string _canonicalCallerPhoneNumber;
+        private string _sipPhoneUsername;
+        
         public IncomingCall()
         {
             this.InitializeComponent();
-
-            SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
-            _settings.Load();
-            UserId = _settings.Username;
-
-            httpClient = new HttpClient();
 
             SystemNavigationManager.GetForCurrentView().BackRequested += Back_requested;
             if (!LinphoneManager.Instance.Core.VideoSupported() || !LinphoneManager.Instance.Core.VideoCaptureEnabled)
@@ -92,46 +86,24 @@ namespace Linphone.Views
 
             if ((nee.Parameter as String).Contains("sip"))
             {
-                _callingNumber = (nee.Parameter as String);
+                _callerNumber = (nee.Parameter as String);
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callerNumber);
+                _canonicalCallerPhoneNumber = address.GetCanonicalPhoneNumber();
 
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                Dialer.CallId = default;
-                Dialer.CallerId = address.GetCanonicalPhoneNumber();
-                Dialer.CalleeId = UserId;
-                Dialer.IsIncomingCallAnswered = false;
-
-                if (_callingNumber.StartsWith("sip:"))
+                if (_callerNumber.StartsWith("sip:"))
                 {
-                    _callingNumber = _callingNumber.Substring(4);
+                    _callerNumber = _callerNumber.Substring(4);
                 }
 
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
-                Contact.Text = _callingNumber;
+                Contact.Text = _callerNumber;
 
-                if (_callingNumber != null && _callingNumber.Length > 0)
+                if (_callerNumber != null && _callerNumber.Length > 0)
                 {
                     //ContactManager cm = ContactManager.Instance;
                     //cm.ContactFound += cm_ContactFound;
                     //cm.FindContact(_callingNumber);
                 }
-
-                Log.Debug("Initiate a new call.");
-                try
-                {
-                    HttpResponseMessage response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
-                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
-                    if (result != null)
-                    {
-                        Dialer.IsIncomingCall = true;
-                        Dialer.CallId = result.Result.Data.Id;
-                    }
-                }
-                catch
-                {
-                    Log.Debug("Exception in iniating a new call.");
-                }
-
-                Log.Debug("Call Initiation finished.");
             }
         }
 
@@ -164,28 +136,16 @@ namespace Linphone.Views
                 {
                     try
                     {
-                        Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/AcceptIncoming/{Dialer.CallId}");
-                        task.ContinueWith(P =>
-                        {
-                            if (task.Exception != null)
-                            {
-                                Log.Error(task.Exception, "Exception during Accepting an incoming call.");
-                            }
-                            else
-                            {
-                                var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
-                                Log.Information("Accept incoming call response payload {Payload}.", result.SerializeToJson());
-                            }
-                        });
+                        CoreHttpClient.Instance.AcceptIncomingCall(Dialer.CallId);
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Answer click event exception.");
+                        Log.Error(ex, "Failure in accepting the incoming call.");
                     }
                 }
 
                 List<string> parameters = new List<string>();
-                parameters.Add(_callingNumber);
+                parameters.Add(_callerNumber);
                 parameters.Add("incomingCall");
                 Frame.Navigate(typeof(Views.InCall), parameters);
             }
@@ -199,20 +159,6 @@ namespace Linphone.Views
         {
             try
             {
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                Task<HttpResponseMessage> task = httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
-                task.ContinueWith(P =>
-                {
-                    if (task.Exception != null)
-                    {
-                        Log.Error(task.Exception, "Exception during submit a missed incoming call.");
-                    }
-                    else
-                    {
-                        var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
-                        Log.Information("Accept missed incoming call response payload {Payload}.", result.SerializeToJson());
-                    }
-                });
 
                 Dialer.IsIncomingCall = false;
                 Dialer.CallId = default;
