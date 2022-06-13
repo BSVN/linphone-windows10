@@ -118,7 +118,8 @@ namespace Linphone.Views
         {
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
-                CallFlowControl.Instance.AgentAcceptedIncomingCall();
+                // HotPoint #1
+                CallFlowControl.Instance.IncomingCallAccepted();
 
                 List<string> parameters = new List<string>();
                 parameters.Add(_callerNumber);
@@ -133,6 +134,7 @@ namespace Linphone.Views
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
+            CallFlowControl.Instance.IncomingCallDeclined();
             LinphoneManager.Instance.EndCurrentCall();
             
             if (Frame.CanGoBack)

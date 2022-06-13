@@ -19,44 +19,34 @@ using Windows.UI.Xaml.Controls;
 using Linphone.Model;
 using Windows.UI.Xaml.Navigation;
 using System;
-using Linphone;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Input;
 using System.ComponentModel;
 using System.Collections.Generic;
 using Microsoft.UI.Xaml.Controls;
-using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
-using Windows.Storage;
-using System.Net.Http;
-using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Diagnostics;
 using StackExchange.Redis;
 using Windows.UI.Popups;
-using System.IO;
 using BelledonneCommunications.Linphone.Core;
+using Serilog;
+using System.Threading.Tasks;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 
 namespace Linphone.Views
 {
 
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
-        // TODO: Please remove it, and use _settings
-        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-
-        private ConnectionMultiplexer connectionMultiplexer;
-
-		private IDatabase database;
-
-        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
-
-		public Dialer()
+        public Dialer()
         {
             this.InitializeComponent();
-			DataContext = this;
+            DataContext = this;
             
+            _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
+
             ContactsManager contactsManager = ContactsManager.Instance;
-            
+
             addressBox.KeyDown += (sender, args) =>
             {
                 if (args.Key == Windows.System.VirtualKey.Enter)
@@ -65,6 +55,7 @@ namespace Linphone.Views
                 }
             };
 
+            // TODO: WebView FixedRuntime Approach make installation easier.
             //CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions();
             //StorageFolder localFolder = Windows.ApplicationModel.Package.Current.InstalledLocation;
 
@@ -81,10 +72,20 @@ namespace Linphone.Views
         /// <param name="e"></param>
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            //if (Browser.Source.OriginalString.Length > BrowserBaseUrl.Length)
-            //    BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+            _logger.Debug("OnNavigatingFrom");
 
-            base.OnNavigatingFrom(e); 
+            try
+            {
+                if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
+                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = Browser.Source.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while updating dialer browser's history.");
+                CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
+            }
+
+            base.OnNavigatingFrom(e);
         }
 
         private int unreadMessageCount;
@@ -114,51 +115,51 @@ namespace Linphone.Views
             }
         }
 
-		private ConnectionMultiplexer RedisConnectionMultiplexer
-		{
-			get
-			{
-				if (connectionMultiplexer == null)
-				{
-					_settings.Load();
-					try
-					{
-						connectionMultiplexer = ConnectionMultiplexer.Connect((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
-					}
-					catch (RedisConnectionException e)
-					{
-						Debug.WriteLine(e.Message);
-						var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
-						messageDialog.Commands.Add(new UICommand("باشه"));
-						messageDialog.DefaultCommandIndex = 0;
-						messageDialog.CancelCommandIndex = 0;
-						messageDialog.ShowAsync();
-					}
-				}
+        private ConnectionMultiplexer RedisConnectionMultiplexer
+        {
+            get
+            {
+                if (connectionMultiplexer == null)
+                {
+                    _settings.Load();
+                    try
+                    {
+                        connectionMultiplexer = ConnectionMultiplexer.Connect((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
+                    }
+                    catch (RedisConnectionException e)
+                    {
+                        Debug.WriteLine(e.Message);
+                        var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
+                        messageDialog.Commands.Add(new UICommand("باشه"));
+                        messageDialog.DefaultCommandIndex = 0;
+                        messageDialog.CancelCommandIndex = 0;
+                        messageDialog.ShowAsync();
+                    }
+                }
 
-				return connectionMultiplexer;
-			}
-		}
+                return connectionMultiplexer;
+            }
+        }
 
-		private IDatabase Database
-		{
-			get
-			{
-				if (database == null)
-				{
-					database = RedisConnectionMultiplexer?.GetDatabase();
-				}
+        private IDatabase Database
+        {
+            get
+            {
+                if (database == null)
+                {
+                    database = RedisConnectionMultiplexer?.GetDatabase();
+                }
 
-				return database;
-			}
-		}
+                return database;
+            }
+        }
 
-		private int missedCallCount;
-		public int MissedCallCount
-		{
-			get
-			{
-				return missedCallCount;
+        private int missedCallCount;
+        public int MissedCallCount
+        {
+            get
+            {
+                return missedCallCount;
             }
 
             set
@@ -251,7 +252,8 @@ namespace Linphone.Views
             if (LinphoneManager.Instance.Core.CallsNb > 0)
             {
                 Call call = LinphoneManager.Instance.Core.CurrentCall;
-                if( call != null){
+                if (call != null)
+                {
                     List<String> parameters = new List<String>();
                     parameters.Add(call.RemoteAddress.AsStringUriOnly());
                     Frame.Navigate(typeof(Views.InCall), parameters);
@@ -278,8 +280,9 @@ namespace Linphone.Views
                     String sipAddressToCall = address.AsStringUriOnly();
                     addressBox.Text = sipAddressToCall;
                 }
-                catch (Exception exception)
+                catch (Exception ex)
                 {
+                    _logger.Error(ex, "Linphone raised exception.");
                 }
             }
         }
@@ -298,14 +301,20 @@ namespace Linphone.Views
 
         private async void call_Click(object sender, RoutedEventArgs e)
         {
-            //if (HasUnfinishedCall)
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                _logger.Information("Cant start a call because of a running command.");
+                return;
+            }
+
+            //if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
             //{
-            //    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/{Dialer.CallId}");
-            //    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
-            //    if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-            //        return;
-            //    else
-            //        HasUnfinishedCall = false;
+            //    return;
+            //}
+            //else
+            //{
+            //    // HotPoint #6
+            //    // TODO: Prepare for outgoing call.
             //}
 
             if (addressBox.Text.Length > 0)
@@ -362,6 +371,10 @@ namespace Linphone.Views
             {
                 Frame.Navigate(typeof(Views.Settings), null);
             }
+            else
+            {
+                _logger.Information("Unsuccessful attempt to enter settings password with: {Password}", AdminPassword.Password);
+            }
         }
 
         private void about_Click(object sender, RoutedEventArgs e)
@@ -398,28 +411,101 @@ namespace Linphone.Views
         }
 
         private void Browser_Loaded(object sender, RoutedEventArgs e)
-        {            
-            //if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
-            //{
-            //    Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{BrowserCurrentUrlOffset}");
-            //}
-            //else
-            //{
+        {
+            // HotPoint #4
+            if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
+                && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
+            {
+                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");                               
+            }
+            else
+            {
                 Browser.Source = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
-            //}
+            }
         }
 
-        private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+        private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
+            // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
             }
-            else if (sender.Source.AbsolutePath.Contains("Dashboard"))
+            else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = true;
+                
+                AgentStatus.IsEnabled = true;
+                await AgentStatus.Dispatcher.RunIdleAsync(P =>
+                {
+                    AgentStatus.SelectedIndex = 0;
+                });
+
                 EnableRegister(true);
+
+                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+            }
+            else if (sender.Source.AbsolutePath.Contains("/api/Operators/UserInfo"))
+            {
+                // Literally کثافتکاری                
+                try
+                {
+                    var html = await Browser.CoreWebView2.ExecuteScriptAsync("document.body.outerHTML");
+                    string content = html.Substring(html.IndexOf("sipProfile"));
+                    content = content.Substring(content.IndexOf("username"));
+                    content = content.Substring(content.IndexOf(":") + 1);
+
+                    CallFlowControl.Instance.AgentProfile.SipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
+
+                    LoadSipSettings();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error while reading sip phonenumber.");
+                }
+
+                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+            }
+        }
+
+        private void LoadSipSettings()
+        {
+            LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+            {
+                UpdateSettings();
+            });
+        }
+
+        private async Task UpdateSettings()
+        {
+            try
+            {
+                _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                  {
+                      OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
+                      SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
+
+                      settings.Load();
+
+                      settings.Username = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
+                      settings.UserId = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.UserId) ? "": agentSettings.Data.SipProfile.UserId;
+                      settings.Password = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Password) ? "" : agentSettings.Data.SipProfile.Password;
+                      settings.Domain = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Domain) ? "10.19.82.3" : agentSettings.Data.SipProfile.Domain;
+                      settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
+                      settings.OutboundProxy = settings.OutboundProxy;
+                      settings.DisplayName = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
+                      settings.Transports = (agentSettings.Data.SipProfile.Protocol == 0) ? "TCP" : agentSettings.Data.SipProfile.Protocol.ToString("g");
+                      settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
+                      settings.AVPF = settings.AVPF;
+                      settings.ICE = settings.ICE;
+
+                      settings.Save();
+                  });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while updating agent settings.");
             }
         }
 
@@ -443,31 +529,57 @@ namespace Linphone.Views
                         break;
                     }
                     LinphoneManager.Instance.Core.Iterate();
-                    System.Threading.Tasks.Task.Delay(100);
+                    Task.Delay(100);
                 }
             }
         }
 
-		private void Callback_Click(object sender, RoutedEventArgs e)
-		{
+        private void Callback_Click(object sender, RoutedEventArgs e)
+        {
             const string QUEUE_NAME = "cbq";
 
             if (Database == null)
                 return;
 
-			while (true)
-			{
+            while (true)
+            {
                 SortedSetEntry? callback = Database.SortedSetPop(QUEUE_NAME);
                 if (callback == null || !callback.HasValue)
                     break;
 
-				Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
                 // Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
                 LinphoneManager.Instance.NewOutgoingCall("0" + callback.Value.Element);
 
                 break;
-			}
-		}
-	}
+            }
+        }
+
+        private async void AgentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (AgentStatus.SelectedIndex == 0)
+                {
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
+                    Browser.CoreWebView2.Reload();
+                }
+                else
+                {
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
+                    Browser.CoreWebView2.Reload();
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "Internal error while updating agent status.");
+            }
+        }
+
+        private readonly ILogger _logger;
+        private ConnectionMultiplexer connectionMultiplexer;
+        private IDatabase database;
+        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
+    }
 }

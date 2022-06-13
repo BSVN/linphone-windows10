@@ -20,19 +20,17 @@ using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Linphone;
 using Linphone.Model;
 using System.Diagnostics;
 using Windows.UI.Core;
 using System.Collections.Generic;
-using Linphone.Views;
 using System.Net.Http;
-using BelledonneCommunications.Linphone.Presentation.Dto;
 using BelledonneCommunications.Linphone;
 using Serilog;
-using System.Threading.Tasks;
 using BelledonneCommunications.Linphone.Core;
-using Microsoft.Web.WebView2.Core;
+using Microsoft.Win32;
+using System.Threading.Tasks;
+using Windows.UI.Core.Preview;
 
 namespace Linphone
 {
@@ -44,7 +42,6 @@ namespace Linphone
         Frame rootFrame;
         bool acceptCall;
         String sipAddress;
-        HttpClient httpClient;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -52,26 +49,32 @@ namespace Linphone
         /// </summary>
         public App()
         {
-            httpClient = new HttpClient();
-            this.InitializeComponent();
+            this.InitializeComponent();            
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
-
+            
             SettingsManager.InstallConfigFile();
+
+            Logger.ConfigureLogger();
+
+            _logger = Log.Logger.ForContext("SourceContext", nameof(App));
+            
+            // TODO: Use this code check current version of WebView.
+            // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
+            IsWebView2Installed();
+
             //System.IO.Path.Combine(Environment.CurrentDirectory, @"FixedRuntime\102.0.1245.33_x64")
             //CoreWebView2Environment.CreateWithOptionsAsync(@"FixedRuntime\102.0.1245.33_x64", @"FixedRuntime\102.0.1245.33_x64\UserData", new CoreWebView2EnvironmentOptions()
             //{
 
             //}).GetResults();
 
-            Logger.ConfigureLogger();
-            Log.Logger.Error("Here is the usage.");
             acceptCall = false;
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
-            Log.Logger.Error(e.Exception, "Catched Exception.");
+            _logger.Error(e.Exception, "Application unhandled exception.");
 
             e.Handled = true;
         }
@@ -87,9 +90,20 @@ namespace Linphone
 
         public async void CallEnded(Call call)
         {
-            Debug.WriteLine("[CallListener] Call ended, can go back ? " + rootFrame.CanGoBack);
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                _logger.Information("A command call has been ended.");
 
-            CallFlowControl.Instance.TerminateCall();
+                if (CloseApp)
+                    Application.Current.Exit();
+
+                CallFlowControl.Instance.CallContext.Direction = CallDirection.Incoming;
+                return;
+            }
+            else
+            {
+                await CallFlowControl.Instance.TerminateCall();
+            }
 
             if (rootFrame.CanGoBack)
             {
@@ -118,6 +132,8 @@ namespace Linphone
 
         public void NewCallStarted(string callerNumber)
         {
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command) return;
+
             Debug.WriteLine("[CallListener] NewCallStarted " + callerNumber);
             List<String> parameters = new List<String>();
             parameters.Add(callerNumber);
@@ -143,7 +159,6 @@ namespace Linphone
 
         private void Initialize(IActivatedEventArgs e, String args)
         {
-
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
@@ -205,6 +220,8 @@ namespace Linphone
                 }
             }
 
+            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += App_CloseRequested;
+
             Window.Current.Activate();
 
             DisableRegisteration();
@@ -218,7 +235,21 @@ namespace Linphone
                 var arguments = toastArgs.Argument;
                 Initialize(args, arguments);
             }
+        }
 
+        private async void App_CloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+            _logger.Information("App_CloseRequested raised omg !!");
+            
+            e.Handled = true;
+            
+            CloseApp = true;
+            
+            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
+                await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
+            
+            if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                Application.Current.Exit();
         }
 
         /// <summary>
@@ -240,12 +271,13 @@ namespace Linphone
         /// <param name="e">Details about the suspend request.</param>
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
-            var deferral = e.SuspendingOperation.GetDeferral();
+            _logger.Debug("OnSuspending.");
+            //var deferral = e.SuspendingOperation.GetDeferral();
 
-            //TODO: Save application state and stop any background activity
-            DisableRegisteration();
+            ////TODO: Save application state and stop any background activity
+            //DisableRegisteration();
 
-            deferral.Complete();
+            //deferral.Complete();
         }
 
         private static void DisableRegisteration()
@@ -268,7 +300,7 @@ namespace Linphone
                         break;
                     }
                     LinphoneManager.Instance.Core.Iterate();
-                    System.Threading.Tasks.Task.Delay(100);
+                    Task.Delay(100);
                 }
             }
         }
@@ -293,11 +325,54 @@ namespace Linphone
             }
             else
             {
+                // HotPoint #0
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(call.RemoteAddress.AsString());
-                CallFlowControl.Instance.InitiateIncomingCall(address.GetCanonicalPhoneNumber());
+                await CallFlowControl.Instance.InitiateIncomingCallAsync(address.GetCanonicalPhoneNumber());
 
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }
         }
+
+        private bool IsWebView2Installed()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue("pv");
+                        if (value != null)
+                        {
+                            _logger.Information($"WebView2 Version: {value}");
+                            return true;
+                        }
+                    }
+                }
+
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue("pv");
+                        if (value != null)
+                        {
+                            _logger.Information($"WebView2 Version: {value}");
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Internal error while checking webview2 installation.");
+                return false;
+            }
+        }
+        
+        bool CloseApp = false;
+        private readonly ILogger _logger; 
     }
 }

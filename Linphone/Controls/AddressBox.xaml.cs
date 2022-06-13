@@ -28,13 +28,13 @@ namespace Linphone.Controls
             get { return address.Text; }
             set {
                 address.Text = value;
-                if(value.Length > 0)
-                {
-                    Backspace.IsEnabled = true;
-                } else
-                {
-                    Backspace.IsEnabled = false;
-                }
+                //if(value.Length > 0)
+                //{
+                //    Backspace.IsEnabled = true;
+                //} else
+                //{
+                //    Backspace.IsEnabled = false;
+                //}
             }
         }
 
@@ -58,13 +58,13 @@ namespace Linphone.Controls
 
         private void address_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if(address.Text.Length > 0)
-            {
-                Backspace.IsEnabled = true;
-            } else
-            {
-                Backspace.IsEnabled = false;
-            }
+            //if(address.Text.Length > 0)
+            //{
+            //    Backspace.IsEnabled = true;
+            //} else
+            //{
+            //    Backspace.IsEnabled = false;
+            //}
         }
     }
 }

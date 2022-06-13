@@ -19,7 +19,7 @@
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>
     </PackageCertificateKeyFile>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
@@ -27,7 +27,7 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
@@ -210,12 +210,16 @@
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
     <Compile Include="Model\Utils.cs" />
+    <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
+    <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceGetByIdResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceInitiateIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceSubmitMissedIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceTerminateIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
     <Compile Include="Presentation.Dto\Infrastructure.cs" />
+    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
+    <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
@@ -466,6 +470,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Web.WebView2">
       <Version>1.0.1248-prerelease</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Registry">
+      <Version>5.0.0</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
       <Version>2.11.0</Version>

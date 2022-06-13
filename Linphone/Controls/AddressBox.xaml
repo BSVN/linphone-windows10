@@ -4,10 +4,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="Linphone.Controls"
-    mc:Ignorable="d"
+    mc:Ignorable="d"    
     d:DesignHeight="100" d:DesignWidth="480">
 
-    <Grid x:Name="LayoutRoot">
+    <Grid x:Name="LayoutRoot" Height="60" Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -17,17 +17,21 @@
             Grid.Column="0"
             x:Name="address"
             Text="{Binding Text}"
+            FontSize="20"
+            VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
             FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
-            PlaceholderText="شماره تماس"            
+            PlaceholderText="شماره تماس"  
+            Padding="5"
             VerticalAlignment="Center"
             AcceptsReturn="False"
             InputScope="EmailSmtpAddress"
             TextChanged="address_TextChanged"
             IsSpellCheckEnabled="false">
+            
         </TextBox>
 
-        <Button 
+        <!--<Button 
             x:Name="Backspace"
             Grid.Column="1"
             BorderBrush="Transparent"
@@ -41,6 +45,6 @@
                     FontFamily="Segoe MDL2 Assets" 
                     Glyph="&#xE750;" 
                     FontSize="30"/>
-        </Button>
+        </Button>-->
     </Grid>
 </UserControl>

@@ -24,11 +24,44 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <controls:StatusBar x:Name="status" Tapped="status_Tapped"/>
+                <Grid Margin="10">
+                    <!--<Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>-->
+                    <ComboBox Grid.Column="0"
+                              x:Name="AgentStatus"
+                              SelectionChanged="AgentStatus_SelectionChanged"
+                              FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                              FlowDirection="RightToLeft" 
+                              IsEnabled="False"
+                              PlaceholderText="وضعیت کاربر"
+                              HorizontalAlignment="Stretch">
+                        <ComboBoxItem x:Name="OnlineAgentComboItem">
+                            <ComboBoxItem.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE95B;" FontSize="20"/>
+                                    <TextBlock Margin="10 0 0 0">پاسخگو</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem.Content>
+                        </ComboBoxItem>
+                        <ComboBoxItem x:Name="OnBreakAgentComboItem">
+                            <ComboBoxItem.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEC32;" FontSize="20"/>
+                                    <TextBlock Margin="10 0 0 0">در حال استراحت</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem.Content>
+                        </ComboBoxItem>
+                    </ComboBox>
+                    
+                    <!--<TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="5 0 0 0">وضعیت: </TextBlock>-->
 
-            <controls:StatusBar 
-            x:Name="status" 
-            Grid.Row="0" 
-            Tapped="status_Tapped"/>
+                    <!--<FontIcon Grid.Column="1" Margin="10 0 0 0" FontFamily="Segoe MDL2 Assets" Glyph="&#xE77B;" FontSize="20"/>-->
+                </Grid>
+            </StackPanel>
 
             <Grid x:Name="ContentPanel" Grid.Row="1">
                 <Grid.RowDefinitions>
@@ -38,19 +71,17 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <controls:AddressBox
-                x:Name="addressBox"
-                Grid.Row="0"
-                Margin="12,0,0,0"
-                BorderThickness="0"
-                FontSize="40"/>
-
                 <StackPanel 
                 x:Name="numpad" 
                 Grid.Row="1" 
                 VerticalAlignment="Bottom" 
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+                    <controls:AddressBox
+                x:Name="addressBox"
+                Grid.Row="0"
+                Margin="0,0,0,0"
+                BorderThickness="0"
+                FontSize="40"/>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="12" />
@@ -332,14 +363,13 @@
                     </AppBarButton.Content>
                 </AppBarButton>
                 <AppBarButton Icon="Setting" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Label="تنظیمات" Click="settings_Click"/>
-
                 <CommandBar.SecondaryCommands>
                     <AppBarButton FlowDirection="RightToLeft" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Label="درباره ما" Click="about_Click"/>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
 
             <ContentDialog x:Name="AdminPasswordDialog"                           
-                           FlowDirection="RightToLeft"         
+                           FlowDirection="RightToLeft"
                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"                           
                            PrimaryButtonText="ورود">
                 <Grid Width="200" VerticalAlignment="Center">

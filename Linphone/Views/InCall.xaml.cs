@@ -183,7 +183,6 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
         }
 
         private async void buttons_HangUpClick(object sender) {
-            CallFlowControl.Instance.HangUpByAgent();
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion
@@ -204,6 +203,7 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
                 calledNumber = String.Format("{0}@{1}", address.Username, address.Domain);
                 Contact.Text = calledNumber;
 
+                // HotPoint #3
                 Browser.Source = CallFlowControl.Instance.BuildInCallUri();
 
                 if (calledNumber != null && calledNumber.Length > 0) {

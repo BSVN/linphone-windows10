@@ -1,4 +1,6 @@
 ﻿using BelledonneCommunications.Linphone.Presentation.Dto;
+using Linphone.Model;
+using Linphone.Views;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,10 +25,10 @@ namespace BelledonneCommunications.Linphone.Core
         private CallFlowControl()
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-
             object settingValue = localSettings.Values["PanelUrl"];
             string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9011" : settingValue as string;
 
+            _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
 
             CallContext = new CallContext();
@@ -38,142 +40,117 @@ namespace BelledonneCommunications.Linphone.Core
 
         }
 
-        public void InitiateIncomingCall(string callerNumber)
+        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerNumber)
         {
             try
             {
+                _logger.Information("Initiation incoming call from: {CallerNumber}.", callerNumber);
+
+                CallContext.CallState = CallState.Ringing;
+                CallContext.CallerNumber = callerNumber;
+                CallContext.CalleeNumber = AgentProfile.SipPhoneNumber;
+                CallContext.Direction = CallDirection.Incoming;
+                CallContext.CallId = default; 
+
                 CallsCommandServiceInitiateIncomingResponse response =
-                    _coreClient.InitiateIncomingCallAsync(callerNumber: callerNumber,
-                                                          calleeNumber: AgentProfile.SipPhoneNumber).Result;
+                    await _coreClient.InitiateIncomingCallAsync(callerNumber: callerNumber,
+                                                                calleeNumber: AgentProfile.SipPhoneNumber);
                 if (response != null)
                 {
-                    CallContext.CallerNumber = callerNumber;
                     CallContext.CallId = response.Data.Id;
                 }
 
-                Log.Information("Initiation incoming call from: {CallerNumber}.", callerNumber);
+                _logger.Information("Incoming call initiation successfully done with call id: {CallId}.", CallContext.CallId.ToString());
+
+                return response;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Internal error during call initation.");
+                _logger.Error(ex, "Internal error during call initation.");
+                return null;
             }
         }
 
-        public void TerminateCall()
+        public void IncomingCallAccepted()
         {
-            //if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && Dialer.IsCallTerminatedByAgent)
-            //{
-            //    bool StayThere = false;
-            //    try
-            //    {
-            //        var response = await httpClient.GetAsync($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Calls/TerminateIncoming/{CallFlowControl.Instance.CallContext.CallId}");
-            //        var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-            //        if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-            //        {
-            //            var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallFlowControl.Instance.CallContext.CallId}&IsIncomingCall=true&CallId={CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-            //            Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-            //            StayThere = true;
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log.Error(ex, "Exception during call termination at the end.");
-            //    }
+            try
+            {
+                // Todo: Call state transition check should be implemented.
+                CallContext.CallState = CallState.Established;
 
-            //    if (!StayThere)
-            //    {
-            //        Dialer.CallId = default;
-            //        Dialer.IsIncomingCallAnswered = false;
-            //        Dialer.CallerId = default;
-            //        Dialer.CalleeId = default;
-            //        Dialer.IsCallTerminatedByAgent = false;
-            //        Dialer.BrowserCurrentUrlOffset = "";
-            //    }
-            //}
-            //else if (Dialer.IsIncomingCall && Dialer.CallId != default && Dialer.IsIncomingCallAnswered && !Dialer.IsCallTerminatedByAgent)
-            //{
-            //    bool StayThere = false;
+                if (CallContext.CallId == default)
+                {
+                    _logger.Information("Skip delivering call establishing event, because the Call did not initiated properly.");
+                    return;
+                }
 
-            //    try
-            //    {
-            //        var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
-            //        var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-            //        if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-            //        {
-            //            var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-            //            Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-            //            StayThere = true;
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log.Error(ex, "Exception during call termination at the end.");
-            //    }
-
-            //    if (!StayThere)
-            //    {
-            //        Dialer.CallId = default;
-            //        Dialer.IsIncomingCallAnswered = false;
-            //        Dialer.CallerId = default;
-            //        Dialer.CalleeId = default;
-            //        Dialer.IsCallTerminatedByAgent = false;
-            //        Dialer.BrowserCurrentUrlOffset = "";
-            //    }
-            //}
-            //else if (Dialer.IsIncomingCall && Dialer.CallId != default && !Dialer.IsIncomingCallAnswered)
-            //{
-            //    try
-            //    {
-            //        Task<HttpResponseMessage> task = httpClient.GetAsync($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
-            //        task.ContinueWith(P =>
-            //        {
-            //            if (task.Exception != null)
-            //            {
-            //                Log.Error(task.Exception, "Exception during submitting call termination by customer.");
-            //            }
-            //            else
-            //            {
-            //                var result = task.Result.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
-            //                Log.Information("Call termination by customer submited {Payload}.", result.SerializeToJson());
-            //            }
-            //        });
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log.Error(ex, "Exception during call termination by customer.");
-            //    }
-
-            //    Dialer.CallId = default;
-            //    Dialer.IsIncomingCallAnswered = false;
-            //    Dialer.CallerId = default;
-            //    Dialer.CalleeId = default;
-            //    Dialer.IsCallTerminatedByAgent = false;
-            //}
+                _coreClient.AcceptIncomingCallAsync(CallContext.CallId);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error while accepting the incoming call.");
+            }
         }
 
-        public void AgentAcceptedIncomingCall()
+        public void IncomingCallDeclined()
         {
-            _coreClient.AcceptIncomingCallAsync(CallContext.CallId);
+            _logger.Information("Incoming call declined by agent.");
+            
+            CallContext.CallState = CallState.DeclinedByAgent;
         }
 
-        public void IncomingCallReceived()
+        public async Task TerminateCall()
         {
+            // Call missed by caller departure.
+            if (CallContext.CallState == CallState.Ringing && CallContext.Direction == CallDirection.Incoming)
+            {
+                _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
-        }
+                _coreClient.SubmitMissedCallAsync(CallContext.CallerNumber,
+                                                  CallContext.CalleeNumber);
+                CallContext.Reset();
+            }
+            // Call missed by agent decline.
+            else if (CallContext.CallState == CallState.DeclinedByAgent && CallContext.Direction == CallDirection.Incoming)
+            {
+                _logger.Information("Missed call caused by agent declining in ringing phase.");
 
-        public void CallAccepted()
-        {
+                _coreClient.SubmitMissedCallAsync(CallContext.CallerNumber,
+                                                  CallContext.CalleeNumber);
+                CallContext.Reset();
+            }
+            // Call terminated either by caller hang up or agent hang up during an established call.
+            else if (CallContext.Direction == CallDirection.Incoming)
+            {
+                try
+                {
+                    _logger.Information("Call terminated either by agent hangup or caller hangup during a call.");
 
+                    if (CallContext.CallId == default)
+                        return;
+
+                    CallsCommandServiceTerminateIncomingResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
+                    if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
+                    {
+                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}{AgentProfile.BrowsingHistory}";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Failed to terminate the call.");
+                }
+            }
+            else
+            {
+                _logger.Information("Unexpected call termination situation, CallContext: {CallContext}.", CallContext.SerializeToJson());
+            }
         }
 
         public void HangUpByAgent()
         {
+            _logger.Information("Agent has ended the call.");
 
-        }
-
-        public void HangUp()
-        {
-
+            //CallContext.CallState = CallState.AgentHangUp;
         }
 
         public Uri BuildInCallUri()
@@ -190,11 +167,77 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentSettings()
+        {
+            try
+            {
+                return await _coreClient.GetAgentInfo(AgentProfile.SipPhoneNumber);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "Error while getting settings for the agent.");
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateAgentStatusAsync(AgentStatus status)
+        {
+            try
+            {
+                _logger.Information("Attempting to update agent status.");
+
+                switch (status)
+                {
+                    case AgentStatus.Ready:
+                        if (AgentProfile.Status == AgentStatus.Ready) return true;
+                        break;
+                    case AgentStatus.Break:
+                        if (AgentProfile.Status == AgentStatus.Break) return true;
+                        break;
+                    case AgentStatus.Offline:
+                        if (AgentProfile.Status == AgentStatus.Offline) return true;
+                        break;
+                }
+
+                bool response = await _coreClient.UpdateAgentStatusAsync(AgentProfile.SipPhoneNumber, status);
+
+                if (response)
+                {
+                    AgentProfile.Status = status;
+                }
+
+                switch (status)
+                {
+                    case AgentStatus.Ready:
+                        CallContext.Direction = CallDirection.Command;
+                        LinphoneManager.Instance.NewOutgoingCall("agent-login");
+                        break;
+                    case AgentStatus.Break:
+                        CallContext.Direction = CallDirection.Command;
+                        LinphoneManager.Instance.NewOutgoingCall("agent-on-break");
+                        break;
+                    case AgentStatus.Offline:
+                        CallContext.Direction = CallDirection.Command;
+                        LinphoneManager.Instance.NewOutgoingCall("agent-logoff");
+                        break;
+                }
+
+                _logger.Information("Successfully updated agent status.");
+                
+                return response;
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "Internal error while updating agent status.");
+                return false;
+            }
+        }
+
+
         public PhoneProfile AgentProfile { get; private set; }
-
         public CallContext CallContext { get; private set; }
-
         private CoreHttpClient _coreClient;
+        private readonly ILogger _logger;
     }
 
     internal class PhoneProfile
@@ -211,6 +254,8 @@ namespace BelledonneCommunications.Linphone.Core
         public string BrowsingHistory { get; set; }
 
         public bool IsLoggedIn { get; set; }
+        
+        public AgentStatus Status { get; set; }
     }
 
     internal class CallContext
@@ -224,21 +269,29 @@ namespace BelledonneCommunications.Linphone.Core
         public CallState CallState { get; set; }
 
         public CallDirection Direction { get; set; }
+
+        internal void Reset()
+        {
+            CallerNumber = string.Empty;
+            CalleeNumber = string.Empty;
+            CallId = default;
+            CallState = CallState.Ready;
+        }
     }
 
     internal enum CallDirection
     {
         Incoming = 1,
-        Outgoing = 2
+        Outgoing = 2,
+        Command = 3
     }
 
     internal enum CallState
     {
         Ready = 1,
         Ringing = 2,
-        AgentAcceptedTheCall = 3,
-        InCall = 4,
-        AgentHangUp = 5,
-        HangUp = 6
+        Established = 3,
+        DeclinedByAgent = 4,
+        InCall = 5
     }
 }

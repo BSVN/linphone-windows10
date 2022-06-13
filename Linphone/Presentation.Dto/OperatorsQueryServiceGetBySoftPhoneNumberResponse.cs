@@ -1,5 +1,5 @@
 ﻿/*
-Logger.cs
+CallsCommandServiceTerminateIncomingResponse.cs
 Copyright (C) 2022 Resaa Corporation.
 Copyright (C) 2016 Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
@@ -15,26 +15,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-using Serilog;
-using System.IO;
-using Windows.Storage;
-
-namespace BelledonneCommunications.Linphone
+namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
-    public class Logger
-    {
-        public static void ConfigureLogger()
-        {
-            string logFilePath = Path.Combine(Path.Combine(ApplicationData.Current.LocalFolder.Path, "logs\\log-.txt"));
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File(logFilePath, 
-                              rollingInterval: RollingInterval.Day, 
-                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {TraceId} {SourceContext} {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
-
-            Log.Information("Serilog Configuration Completed!");
-        }
-    }
+    public class OperatorsQueryServiceGetBySoftPhoneNumberResponse : GenericResponseBase<OperatorViewModel> { }
 }
