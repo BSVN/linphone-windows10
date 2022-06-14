@@ -55,6 +55,23 @@ namespace Linphone.Views
                 }
             };
 
+
+            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
+            {
+                AgentStatus.SelectionChanged -= AgentStatus_SelectionChanged;
+                AgentStatus.IsEnabled = true;
+                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                {
+                    AgentStatus.SelectedValue = OnlineAgentComboItem;
+                }
+                else if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break)
+                {
+                    AgentStatus.SelectedValue = OnBreakAgentComboItem;
+                }
+
+                AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
+            }
+
             // TODO: WebView FixedRuntime Approach make installation easier.
             //CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions();
             //StorageFolder localFolder = Windows.ApplicationModel.Package.Current.InstalledLocation;
@@ -64,7 +81,6 @@ namespace Linphone.Views
 
             //Browser.EnsureCoreWebView2Async().GetResults();
         }
-
 
         /// <summary>
         /// Raises right after page unloading 
@@ -435,12 +451,6 @@ namespace Linphone.Views
             else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = true;
-                
-                AgentStatus.IsEnabled = true;
-                await AgentStatus.Dispatcher.RunIdleAsync(P =>
-                {
-                    AgentStatus.SelectedIndex = 0;
-                });
 
                 EnableRegister(true);
 
@@ -457,6 +467,13 @@ namespace Linphone.Views
                     content = content.Substring(content.IndexOf(":") + 1);
 
                     CallFlowControl.Instance.AgentProfile.SipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
+
+                    AgentStatus.IsEnabled = true;
+
+                    await AgentStatus.Dispatcher.RunIdleAsync(P =>
+                    {
+                        AgentStatus.SelectedIndex = 0;
+                    });
 
                     LoadSipSettings();
                 }
