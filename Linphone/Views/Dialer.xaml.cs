@@ -316,32 +316,30 @@ namespace Linphone.Views
         }
 
         private async void call_Click(object sender, RoutedEventArgs e)
-        {
+        {            
             if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("Cant start a call because of a running command.");
                 return;
             }
 
-            //if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
-            //{
-            //    return;
-            //}
-            //else
-            //{
-            //    // HotPoint #6
-            //    // TODO: Prepare for outgoing call.
-            //}
+            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
+            {
+                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
+                return;
+            }
 
             if (addressBox.Text.Length > 0)
             {
                 LinphoneManager.Instance.NewOutgoingCall(addressBox.Text);
+                await CallFlowControl.Instance.InitiateOutgoingCallAsync(addressBox.Text);
             }
-            else
-            {
-                string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
-                addressBox.Text = lastDialedNumber == null ? "" : lastDialedNumber;
-            }
+            // Extra feature disabled 😊
+            //else
+            //{
+            //    string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
+            //    addressBox.Text = lastDialedNumber == null ? "" : lastDialedNumber;
+            //}
         }
 
         private void numpad_Click(object sender, RoutedEventArgs e)

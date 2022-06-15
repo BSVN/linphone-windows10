@@ -250,6 +250,7 @@
                     </Grid>
 
                     <Button
+                        x:Name="CallButton"
                     Click="call_Click" 
                      Style="{StaticResource AccentLongButtonStyle}">
 

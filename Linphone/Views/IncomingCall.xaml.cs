@@ -119,7 +119,7 @@ namespace Linphone.Views
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
                 // HotPoint #1
-                CallFlowControl.Instance.IncomingCallAccepted();
+                CallFlowControl.Instance.CallEstablished();
 
                 List<string> parameters = new List<string>();
                 parameters.Add(_callerNumber);

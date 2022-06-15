@@ -19,13 +19,19 @@ namespace BelledonneCommunications.Linphone.Core
             _logger = Log.Logger.ForContext("SourceContext", nameof(CoreHttpClient));
         }
 
-        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerNumber, string calleeNumber)
+        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber)
         {
             try
             {
-                _logger.Information("Attempting to deliver incoming call initation from {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
+                _logger.Information("Attempting to deliver incoming call initation from {CallerNumber} to {CalleeNumber}.", callerPhoneNumber, agentPhoneNumber);
 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Calls/InitiateIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
+                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceInitiateIncomingRequest
+                { 
+                    AgentPhoneNumber = agentPhoneNumber,
+                    CallerPhoneNumber = callerPhoneNumber,
+                }), System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Incoming/Initiate", content);
 
                 CallsCommandServiceInitiateIncomingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
 
@@ -40,6 +46,33 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber)
+        {
+            try
+            {
+                _logger.Information("Attempting to deliver outgoing call initation from {CallerNumber} to {CalleeNumber}.", agentPhoneNumber, calleePhoneNumber);
+
+                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceInitiateOutgoingRequest
+                {
+                    AgentPhoneNumber = agentPhoneNumber,
+                    CalleePhoneNumber = calleePhoneNumber
+                }), System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Outgoing/Initiate", content);
+
+                CallsCommandServiceInitiateOutgoingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateOutgoingResponse>();
+
+                _logger.Information("Successfully delivered call initiation message with call id: {CallId}.", response.Data?.Id);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error while delivering outgoing call initiation message.");
+                throw ex;
+            }
+        }
+
         /// <summary>
         /// Fire and forget method for updating call's state to accepted.
         /// </summary>
@@ -49,36 +82,42 @@ namespace BelledonneCommunications.Linphone.Core
         /// Timing is not a premise as long as we doubted on application crashing reason.
         /// </remarks>
         /// <param name="callId">Call id</param>
-        public async Task AcceptIncomingCallAsync(Guid callId)
+        public async Task CallEstablishedAsync(Guid callId)
         {
             try
             {
-                _logger.Information("Attemting to deliver incoming call accepted event, for call id: {CallId}.", callId);
+                _logger.Information("Attemting to deliver call established event, for call id: {CallId}.", callId);
                 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Calls/AcceptIncoming/{callId}");
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Established/{callId}", null);
 
-                CallsCommandServiceInitiateIncomingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
+                CallsCommandServiceEstablishResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceEstablishResponse>();
                 
-                _logger.Information("Successfully delivered incoming call accepted event with response payload: {Payload}.", response.SerializeToJson());
+                _logger.Information("Successfully delivered call established event with response payload: {Payload}.", response.SerializeToJson());
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to deliver incoming call accepted message.");
+                _logger.Error(ex, "Failed to deliver call established event message.");
             }
         }
 
         /// <summary>
         /// Fire and forget method to submit a missed call.
         /// </summary>
-        /// <param name="callerNumber">Caller PhoneNumber.</param>
-        /// <param name="calleeNumber">Callee PhoneNumber</param>
-        public async Task SubmitMissedCallAsync(string callerNumber, string calleeNumber)
+        /// <param name="callerPhoneNumber">Caller PhoneNumber.</param>
+        /// <param name="agentPhoneNumber">Callee PhoneNumber</param>
+        public async Task SubmitMissedIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber)
         {
             try
             {
-                _logger.Information("Attempting to deliver a missed call report form {CallerNumber} to {CalleeNumber}.", callerNumber, calleeNumber);
+                _logger.Information("Attempting to deliver a missed call report form {CallerNumber} to {CalleeNumber}.", callerPhoneNumber, agentPhoneNumber);
 
-                HttpResponseMessage response = await _httpClient.GetAsync($"/api/Calls/MissedIncoming?CustomerPhoneNumber={callerNumber}&OperatorSoftPhoneNumber={calleeNumber}");
+                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceSubmitMissedIncomingRequest
+                {
+                    CallerPhoneNumber = callerPhoneNumber,
+                    AgentPhoneNumber = agentPhoneNumber
+                }), System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Incoming/Missed", content);
 
                 CallsCommandServiceSubmitMissedIncomingResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
 
@@ -90,19 +129,48 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<CallsCommandServiceTerminateIncomingResponse> TerminateCallAsync(Guid callId)
+        /// <summary>
+        /// Fire and forget method to submit a missed call.
+        /// </summary>
+        /// <param name="callerPhoneNumber">Caller PhoneNumber.</param>
+        /// <param name="agentPhoneNumber">Callee PhoneNumber</param>
+        public async Task SubmitMissedOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber)
+        {
+            try
+            {
+                _logger.Information("Attempting to deliver a missed outgoing call report form {CallerNumber} to {CalleeNumber}.", agentPhoneNumber, calleePhoneNumber);
+
+                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceSubmitMissedOutgoingRequest
+                {
+                    AgentSoftPhoneNumber = agentPhoneNumber,
+                    CalleePhoneNumber = calleePhoneNumber
+                }), System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Outgoing/Missed", content);
+
+                CallsCommandServiceSubmitMissedOutgoingResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedOutgoingResponse>();
+
+                _logger.Information("Successfully reported the missed outgoing call with response payload {Payload}.", result.SerializeToJson());
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to send request for submission of a missed call.");
+            }
+        }
+
+        public async Task<CallsCommandServiceTerminateResponse> TerminateCallAsync(Guid callId)
         {            
             try
             {
                 _logger.Information("Attemting to deliver call termination event, for call id: {CallId}.", callId);
 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Calls/TerminateIncoming/{callId}");
-                
-                CallsCommandServiceTerminateIncomingResponse deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Terminate/{callId}", null);
 
-                _logger.Information("Successfully delivered call termination event with payload: {Payload}.", deserializedResponse.SerializeToJson());
+                CallsCommandServiceTerminateResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateResponse>();
 
-                return deserializedResponse;
+                _logger.Information("Successfully delivered call termination event with payload: {Payload}.", response.SerializeToJson());
+
+                return response;
             }
             catch (Exception ex)
             {

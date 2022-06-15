@@ -52,7 +52,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
 
     public enum AgentStatus
     {
-        Ready = 1,
+        Ready  = 1,
         Break = 2,
         Offline = 3,
     }

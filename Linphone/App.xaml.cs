@@ -132,7 +132,14 @@ namespace Linphone
 
         public void NewCallStarted(string callerNumber)
         {
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command) return;
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                return;
+            }
+            else if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing)
+            {
+                CallFlowControl.Instance.CallEstablished();
+            }
 
             Debug.WriteLine("[CallListener] NewCallStarted " + callerNumber);
             List<String> parameters = new List<String>();

@@ -182,7 +182,14 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             statsVisible = areStatsVisible;
         }
 
-        private async void buttons_HangUpClick(object sender) {
+        private async void buttons_HangUpClick(object sender) 
+        {            
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing 
+                && CallFlowControl.Instance.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
+            {
+                CallFlowControl.Instance.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
+            }
+
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion

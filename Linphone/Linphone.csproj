@@ -212,10 +212,7 @@
     <Compile Include="Model\Utils.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
-    <Compile Include="Presentation.Dto\CallsCommandServiceGetByIdResponse.cs" />
-    <Compile Include="Presentation.Dto\CallsCommandServiceInitiateIncomingResponse.cs" />
-    <Compile Include="Presentation.Dto\CallsCommandServiceSubmitMissedIncomingResponse.cs" />
-    <Compile Include="Presentation.Dto\CallsCommandServiceTerminateIncomingResponse.cs" />
+    <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
     <Compile Include="Presentation.Dto\Infrastructure.cs" />
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />

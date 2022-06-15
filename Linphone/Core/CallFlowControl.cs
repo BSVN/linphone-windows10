@@ -10,7 +10,7 @@ namespace BelledonneCommunications.Linphone.Core
 {
     internal class CallFlowControl
     {
-        private static CallFlowControl _instance = new CallFlowControl();
+        private static readonly CallFlowControl _instance = new CallFlowControl();
         public static CallFlowControl Instance
         {
             get
@@ -37,21 +37,21 @@ namespace BelledonneCommunications.Linphone.Core
 
         }
 
-        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerNumber)
+        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber)
         {
             try
             {
-                _logger.Information("Initiation incoming call from: {CallerNumber}.", callerNumber);
+                _logger.Information("Initiation incoming call from: {CallerNumber}.", callerPhoneNumber);
 
                 CallContext.CallState = CallState.Ringing;
-                CallContext.CallerNumber = callerNumber;
+                CallContext.CallerNumber = callerPhoneNumber;
                 CallContext.CalleeNumber = AgentProfile.SipPhoneNumber;
                 CallContext.Direction = CallDirection.Incoming;
                 CallContext.CallId = default; 
 
                 CallsCommandServiceInitiateIncomingResponse response =
-                    await _coreClient.InitiateIncomingCallAsync(callerNumber: callerNumber,
-                                                                calleeNumber: AgentProfile.SipPhoneNumber);
+                    await _coreClient.InitiateIncomingCallAsync(callerPhoneNumber: callerPhoneNumber,
+                                                                agentPhoneNumber: AgentProfile.SipPhoneNumber);
                 if (response != null)
                 {
                     CallContext.CallId = response.Data.Id;
@@ -68,7 +68,38 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public void IncomingCallAccepted()
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string calleePhoneNumber)
+        {
+            try
+            {
+                _logger.Information("Initiation outgoing call to: {CallePhoneNumber}.", calleePhoneNumber);
+
+                CallContext.CallState = CallState.Ringing;
+                CallContext.CallerNumber = AgentProfile.SipPhoneNumber;
+                CallContext.CalleeNumber = calleePhoneNumber;
+                CallContext.Direction = CallDirection.Outgoing;
+                CallContext.CallId = default;
+
+                CallsCommandServiceInitiateOutgoingResponse response =
+                    await _coreClient.InitiateOutgoingCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                                calleePhoneNumber: calleePhoneNumber);
+                if (response != null)
+                {
+                    CallContext.CallId = response.Data.Id;
+                }
+
+                _logger.Information("Outgoing call initiation successfully done with call id: {CallId}.", CallContext.CallId.ToString());
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error during call initation.");
+                return null;
+            }
+        }
+
+        public void CallEstablished()
         {
             try
             {
@@ -81,7 +112,7 @@ namespace BelledonneCommunications.Linphone.Core
                     return;
                 }
 
-                _coreClient.AcceptIncomingCallAsync(CallContext.CallId);
+                _coreClient.CallEstablishedAsync(CallContext.CallId);
             }
             catch (Exception ex)
             {
@@ -103,8 +134,8 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
-                _coreClient.SubmitMissedCallAsync(CallContext.CallerNumber,
-                                                  CallContext.CalleeNumber);
+                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                          CallContext.CalleeNumber);
                 CallContext.Reset();
             }
             // Call missed by agent decline.
@@ -112,10 +143,11 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
-                _coreClient.SubmitMissedCallAsync(CallContext.CallerNumber,
-                                                  CallContext.CalleeNumber);
+                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                          CallContext.CalleeNumber);
                 CallContext.Reset();
             }
+
             // Call terminated either by caller hang up or agent hang up during an established call.
             else if (CallContext.Direction == CallDirection.Incoming)
             {
@@ -126,7 +158,7 @@ namespace BelledonneCommunications.Linphone.Core
                     if (CallContext.CallId == default)
                         return;
 
-                    CallsCommandServiceTerminateIncomingResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
+                    CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
                         AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}{AgentProfile.BrowsingHistory}";
@@ -135,6 +167,56 @@ namespace BelledonneCommunications.Linphone.Core
                 catch (Exception ex)
                 {
                     _logger.Error(ex, "Failed to terminate the call.");
+                }
+            }
+            else if (CallContext.Direction == CallDirection.Outgoing &&
+                     CallContext.CallState == CallState.DeclinedByAgent)
+            {
+                _logger.Information("Agent canceled the call before customer answers the call.");
+                try
+                {
+                    // Todo: Call should be ignored in this situation.
+                    _coreClient.TerminateCallAsync(CallContext.CallId);
+
+                    CallContext.Reset();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Internal error while delivering call termination report.");
+                }
+            }
+            else if (CallContext.Direction == CallDirection.Outgoing &&
+                     CallContext.CallState == CallState.Ringing)
+            {
+                _logger.Information("Callee canceled the call before call being established.");
+                try
+                {
+                    // Todo: Call should be ignored in this situation.
+                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber, 
+                                                              CallContext.CalleeNumber);
+
+                    AgentProfile.BrowsingHistory = "";
+
+                    CallContext.Reset();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Internal error while delivering missed outgoing call report.");
+                }
+            }
+            else if (CallContext.Direction == CallDirection.Outgoing)
+            {
+                _logger.Information("Callee canceled the call before call being established.");
+                try
+                {
+                    // Todo: Call should be ignored in this situation.
+                    _coreClient.TerminateCallAsync(CallContext.CallId);
+                    
+                    CallContext.Reset();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Internal error while delivering missed outgoing call report.");
                 }
             }
             else
@@ -159,8 +241,8 @@ namespace BelledonneCommunications.Linphone.Core
             }
             else
             {
-                // TODO: Complete this.
-                return new Uri("");
+                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={AgentProfile.PanelBaseUrl}&IsIncomingCall=true&CallId={CallContext.CallId}";
+                return new Uri(inCallUri);
             }
         }
 
@@ -263,7 +345,7 @@ namespace BelledonneCommunications.Linphone.Core
 
         public Guid CallId { get; set; }
 
-        public CallState CallState { get; set; }
+        public CallState CallState { get; set; } = CallState.Ready;
 
         public CallDirection Direction { get; set; }
 
