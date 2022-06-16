@@ -42,7 +42,7 @@ namespace Linphone.Views
         {
             this.InitializeComponent();
             DataContext = this;
-            
+
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
 
             ContactsManager contactsManager = ContactsManager.Instance;
@@ -59,7 +59,10 @@ namespace Linphone.Views
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
             {
                 AgentStatus.SelectionChanged -= AgentStatus_SelectionChanged;
+                OutgoingChannel.SelectionChanged -= OutgoingChannel_SelectionChanged;
                 AgentStatus.IsEnabled = true;
+                OutgoingChannel.IsEnabled = true;
+
                 if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
                 {
                     AgentStatus.SelectedValue = OnlineAgentComboItem;
@@ -69,7 +72,25 @@ namespace Linphone.Views
                     AgentStatus.SelectedValue = OnBreakAgentComboItem;
                 }
 
+                if (string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName))
+                {
+                    CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = "99970";
+                    OutgoingChannel.SelectedIndex = 0;
+                }
+                else
+                {
+                    if (CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName == "99970")
+                    {
+                        OutgoingChannel.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        OutgoingChannel.SelectedIndex = 1;
+                    }
+                }
+
                 AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
+                OutgoingChannel.SelectionChanged += OutgoingChannel_SelectionChanged;
             }
 
             // TODO: WebView FixedRuntime Approach make installation easier.
@@ -80,6 +101,11 @@ namespace Linphone.Views
             //CoreWebView2Environment env = CoreWebView2Environment.CreateWithOptionsAsync(path, "", options).GetResults();
 
             //Browser.EnsureCoreWebView2Async().GetResults();
+        }
+
+        private void OutgoingChannel_SelectionChanged1(object sender, SelectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -316,7 +342,9 @@ namespace Linphone.Views
         }
 
         private async void call_Click(object sender, RoutedEventArgs e)
-        {            
+        {
+            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
+
             if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("Cant start a call because of a running command.");
@@ -331,8 +359,18 @@ namespace Linphone.Views
 
             if (addressBox.Text.Length > 0)
             {
-                LinphoneManager.Instance.NewOutgoingCall(addressBox.Text);
-                await CallFlowControl.Instance.InitiateOutgoingCallAsync(addressBox.Text);
+                string normalizedAddres = addressBox.Text;
+                if (!normalizedAddres.StartsWith("00"))
+                {
+                    if (normalizedAddres.StartsWith('0'))
+                        normalizedAddres = "0" + normalizedAddres;
+                    else
+                        normalizedAddres = "00" + normalizedAddres;
+                }
+
+                LinphoneManager.Instance.NewOutgoingCall(normalizedAddres);
+
+                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(1));
             }
             // Extra feature disabled 😊
             //else
@@ -430,7 +468,7 @@ namespace Linphone.Views
             if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
                 && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
             {
-                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");                               
+                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");
             }
             else
             {
@@ -444,7 +482,7 @@ namespace Linphone.Views
         }
 
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
-        {            
+        {
             if (BrowserReloadIsRequired)
             {
                 BrowserReloadIsRequired = false;
@@ -478,6 +516,8 @@ namespace Linphone.Views
 
                     CallFlowControl.Instance.AgentProfile.SipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
 
+                    LoadSipSettings();
+
                     AgentStatus.IsEnabled = true;
 
                     await AgentStatus.Dispatcher.RunIdleAsync(P =>
@@ -485,7 +525,7 @@ namespace Linphone.Views
                         AgentStatus.SelectedIndex = 0;
                     });
 
-                    LoadSipSettings();
+                    OutgoingChannel.IsEnabled = true;
                 }
                 catch (Exception ex)
                 {
@@ -500,45 +540,77 @@ namespace Linphone.Views
             }
         }
 
-        private void LoadSipSettings()
+        private async void LoadSipSettings()
         {
-            LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+            await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
             {
                 UpdateSettings();
             });
         }
 
-        private async Task UpdateSettings()
+        private async void UpdateSettings()
         {
             try
             {
-                _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
-                  {
-                      OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
-                      SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                {
+                    OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
+                    SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
 
-                      settings.Load();
+                    settings.Load();
 
-                      settings.Username = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
-                      settings.UserId = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.UserId) ? "": agentSettings.Data.SipProfile.UserId;
-                      settings.Password = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Password) ? "" : agentSettings.Data.SipProfile.Password;
-                      settings.Domain = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Domain) ? "10.19.82.3" : agentSettings.Data.SipProfile.Domain;
-                      settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
-                      settings.OutboundProxy = settings.OutboundProxy;
-                      settings.DisplayName = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
-                      settings.Transports = (agentSettings.Data.SipProfile.Protocol == 0) ? "TCP" : agentSettings.Data.SipProfile.Protocol.ToString("g");
-                      settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
-                      settings.AVPF = settings.AVPF;
-                      settings.ICE = settings.ICE;
+                    settings.Username = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
+                    settings.UserId = "99970";
+                    settings.Password = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Password) ? "" : agentSettings.Data.SipProfile.Password;
+                    settings.Domain = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Domain) ? "10.19.82.3" : agentSettings.Data.SipProfile.Domain;
+                    settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
+                    settings.OutboundProxy = settings.OutboundProxy;
+                    settings.DisplayName = "99970";
+                    settings.Transports = (agentSettings.Data.SipProfile.Protocol == 0) ? "TCP" : agentSettings.Data.SipProfile.Protocol.ToString("g");
+                    settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
+                    settings.AVPF = settings.AVPF;
+                    settings.ICE = settings.ICE;
 
-                      settings.Save();
-                  });
+                    settings.Save();
+                });
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error while updating agent settings.");
             }
         }
+
+        private async void UpdateDisplayName(string service)
+        {
+            try
+            {
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
+
+                    settings.Load();
+
+                    settings.Username = settings.Username;
+                    settings.UserId = service;
+                    settings.Password = settings.Password;
+                    settings.Domain = settings.Domain;
+                    settings.Proxy = settings.Proxy;
+                    settings.OutboundProxy = settings.OutboundProxy;
+                    settings.DisplayName = service;
+                    settings.Transports = settings.Transports;
+                    settings.Expires = settings.Expires;
+                    settings.AVPF = settings.AVPF;
+                    settings.ICE = settings.ICE;
+
+                    settings.Save();
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while updating agent settings.");
+            }
+        }
+
 
         private static void DisableRegisteration()
         {
@@ -593,7 +665,7 @@ namespace Linphone.Views
             {
                 if (AgentStatus.SelectedIndex == 0)
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);                                      
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
                 }
                 else
                 {
@@ -609,7 +681,7 @@ namespace Linphone.Views
                     Browser.CoreWebView2.Reload();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error(ex, "Internal error while updating agent status.");
             }
@@ -621,5 +693,29 @@ namespace Linphone.Views
         private ConnectionMultiplexer connectionMultiplexer;
         private IDatabase database;
         private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
+
+        private async void OutgoingChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn ||
+                string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.SipPhoneNumber))
+            {
+                return;
+            }
+
+            if (OutgoingChannel.SelectedIndex == 0)
+            {
+                await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+                {
+                    UpdateDisplayName("99970");
+                });
+            }
+            else
+            {
+                await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+                {
+                    UpdateDisplayName("99971");
+                });
+            }
+        }
     }
 }

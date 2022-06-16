@@ -76,12 +76,36 @@
                 Grid.Row="1" 
                 VerticalAlignment="Bottom" 
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                    <controls:AddressBox
-                x:Name="addressBox"
-                Grid.Row="0"
-                Margin="0,0,0,0"
-                BorderThickness="0"
-                FontSize="40"/>
+                    <StackPanel Grid.Row="0" Margin="10">
+                        <controls:AddressBox x:Name="addressBox"
+                                             Margin="0,0,0,0"
+                                             BorderThickness="0"
+                                             FontSize="40"/>
+                        <ComboBox x:Name="OutgoingChannel"
+                                  FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                  FlowDirection="RightToLeft" 
+                                  IsEnabled="false"
+                                  SelectionChanged="OutgoingChannel_SelectionChanged"
+                                  PlaceholderText="سرویس"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem>
+                                <ComboBoxItem.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE716;" FontSize="20"/>
+                                        <TextBlock Margin="10 0 0 0">از طرف: 99970</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem.Content>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <ComboBoxItem.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE731;" FontSize="20"/>
+                                        <TextBlock Margin="10 0 0 0">ازطرف: 99971</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem.Content>
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="12" />

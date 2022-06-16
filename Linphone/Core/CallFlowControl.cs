@@ -24,7 +24,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             object settingValue = localSettings.Values["PanelUrl"];
-            string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9011" : settingValue as string;
+            string panelBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
@@ -237,14 +237,14 @@ namespace BelledonneCommunications.Linphone.Core
         {
             if (CallContext.Direction == CallDirection.Incoming)
             {
-                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallFlowControl.Instance.CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
+                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
                 var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                 return new Uri(inCallUri);
             }
             else
             {
-                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallFlowControl.Instance.CallContext.CalleeNumber}&IsIncomingCall=true&CallId={CallContext.CallId}"); 
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
+                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&IsOutgoingCall=true&IsIncomingCall=false&CallId={CallContext.CallId}"); 
+                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&IsOutgoingCall=true&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                 return new Uri(inCallUri);
             }
         }
@@ -328,6 +328,8 @@ namespace BelledonneCommunications.Linphone.Core
         {
             PanelBaseUrl = panelBaseUrl;
         }
+
+        public string OutgoingCallChannelName { get; set; }
 
         public string PanelBaseUrl { get; private set; }
 

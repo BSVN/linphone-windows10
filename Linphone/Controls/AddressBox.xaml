@@ -7,7 +7,7 @@
     mc:Ignorable="d"    
     d:DesignHeight="100" d:DesignWidth="480">
 
-    <Grid x:Name="LayoutRoot" Height="60" Margin="10">
+    <Grid x:Name="LayoutRoot" Height="60">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
