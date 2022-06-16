@@ -84,8 +84,7 @@
                         <ComboBox x:Name="OutgoingChannel"
                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                                   FlowDirection="RightToLeft" 
-                                  IsEnabled="false"
-                                  SelectionChanged="OutgoingChannel_SelectionChanged"
+                                  SelectedIndex="0"
                                   PlaceholderText="سرویس"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem>

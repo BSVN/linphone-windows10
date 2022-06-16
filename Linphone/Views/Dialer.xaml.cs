@@ -38,8 +38,8 @@ namespace Linphone.Views
 
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
-        private const string HEAD_OF_HOUSEHOLD_CHANNEL = "99970";
-        private const string SELLERS_CHANNEL = "99971";
+        private const string HEAD_OF_HOUSEHOLD_SERVICE_PHONENUMBER = "99970";
+        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
 
         public Dialer()
         {
@@ -62,9 +62,7 @@ namespace Linphone.Views
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
             {
                 AgentStatus.SelectionChanged -= AgentStatus_SelectionChanged;
-                OutgoingChannel.SelectionChanged -= OutgoingChannel_SelectionChanged;
                 AgentStatus.IsEnabled = true;
-                OutgoingChannel.IsEnabled = true;
 
                 if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
                 {
@@ -73,27 +71,9 @@ namespace Linphone.Views
                 else if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break)
                 {
                     AgentStatus.SelectedValue = OnBreakAgentComboItem;
-                }
-
-                if (string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName))
-                {
-                    CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = HEAD_OF_HOUSEHOLD_CHANNEL;
-                    OutgoingChannel.SelectedIndex = 0;
-                }
-                else
-                {
-                    if (CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName == HEAD_OF_HOUSEHOLD_CHANNEL)
-                    {
-                        OutgoingChannel.SelectedIndex = 0;
-                    }
-                    else
-                    {
-                        OutgoingChannel.SelectedIndex = 1;
-                    }
-                }
+                }               
 
                 AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
-                OutgoingChannel.SelectionChanged += OutgoingChannel_SelectionChanged;
             }
 
             // TODO: WebView FixedRuntime Approach make installation easier.
@@ -104,11 +84,6 @@ namespace Linphone.Views
             //CoreWebView2Environment env = CoreWebView2Environment.CreateWithOptionsAsync(path, "", options).GetResults();
 
             //Browser.EnsureCoreWebView2Async().GetResults();
-        }
-
-        private void OutgoingChannel_SelectionChanged1(object sender, SelectionChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -346,14 +321,6 @@ namespace Linphone.Views
 
         private async void call_Click(object sender, RoutedEventArgs e)
         {
-            UpdateCalllerDisplayName("99970");
-
-            SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
-
-            settings.Load();
-
-            _logger.Information("Settings: {Settings}", settings.SerializeToJson());
-
             if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
 
             if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
@@ -370,6 +337,16 @@ namespace Linphone.Views
 
             if (addressBox.Text.Length > 0)
             {
+                string ServicePhoneNumber;
+                if (OutgoingChannel.SelectedIndex == 0)
+                {
+                    ServicePhoneNumber = HEAD_OF_HOUSEHOLD_SERVICE_PHONENUMBER;
+                }   
+                else
+                {
+                    ServicePhoneNumber = SELLERS_SERVICE_PHONENUMBER;
+                }
+
                 string normalizedAddres = addressBox.Text;
                 if (!normalizedAddres.StartsWith("00"))
                 {
@@ -379,7 +356,7 @@ namespace Linphone.Views
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-                LinphoneManager.Instance.NewOutgoingCall(normalizedAddres);
+                LinphoneManager.Instance.NewOutgoingCall($"{ServicePhoneNumber}:{normalizedAddres}");
 
                 await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(1));
             }
@@ -535,14 +512,6 @@ namespace Linphone.Views
                     {
                         AgentStatus.SelectedIndex = 0;
                     });
-
-                    OutgoingChannel.IsEnabled = true;
-                    await OutgoingChannel.Dispatcher.RunIdleAsync(P =>
-                    {
-                        OutgoingChannel.SelectionChanged -= OutgoingChannel_SelectionChanged;
-                        OutgoingChannel.SelectedIndex = 0;
-                        OutgoingChannel.SelectionChanged += OutgoingChannel_SelectionChanged;
-                    });
                 }
                 catch (Exception ex)
                 {
@@ -569,8 +538,7 @@ namespace Linphone.Views
         {
             try
             {
-                CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = HEAD_OF_HOUSEHOLD_CHANNEL;
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
                 {
                     OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
                     SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
@@ -578,47 +546,16 @@ namespace Linphone.Views
                     settings.Load();
 
                     settings.Username = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
-                    settings.UserId = HEAD_OF_HOUSEHOLD_CHANNEL;
-                    settings.Password = "1234";
+                    settings.UserId = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.UserId) ? "" : agentSettings.Data.SipProfile.UserId;
+                    settings.Password = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Password) ? "" : agentSettings.Data.SipProfile.Password;
                     settings.Domain = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Domain) ? "10.19.82.3" : agentSettings.Data.SipProfile.Domain;
                     settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
                     settings.OutboundProxy = settings.OutboundProxy;
-                    settings.DisplayName = HEAD_OF_HOUSEHOLD_CHANNEL;
+                    settings.DisplayName = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
                     settings.Transports = (agentSettings.Data.SipProfile.Protocol == 0) ? "TCP" : agentSettings.Data.SipProfile.Protocol.ToString("g");
                     settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
                     settings.AVPF = settings.AVPF;
                     settings.ICE = settings.ICE;
-                    settings.Save();
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error while updating agent settings.");
-            }
-        }
-
-        private async void UpdateCalllerDisplayName(string service)
-        {
-            try
-            {
-                CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = service;
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-                    SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
-
-                    settings.Load();
-
-                    settings.Username = settings.Username;
-                    settings.UserId = service;
-                    settings.Password = "1234";
-                    settings.Domain = settings.Domain;
-                    settings.Proxy = settings.Proxy;
-                    settings.OutboundProxy = settings.OutboundProxy;
-                    settings.DisplayName = service;
-                    settings.Transports = settings.Transports;
-                    settings.Expires = settings.Expires;
-                    settings.AVPF = settings.AVPF;
-                    settings.ICE = settings.ICE;
 
                     settings.Save();
                 });
@@ -628,7 +565,6 @@ namespace Linphone.Views
                 _logger.Error(ex, "Error while updating agent settings.");
             }
         }
-
 
         private static void DisableRegisteration()
         {
@@ -702,30 +638,6 @@ namespace Linphone.Views
             catch (Exception ex)
             {
                 _logger.Error(ex, "Internal error while updating agent status.");
-            }
-        }
-
-        private async void OutgoingChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn ||
-                string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.SipPhoneNumber))
-            {
-                return;
-            }
-
-            if (OutgoingChannel.SelectedIndex == 0)
-            {
-                await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
-                {
-                    UpdateCalllerDisplayName(HEAD_OF_HOUSEHOLD_CHANNEL);
-                });
-            }
-            else
-            {
-                await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
-                {
-                    UpdateCalllerDisplayName(SELLERS_CHANNEL);
-                });
             }
         }
 

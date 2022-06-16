@@ -183,8 +183,6 @@ namespace Linphone
             LinphoneManager.Instance.CallListener = this;
             LinphoneManager.Instance.CoreDispatcher = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().CoreWindow.Dispatcher;
 
-            DisableRegisteration();
-
             rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -235,6 +233,8 @@ namespace Linphone
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += App_CloseRequested;
 
             Window.Current.Activate();
+
+            DisableRegisteration();
         }
 
         protected override void OnActivated(IActivatedEventArgs args)
