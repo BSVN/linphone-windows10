@@ -38,6 +38,9 @@ namespace Linphone.Views
 
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
+        private const string HEAD_OF_HOUSEHOLD_CHANNEL = "99970";
+        private const string SELLERS_CHANNEL = "99971";
+
         public Dialer()
         {
             this.InitializeComponent();
@@ -74,12 +77,12 @@ namespace Linphone.Views
 
                 if (string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName))
                 {
-                    CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = "99970";
+                    CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = HEAD_OF_HOUSEHOLD_CHANNEL;
                     OutgoingChannel.SelectedIndex = 0;
                 }
                 else
                 {
-                    if (CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName == "99970")
+                    if (CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName == HEAD_OF_HOUSEHOLD_CHANNEL)
                     {
                         OutgoingChannel.SelectedIndex = 0;
                     }
@@ -343,6 +346,14 @@ namespace Linphone.Views
 
         private async void call_Click(object sender, RoutedEventArgs e)
         {
+            UpdateCalllerDisplayName("99970");
+
+            SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
+
+            settings.Load();
+
+            _logger.Information("Settings: {Settings}", settings.SerializeToJson());
+
             if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
 
             if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
@@ -526,6 +537,12 @@ namespace Linphone.Views
                     });
 
                     OutgoingChannel.IsEnabled = true;
+                    await OutgoingChannel.Dispatcher.RunIdleAsync(P =>
+                    {
+                        OutgoingChannel.SelectionChanged -= OutgoingChannel_SelectionChanged;
+                        OutgoingChannel.SelectedIndex = 0;
+                        OutgoingChannel.SelectionChanged += OutgoingChannel_SelectionChanged;
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -552,6 +569,7 @@ namespace Linphone.Views
         {
             try
             {
+                CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = HEAD_OF_HOUSEHOLD_CHANNEL;
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
                 {
                     OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
@@ -560,17 +578,16 @@ namespace Linphone.Views
                     settings.Load();
 
                     settings.Username = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Username) ? "" : agentSettings.Data.SipProfile.Username;
-                    settings.UserId = "99970";
-                    settings.Password = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Password) ? "" : agentSettings.Data.SipProfile.Password;
+                    settings.UserId = HEAD_OF_HOUSEHOLD_CHANNEL;
+                    settings.Password = "1234";
                     settings.Domain = string.IsNullOrWhiteSpace(agentSettings.Data.SipProfile.Domain) ? "10.19.82.3" : agentSettings.Data.SipProfile.Domain;
                     settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
                     settings.OutboundProxy = settings.OutboundProxy;
-                    settings.DisplayName = "99970";
+                    settings.DisplayName = HEAD_OF_HOUSEHOLD_CHANNEL;
                     settings.Transports = (agentSettings.Data.SipProfile.Protocol == 0) ? "TCP" : agentSettings.Data.SipProfile.Protocol.ToString("g");
                     settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
                     settings.AVPF = settings.AVPF;
                     settings.ICE = settings.ICE;
-
                     settings.Save();
                 });
             }
@@ -580,10 +597,11 @@ namespace Linphone.Views
             }
         }
 
-        private async void UpdateDisplayName(string service)
+        private async void UpdateCalllerDisplayName(string service)
         {
             try
             {
+                CallFlowControl.Instance.AgentProfile.OutgoingCallChannelName = service;
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
                     SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
@@ -592,7 +610,7 @@ namespace Linphone.Views
 
                     settings.Username = settings.Username;
                     settings.UserId = service;
-                    settings.Password = settings.Password;
+                    settings.Password = "1234";
                     settings.Domain = settings.Domain;
                     settings.Proxy = settings.Proxy;
                     settings.OutboundProxy = settings.OutboundProxy;
@@ -687,13 +705,6 @@ namespace Linphone.Views
             }
         }
 
-        private bool BrowserIsInNavigation = false;
-        private bool BrowserReloadIsRequired = false;
-        private readonly ILogger _logger;
-        private ConnectionMultiplexer connectionMultiplexer;
-        private IDatabase database;
-        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
-
         private async void OutgoingChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn ||
@@ -706,16 +717,24 @@ namespace Linphone.Views
             {
                 await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
                 {
-                    UpdateDisplayName("99970");
+                    UpdateCalllerDisplayName(HEAD_OF_HOUSEHOLD_CHANNEL);
                 });
             }
             else
             {
                 await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
                 {
-                    UpdateDisplayName("99971");
+                    UpdateCalllerDisplayName(SELLERS_CHANNEL);
                 });
             }
         }
+
+
+        private bool BrowserIsInNavigation = false;
+        private bool BrowserReloadIsRequired = false;
+        private readonly ILogger _logger;
+        private ConnectionMultiplexer connectionMultiplexer;
+        private IDatabase database;
+        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
     }
 }

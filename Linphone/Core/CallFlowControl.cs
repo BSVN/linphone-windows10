@@ -9,6 +9,7 @@ using Windows.Storage;
 
 namespace BelledonneCommunications.Linphone.Core
 {
+    // Todo: Mention: Sip login on shayan side, means that "I am ready for accept incoming calls" and does nothing to outgoing calls.
     internal class CallFlowControl
     {
         private static readonly CallFlowControl _instance = new CallFlowControl();
@@ -24,7 +25,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             object settingValue = localSettings.Values["PanelUrl"];
-            string panelBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
+            string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9012" : settingValue as string;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
