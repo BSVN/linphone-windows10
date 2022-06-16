@@ -31,6 +31,7 @@ using BelledonneCommunications.Linphone.Core;
 using Microsoft.Win32;
 using System.Threading.Tasks;
 using Windows.UI.Core.Preview;
+using PCLAppConfig;
 
 namespace Linphone
 {
