@@ -362,6 +362,18 @@ namespace Linphone.Model {
 #endregion
 
 #region Call Management
+		public Call GetCurrentCall()
+		{
+			if (Core.CallsNb > 0)
+			{
+				return Core.CurrentCall;
+			}
+			else
+			{
+				return null;
+			}
+		}
+
         public void PauseCurrentCall() {
             if (Core.CallsNb > 0) {
                 Call call = Core.CurrentCall;
@@ -381,7 +393,7 @@ namespace Linphone.Model {
             // Workaround to pop the microphone permission window
             await openMicrophonePopup();
 
-            Call LCall = Core.Invite(sipAddress);
+            Call call = Core.Invite(sipAddress);
         }
 
         public void EndCurrentCall() {
