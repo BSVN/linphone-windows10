@@ -4,6 +4,7 @@ using Linphone.Views;
 using Serilog;
 using System;
 using System.Threading.Tasks;
+using System.Web;
 using Windows.Storage;
 
 namespace BelledonneCommunications.Linphone.Core
@@ -161,7 +162,7 @@ namespace BelledonneCommunications.Linphone.Core
                     CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
-                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}{AgentProfile.BrowsingHistory}";
+                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={HttpUtility.UrlEncode(AgentProfile.PanelBaseUrl + AgentProfile.BrowsingHistory)}";
                     }
                 }
                 catch (Exception ex)
@@ -236,12 +237,14 @@ namespace BelledonneCommunications.Linphone.Core
         {
             if (CallContext.Direction == CallDirection.Incoming)
             {
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={AgentProfile.PanelBaseUrl}&IsIncomingCall=true&CallId={CallContext.CallId}";
+                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallFlowControl.Instance.CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
+                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                 return new Uri(inCallUri);
             }
             else
             {
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={AgentProfile.PanelBaseUrl}&IsIncomingCall=true&CallId={CallContext.CallId}";
+                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallFlowControl.Instance.CallContext.CalleeNumber}&IsIncomingCall=true&CallId={CallContext.CallId}"); 
+                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                 return new Uri(inCallUri);
             }
         }

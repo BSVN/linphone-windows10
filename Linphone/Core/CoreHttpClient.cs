@@ -88,7 +88,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Attemting to deliver call established event, for call id: {CallId}.", callId);
                 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Established/{callId}", null);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Establish/{callId}", null);
 
                 CallsCommandServiceEstablishResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceEstablishResponse>();
                 

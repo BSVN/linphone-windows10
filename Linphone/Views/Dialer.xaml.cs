@@ -438,13 +438,25 @@ namespace Linphone.Views
             }
         }
 
-        private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+        private void Browser_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
         {
+            BrowserIsInNavigation = true;
+        }
+
+        private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+        {            
+            if (BrowserReloadIsRequired)
+            {
+                BrowserReloadIsRequired = false;
+                Browser.CoreWebView2.Reload();
+            }
+
             // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
+                BrowserIsInNavigation = false;
             }
             else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
             {
@@ -481,6 +493,10 @@ namespace Linphone.Views
                 }
 
                 Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+            }
+            else
+            {
+                BrowserIsInNavigation = false;
             }
         }
 
@@ -577,12 +593,19 @@ namespace Linphone.Views
             {
                 if (AgentStatus.SelectedIndex == 0)
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
-                    Browser.CoreWebView2.Reload();
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);                                      
                 }
                 else
                 {
                     await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
+                }
+
+                if (BrowserIsInNavigation)
+                {
+                    BrowserReloadIsRequired = true;
+                }
+                else
+                {
                     Browser.CoreWebView2.Reload();
                 }
             }
@@ -592,6 +615,8 @@ namespace Linphone.Views
             }
         }
 
+        private bool BrowserIsInNavigation = false;
+        private bool BrowserReloadIsRequired = false;
         private readonly ILogger _logger;
         private ConnectionMultiplexer connectionMultiplexer;
         private IDatabase database;
