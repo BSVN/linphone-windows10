@@ -239,6 +239,8 @@ namespace Linphone
 
         private async void App_CloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
         {
+            if (CloseApp) return;
+
             _logger.Information("App_CloseRequested raised omg !!");
             
             e.Handled = true;

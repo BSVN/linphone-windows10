@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Windows.Storage;
 
 namespace BelledonneCommunications.Linphone.Core
@@ -132,7 +133,8 @@ namespace BelledonneCommunications.Linphone.Core
                     CallsCommandServiceTerminateIncomingResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
-                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}{AgentProfile.BrowsingHistory}";
+                        var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
+                        var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                     }
                 }
                 catch (Exception ex)
@@ -157,7 +159,8 @@ namespace BelledonneCommunications.Linphone.Core
         {
             if (CallContext.Direction == CallDirection.Incoming)
             {
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={AgentProfile.PanelBaseUrl}&IsIncomingCall=true&CallId={CallContext.CallId}";
+                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
+                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
                 return new Uri(inCallUri);
             }
             else
@@ -245,6 +248,7 @@ namespace BelledonneCommunications.Linphone.Core
         public PhoneProfile(string panelBaseUrl)
         {
             PanelBaseUrl = panelBaseUrl;
+            Status = AgentStatus.Offline;
         }
 
         public string PanelBaseUrl { get; private set; }
@@ -254,8 +258,8 @@ namespace BelledonneCommunications.Linphone.Core
         public string BrowsingHistory { get; set; }
 
         public bool IsLoggedIn { get; set; }
-        
-        public AgentStatus Status { get; set; }
+
+        public AgentStatus Status { get; set; } = AgentStatus.Offline;
     }
 
     internal class CallContext

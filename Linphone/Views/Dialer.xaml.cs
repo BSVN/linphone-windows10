@@ -424,23 +424,29 @@ namespace Linphone.Views
             }
         }
 
+        private void Browser_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
+        {
+            BrowserIsNavigating = true;
+        }
+
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
+            if (BrowserReloadIsRequired)
+            {
+                BrowserReloadIsRequired = false;
+                Browser.CoreWebView2.Reload();
+            }    
+
             // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
+                BrowserIsNavigating = false;
             }
             else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = true;
-                
-                AgentStatus.IsEnabled = true;
-                await AgentStatus.Dispatcher.RunIdleAsync(P =>
-                {
-                    AgentStatus.SelectedIndex = 0;
-                });
 
                 EnableRegister(true);
 
@@ -459,6 +465,12 @@ namespace Linphone.Views
                     CallFlowControl.Instance.AgentProfile.SipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
 
                     LoadSipSettings();
+
+                    AgentStatus.IsEnabled = true;
+                    await AgentStatus.Dispatcher.RunIdleAsync(P =>
+                    {
+                        AgentStatus.SelectedIndex = 0;
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -466,6 +478,10 @@ namespace Linphone.Views
                 }
 
                 Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+            }
+            else
+            {
+                BrowserIsNavigating = false;
             }
         }
 
@@ -563,20 +579,29 @@ namespace Linphone.Views
                 if (AgentStatus.SelectedIndex == 0)
                 {
                     await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
-                    Browser.CoreWebView2.Reload();
                 }
                 else
                 {
                     await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
+                }
+
+                if (BrowserIsNavigating)
+                {
+                    BrowserReloadIsRequired = true;
+                }
+                else
+                {
                     Browser.CoreWebView2.Reload();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error(ex, "Internal error while updating agent status.");
             }
         }
 
+        private bool BrowserIsNavigating = false;
+        private bool BrowserReloadIsRequired = false; 
         private readonly ILogger _logger;
         private ConnectionMultiplexer connectionMultiplexer;
         private IDatabase database;
