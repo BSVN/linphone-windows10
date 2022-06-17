@@ -32,7 +32,15 @@ namespace Linphone.Model {
 		public static string GetCanonicalPhoneNumber(this Address address)
 		{
 			string phoneNumber = address?.Username ?? throw new ArgumentNullException(nameof(address));
-			return "0" + phoneNumber.Substring(phoneNumber.Length - 10);
+            if (phoneNumber.Length < 10)
+            {
+                Debug.WriteLine("[AddressExtentions] GetCanonicalPhoneNumber: phoneNumber is too short: " + phoneNumber);
+				return phoneNumber;
+			}
+            else
+			{
+    			return "0" + phoneNumber.Substring(phoneNumber.Length - 10);
+			}
 		}
 	}
     public class Utils {

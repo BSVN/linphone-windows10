@@ -213,7 +213,6 @@
     <Compile Include="Presentation.Dto\CallsCommandServiceSubmitMissedIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceTerminateIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
-    <Compile Include="Presentation.Dto\Infrastructure.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
@@ -441,6 +440,14 @@
     <PRIResource Include="String\en-US\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BSN.Resa.Mci.CallCenter.AgentApp.Data\BSN.Resa.Mci.CallCenter.AgentApp.Data.csproj">
+      <Project>{fef53d4b-04b8-44c7-970b-46c0231a1d34}</Project>
+      <Name>BSN.Resa.Mci.CallCenter.AgentApp.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BSN.Resa.Vns.Commons\BSN.Resa.Vns.Commons.csproj">
+      <Project>{59B6FC97-351C-4800-8C53-D19FA5DB1C95}</Project>
+      <Name>BSN.Resa.Vns.Commons</Name>
+    </ProjectReference>
     <ProjectReference Include="Tasks\LinphoneTasks.csproj">
       <Project>{088a6c0f-16fa-4360-93c7-d781244e77fd}</Project>
       <Name>LinphoneTasks</Name>
@@ -452,6 +459,9 @@
     </PackageReference>
     <PackageReference Include="BSN.Common.PCLAppConfig">
       <Version>1.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="BSN.Commons.PresentationInfrastructure">
+      <Version>1.7.1</Version>
     </PackageReference>
     <PackageReference Include="LinphoneSDK">
       <Version>5.1.36</Version>
@@ -492,7 +502,6 @@
       <Name>Windows Mobile Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <LinphoneSDK-Content>Assets</LinphoneSDK-Content>
   </PropertyGroup>

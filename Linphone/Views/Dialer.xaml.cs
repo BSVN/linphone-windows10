@@ -31,8 +31,9 @@ using Windows.Storage;
 using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Diagnostics;
-using StackExchange.Redis;
 using Windows.UI.Popups;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using StackExchange.Redis;
 
 namespace Linphone.Views
 {
@@ -57,9 +58,8 @@ namespace Linphone.Views
 
         public static bool HasUnfinishedCall = false;
 
+        private DatabaseFactory databaseFactory;
         private readonly HttpClient httpClient;
-        private ConnectionMultiplexer connectionMultiplexer;
-		private IDatabase database;
         private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
 
 		public Dialer()
@@ -116,45 +116,6 @@ namespace Linphone.Views
                 }
             }
         }
-
-		private ConnectionMultiplexer RedisConnectionMultiplexer
-		{
-			get
-			{
-				if (connectionMultiplexer == null)
-				{
-					_settings.Load();
-					try
-					{
-						connectionMultiplexer = ConnectionMultiplexer.Connect((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
-					}
-					catch (RedisConnectionException e)
-					{
-						Debug.WriteLine(e.Message);
-						var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
-						messageDialog.Commands.Add(new UICommand("باشه"));
-						messageDialog.DefaultCommandIndex = 0;
-						messageDialog.CancelCommandIndex = 0;
-						messageDialog.ShowAsync();
-					}
-				}
-
-				return connectionMultiplexer;
-			}
-		}
-
-		private IDatabase Database
-		{
-			get
-			{
-				if (database == null)
-				{
-					database = RedisConnectionMultiplexer?.GetDatabase();
-				}
-
-				return database;
-			}
-		}
 
 		private int missedCallCount;
 		public int MissedCallCount
@@ -461,6 +422,7 @@ namespace Linphone.Views
 		{
             const string QUEUE_NAME = "cbq";
 
+            /*
             if (Database == null)
                 return;
 
@@ -472,14 +434,50 @@ namespace Linphone.Views
 
 				Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-                // Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
-                LinphoneManager.Instance.NewOutgoingCall("0" + callback.Value.Element);
+				// Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
+				if (_settings.OutgoingCallEnabled)
+				{
+					string number = "0" + callback.Value.Element;
+					LinphoneManager.Instance.NewOutgoingCall(number);
+				}
+                else
+                {
+					string number = callback.Value.Element;
+					LinphoneManager.Instance.NewOutgoingCall(number);
+				}	
                 Call call = LinphoneManager.Instance.GetCurrentCall();
                 if (call == null)
                     break;
                 if (call.State == CallState.End)
                     Debug.WriteLine($"Call to {call.ToAddress} is ended");
                 break;
+			}
+            */
+		}
+
+		private DatabaseFactory DatabaseFactory
+		{
+			get
+			{
+				if (databaseFactory == null)
+				{
+					_settings.Load();
+					try
+					{
+						databaseFactory = new DatabaseFactory((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
+					}
+					catch (RedisConnectionException e)
+					{
+						Debug.WriteLine(e.Message);
+						var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
+						messageDialog.Commands.Add(new UICommand("باشه"));
+						messageDialog.DefaultCommandIndex = 0;
+						messageDialog.CancelCommandIndex = 0;
+						messageDialog.ShowAsync();
+					}
+
+				}
+				return databaseFactory;
 			}
 		}
 	}

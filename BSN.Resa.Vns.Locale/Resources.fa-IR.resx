@@ -1,0 +1,759 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FirstName" xml:space="preserve">
+    <value>نام</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>نام خانوادگی</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>نام کاربری</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>رمز عبور</value>
+  </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>شماره سریال</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>وضعیت</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>شناسه</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>نامشخص</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>افزودن</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>جستجو</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>تعداد</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>توضیحات</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>ویرایش</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>عملیات</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>وضعیت</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>شماره</value>
+  </data>
+  <data name="CreatedAt" xml:space="preserve">
+    <value>تاریخ ایجاد</value>
+  </data>
+  <data name="NextPage" xml:space="preserve">
+    <value>صفحه‌ی بعد</value>
+  </data>
+  <data name="PreviousPage" xml:space="preserve">
+    <value>صفحه‌ی قبل</value>
+  </data>
+  <data name="Dossier" xml:space="preserve">
+    <value>مشاهده‌ی پرونده</value>
+  </data>
+  <data name="CallerSubscriberIdentificationCard" xml:space="preserve">
+    <value>سیم‌کارت تماس‌گیرنده</value>
+  </data>
+  <data name="ReceiverSubscriberIdentificationCard" xml:space="preserve">
+    <value>سیم‌کارت دریافت‌کننده‌ی تماس</value>
+  </data>
+  <data name="EffectiveDuration" xml:space="preserve">
+    <value>مدت زمان موثر</value>
+  </data>
+  <data name="FinishedAt" xml:space="preserve">
+    <value>زمان پایان</value>
+  </data>
+  <data name="StartedAt" xml:space="preserve">
+    <value>زمان شروع</value>
+  </data>
+  <data name="InputRequired" xml:space="preserve">
+    <value>ورودی الزامی است</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>دقیقه</value>
+  </data>
+  <data name="IssuedAt" xml:space="preserve">
+    <value>تاریخ صدور</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>نام</value>
+  </data>
+  <data name="NationalIdentificationNumber" xml:space="preserve">
+    <value>شناسه‌ی ملی</value>
+  </data>
+  <data name="PricingPolicy" xml:space="preserve">
+    <value>سیاست قیمت‌گذاری</value>
+  </data>
+  <data name="SimCards" xml:space="preserve">
+    <value>سیم کارت‌ها</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>تاریخ پایان</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>تاریخ شروع</value>
+  </data>
+  <data name="TaxIdentificationNumber" xml:space="preserve">
+    <value>کد اقتصادی</value>
+  </data>
+  <data name="PrimaryContactPersonName" xml:space="preserve">
+    <value>نام نماینده</value>
+  </data>
+  <data name="CustomerName" xml:space="preserve">
+    <value>نام مشتری</value>
+  </data>
+  <data name="SimCardPool" xml:space="preserve">
+    <value>استخر سیم‌کارت</value>
+  </data>
+  <data name="IsCustomerAssignable" xml:space="preserve">
+    <value>قابلیت اختصاص</value>
+  </data>
+  <data name="PrimaryContactPersonPhoneNumber" xml:space="preserve">
+    <value>شماره تلفن نماینده</value>
+  </data>
+  <data name="PrimaryContactPersonEmail" xml:space="preserve">
+    <value>ایمیل نماینده</value>
+  </data>
+  <data name="SimCardPoolName" xml:space="preserve">
+    <value>نام استخر سیم‌کارت</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>از تاریخ</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>تا تاریخ</value>
+  </data>
+  <data name="AcquisitionStrategyType" xml:space="preserve">
+    <value>سیاست تخصیص سیم‌کارت</value>
+  </data>
+  <data name="DisplayName" xml:space="preserve">
+    <value>نام نمایشی</value>
+  </data>
+  <data name="MostRecentlyUsed" xml:space="preserve">
+    <value>جدیدترین مورد استفاده شده</value>
+  </data>
+  <data name="MultiOccupancy" xml:space="preserve">
+    <value>چند سیم‌کارتی</value>
+  </data>
+  <data name="Randomized" xml:space="preserve">
+    <value>تصادفی</value>
+  </data>
+  <data name="SingleOccupancy" xml:space="preserve">
+    <value>تک سیم‌کارتی</value>
+  </data>
+  <data name="Sorted" xml:space="preserve">
+    <value>مرتب شده</value>
+  </data>
+  <data name="SubscriberIdentificationCardPoolType" xml:space="preserve">
+    <value>نوع استخر سیم‌کارت</value>
+  </data>
+  <data name="PayPerMinute" xml:space="preserve">
+    <value>پرداخت برای هر دقیقه</value>
+  </data>
+  <data name="CompensationModel" xml:space="preserve">
+    <value>مدل بازپرداخت</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>هزینه</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>ردیف</value>
+  </data>
+  <data name="Simple" xml:space="preserve">
+    <value>ساده</value>
+  </data>
+  <data name="StepDetails" xml:space="preserve">
+    <value>جزئیات پله‌ها</value>
+  </data>
+  <data name="Stepwise" xml:space="preserve">
+    <value>پلکانی</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>نوع</value>
+  </data>
+  <data name="ReceiverPhoneNumber" xml:space="preserve">
+    <value>شماره تلفن دریافت کننده</value>
+  </data>
+  <data name="ReceiverVirtualNumber" xml:space="preserve">
+    <value>شماره مجازی دریافت‌کننده</value>
+  </data>
+  <data name="SenderPhoneNumber" xml:space="preserve">
+    <value>شماره تلفن ارسال‌کننده</value>
+  </data>
+  <data name="SenderVirtualNumber" xml:space="preserve">
+    <value>شماره مجازی ارسال‌کننده</value>
+  </data>
+  <data name="Customer" xml:space="preserve">
+    <value>مشتری</value>
+  </data>
+  <data name="Consumption" xml:space="preserve">
+    <value>میزان مصرف</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>هزینه</value>
+  </data>
+  <data name="ReferenceNumber" xml:space="preserve">
+    <value>شماره پیگیری</value>
+  </data>
+  <data name="RecordPaymentInformation" xml:space="preserve">
+    <value>ثبت اطلاعات پرداخت</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>چاپ</value>
+  </data>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>تعداد ردیف‌ها</value>
+  </data>
+  <data name="PayableAmount" xml:space="preserve">
+    <value>مبلغ قابل پرداخت</value>
+  </data>
+  <data name="ReceivedAt" xml:space="preserve">
+    <value>تاریخ دریافت</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>متن</value>
+  </data>
+  <data name="Voice" xml:space="preserve">
+    <value>صوت</value>
+  </data>
+  <data name="PayPerSession" xml:space="preserve">
+    <value>پرداخت برای هر جلسه</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>جزئیات</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>طبقه‌بندی</value>
+  </data>
+  <data name="PricingPolicyId" xml:space="preserve">
+    <value>شناسه سیاست قیمت‌گذاری</value>
+  </data>
+  <data name="PoolDisplayName" xml:space="preserve">
+    <value>نام نمایشی استخر</value>
+  </data>
+  <data name="PolicyModel" xml:space="preserve">
+    <value>نوع سیاست قیمت‌گذاری</value>
+  </data>
+  <data name="Toman" xml:space="preserve">
+    <value>تومان</value>
+  </data>
+  <data name="CallerVirtualNumber" xml:space="preserve">
+    <value>شماره مجازی تماس‌گیرنده</value>
+  </data>
+  <data name="CalleeVirtualNumber" xml:space="preserve">
+    <value>شماره مجازی دریافت‌کننده تماس</value>
+  </data>
+  <data name="CallBookingId" xml:space="preserve">
+    <value>شناسه رزرو تماس</value>
+  </data>
+  <data name="CallBookingType" xml:space="preserve">
+    <value>نوع رزور تماس</value>
+  </data>
+  <data name="UnassignableToCustomer" xml:space="preserve">
+    <value>غیر قابل تخصیص به مشتری</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>مدت زمان</value>
+  </data>
+  <data name="MaximumNumberOfCalls" xml:space="preserve">
+    <value>حداکثر تعداد تماس</value>
+  </data>
+  <data name="RemainingNumberOfCalls" xml:space="preserve">
+    <value>تعداد تماس‌های باقیمانده</value>
+  </data>
+  <data name="MaximumCumulativeDurationOfCalls" xml:space="preserve">
+    <value>حداکثر زمان تجمعی تماس‌ها</value>
+  </data>
+  <data name="RemainingCumulativeDurationOfCalls" xml:space="preserve">
+    <value>مجموع زمان باقیمانده تماس‌ها</value>
+  </data>
+  <data name="CallDirection" xml:space="preserve">
+    <value>جهت تماس</value>
+  </data>
+  <data name="CallerPhoneNumber" xml:space="preserve">
+    <value>شماره تلفن تماس گیرنده</value>
+  </data>
+  <data name="CalleePhoneNumber" xml:space="preserve">
+    <value>شماره تلفن مخاطب تماس</value>
+  </data>
+  <data name="Lifetime" xml:space="preserve">
+    <value>طول عمر</value>
+  </data>
+  <data name="CalleePhoneNumbers" xml:space="preserve">
+    <value>شماره تلفن های مخاطبین تماس</value>
+  </data>
+  <data name="ActiveCalleePhoneNumber" xml:space="preserve">
+    <value>شماره تلفن مخاطب تماس فعال</value>
+  </data>
+  <data name="CallBooking" xml:space="preserve">
+    <value>رزرو تماس</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>ثانیه</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>بستن</value>
+  </data>
+  <data name="AXBManagementSystem" xml:space="preserve">
+    <value>سامانه مدیریت AXB</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>خروج</value>
+  </data>
+  <data name="Authentication" xml:space="preserve">
+    <value>احراز هویت</value>
+  </data>
+  <data name="CallBookingList" xml:space="preserve">
+    <value>لیست رزرو تماس ها</value>
+  </data>
+  <data name="SimpleCallBooking" xml:space="preserve">
+    <value>رزرو تماس ساده</value>
+  </data>
+  <data name="ChainedCallBooking" xml:space="preserve">
+    <value>رزرو تماس زنجیره ای</value>
+  </data>
+  <data name="RotaryCallBooking" xml:space="preserve">
+    <value>رزرو تماس چرخشی</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>به روز رسانی</value>
+  </data>
+  <data name="CallTerminationReason" xml:space="preserve">
+    <value>دلیل قطع تماس</value>
+  </data>
+  <data name="ServiceType" xml:space="preserve">
+    <value>نوع سرویس</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>تغییر</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>لیست</value>
+  </data>
+  <data name="BillingCycle" xml:space="preserve">
+    <value>چرخه صورت حساب</value>
+  </data>
+  <data name="WalletInformation" xml:space="preserve">
+    <value>اطلاعات کیف پول</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>موجودی حساب</value>
+  </data>
+  <data name="AvailableBalance" xml:space="preserve">
+    <value>موجودی قابل استفاده</value>
+  </data>
+  <data name="TransactionList" xml:space="preserve">
+    <value>لیست تراکنش‌ها</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>مبلغ</value>
+  </data>
+  <data name="TrackingNumber" xml:space="preserve">
+    <value>شماره پیگیری</value>
+  </data>
+  <data name="Temporal" xml:space="preserve">
+    <value>زمانی</value>
+  </data>
+  <data name="Numeral" xml:space="preserve">
+    <value>عددی</value>
+  </data>
+  <data name="ConsumptionUnit" xml:space="preserve">
+    <value>واحد مصرف</value>
+  </data>
+  <data name="ServiceConsumptionUnit" xml:space="preserve">
+    <value>واحد مصرف سرویس</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>تأیید رمز عبور جدید</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>رمز عبور کنونی</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>رمز عبور جدید</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>غیرفعال</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>فعال</value>
+  </data>
+  <data name="Disable" xml:space="preserve">
+    <value>غیرفعال‌سازی</value>
+  </data>
+  <data name="Enable" xml:space="preserve">
+    <value>فعال‌سازی</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>نامشخص</value>
+  </data>
+  <data name="Blacklist" xml:space="preserve">
+    <value>لیست سیاه</value>
+  </data>
+  <data name="Whitelist" xml:space="preserve">
+    <value>لیست سفید</value>
+  </data>
+  <data name="NumberOfSimCards" xml:space="preserve">
+    <value>تعداد سیم کارت‌ها</value>
+  </data>
+  <data name="SelectAnOption" xml:space="preserve">
+    <value>انتخاب کنید ...</value>
+  </data>
+  <data name="Credentials" xml:space="preserve">
+    <value>اطلاعات هویتی</value>
+  </data>
+  <data name="CallBookingDefaultSetting" xml:space="preserve">
+    <value>تنظیمات پیشفرض رزرو تماس</value>
+  </data>
+  <data name="Suspend" xml:space="preserve">
+    <value>تعلیق</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>تعلیق شده</value>
+  </data>
+  <data name="Unsuspend" xml:space="preserve">
+    <value>لغو تعلیق</value>
+  </data>
+  <data name="Unsuspended" xml:space="preserve">
+    <value>بدون تعلیق</value>
+  </data>
+  <data name="NumberOfOngoingCalls" xml:space="preserve">
+    <value>تعداد تماس‌های در حال پیشرفت</value>
+  </data>
+  <data name="NumberOfOperationalBookings" xml:space="preserve">
+    <value>تعداد رزروهای عملیاتی</value>
+  </data>
+  <data name="NonOperational" xml:space="preserve">
+    <value>غیر عملیاتی</value>
+  </data>
+  <data name="NotValidAfter" xml:space="preserve">
+    <value>معتبر تا</value>
+  </data>
+  <data name="NotValidBefore" xml:space="preserve">
+    <value>معتبر از</value>
+  </data>
+  <data name="Operational" xml:space="preserve">
+    <value>عملیاتی</value>
+  </data>
+  <data name="AccessLevels" xml:space="preserve">
+    <value>سطوح دسترسی</value>
+  </data>
+  <data name="PasswordChangedSuccessfully" xml:space="preserve">
+    <value>رمز عبور با موفقیت تغییر یافت</value>
+  </data>
+  <data name="NewCustomerSuccessfullyAdded" xml:space="preserve">
+    <value>مشتری جدید با موفقیت افزوده شد</value>
+  </data>
+  <data name="BalanceSuccessfullyCharged" xml:space="preserve">
+    <value>موجودی حساب با موفقیت شارژ شد</value>
+  </data>
+  <data name="NewPoolSuccessfullyAdded" xml:space="preserve">
+    <value>استخر جدید با موفقیت افزوده شد</value>
+  </data>
+  <data name="PoolSeccessfullyUpdated" xml:space="preserve">
+    <value>استخر موردنظر با موفقیت ویرایش شد</value>
+  </data>
+  <data name="InputInvalid" xml:space="preserve">
+    <value>ورودی نامعتبر است</value>
+  </data>
+  <data name="NewPricingPolicySuccessfullyAdded" xml:space="preserve">
+    <value>سیاست قیمت‌گذاری جدید با موفقیت افزوده شد</value>
+  </data>
+  <data name="NoDataToDisplay" xml:space="preserve">
+    <value>داده‌ای برای نمایش وجود ندارد</value>
+  </data>
+  <data name="NoRecordInTheSelectedInterval" xml:space="preserve">
+    <value>در بازه انتخابی رکوردی ثبت نشده‌است</value>
+  </data>
+  <data name="SimcardSuccessfullyDeleted" xml:space="preserve">
+    <value>سیم‌کارت با موفقیت حذف شد</value>
+  </data>
+  <data name="CustomerSuccessfullyEnabled" xml:space="preserve">
+    <value>مشتری با موفقیت فعال شد</value>
+  </data>
+  <data name="UserSuccessfullyDisabled" xml:space="preserve">
+    <value>کاربر با موفقیت غیرفعال شد</value>
+  </data>
+  <data name="UserSuccessfullyEnabled" xml:space="preserve">
+    <value>کاربر با موفقیت فعال شد</value>
+  </data>
+  <data name="UserSuccessfullyDeleted" xml:space="preserve">
+    <value>کاربر با موفقیت حذف شد</value>
+  </data>
+  <data name="CustomerSuccessfullyDisabled" xml:space="preserve">
+    <value>مشتری با موفقیت غیرفعال شد</value>
+  </data>
+  <data name="CallBookingDefaultSettingsSuccessfullyUpdated" xml:space="preserve">
+    <value>تنظیمات پیش فرض رزرو تماس با موفقیت ویرایش شد</value>
+  </data>
+  <data name="PoolSuccessfullyAttachedToCustomer" xml:space="preserve">
+    <value>استخر با موفقیت به مشتری انتصاب داده شد</value>
+  </data>
+  <data name="PoolSuccessfullyDetachedFromCustomer" xml:space="preserve">
+    <value>استخر با موفقیت آزاد شد</value>
+  </data>
+  <data name="UpdateCompletedSuccessfully" xml:space="preserve">
+    <value>به روز رسانی با موفقیت انجام شد</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>هفته</value>
+  </data>
+  <data name="NumberOfSuccessfulCalls" xml:space="preserve">
+    <value>تعداد تماس‌های موفق</value>
+  </data>
+  <data name="NumberOfTotalCalls" xml:space="preserve">
+    <value>تعداد کل تماس‌ها</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>ماه</value>
+  </data>
+  <data name="NumberOfTotalTextMessages" xml:space="preserve">
+    <value>تعداد کل پیامک‌ها</value>
+  </data>
+  <data name="LastPage" xml:space="preserve">
+    <value>صفحه آخر</value>
+  </data>
+  <data name="FirstPage" xml:space="preserve">
+    <value>صفحه اول</value>
+  </data>
+  <data name="TimesAfter" xml:space="preserve">
+    <value>زمان‌های بعد از</value>
+  </data>
+  <data name="TimesBefore" xml:space="preserve">
+    <value>زمان‌های قبل از</value>
+  </data>
+  <data name="ActionName" xml:space="preserve">
+    <value>نام فعالیت</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>آدرس آی‌پی</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>تاریخ</value>
+  </data>
+  <data name="UnableToAccessTheRequestedResource" xml:space="preserve">
+    <value>شما مجوز دسترسی به این بخش را ندارید</value>
+  </data>
+  <data name="ViewReport" xml:space="preserve">
+    <value>نمایش گزارش</value>
+  </data>
+  <data name="UserActivitiesList" xml:space="preserve">
+    <value>لیست اقدامات کاربران</value>
+  </data>
+  <data name="Booking" xml:space="preserve">
+    <value>رزرو</value>
+  </data>
+  <data name="BookingList" xml:space="preserve">
+    <value>لیست رزروها</value>
+  </data>
+  <data name="ReceivingInformation" xml:space="preserve">
+    <value>در حال دریافت اطلاعات</value>
+  </data>
+  <data name="Display" xml:space="preserve">
+    <value>نمایش</value>
+  </data>
+  <data name="RequestDetails" xml:space="preserve">
+    <value>جزئیات درخواست</value>
+  </data>
+  <data name="Callback" xml:space="preserve">
+    <value>تماس خروجی</value>
+  </data>
+  <data name="Question" xml:space="preserve">
+    <value>پرسش و پاسخ</value>
+  </data>
+  <data name="Objection" xml:space="preserve">
+    <value>اعتراض</value>
+  </data>
+  <data name="TicketFollowUp" xml:space="preserve">
+    <value>پیگیری تیکت</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>سایر</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>آنلاین</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>آفلاین</value>
+  </data>
+  <data name="Busy" xml:space="preserve">
+    <value>مشغول</value>
+  </data>
+  <data name="Away" xml:space="preserve">
+    <value>دور</value>
+  </data>
+  <data name="OutToLunch" xml:space="preserve">
+    <value>در حال صرف ناهار</value>
+  </data>
+  <data name="OnThePhone" xml:space="preserve">
+    <value>در حال مکالمه</value>
+  </data>
+  <data name="BeRightBack" xml:space="preserve">
+    <value>به زودی برمیگردد</value>
+  </data>
+  <data name="Extortion" xml:space="preserve">
+    <value>گرانفروشی</value>
+  </data>
+  <data name="Hoarding" xml:space="preserve">
+    <value>احتکار</value>
+  </data>
+  <data name="LackOfHygiene" xml:space="preserve">
+    <value>عدم رعایت بهداشت</value>
+  </data>
+  <data name="Underselling" xml:space="preserve">
+    <value>کم‌فروشی</value>
+  </data>
+  <data name="Ringing" xml:space="preserve">
+    <value>در حال تماس</value>
+  </data>
+  <data name="Accepted" xml:space="preserve">
+    <value>در حال مکالمه</value>
+  </data>
+  <data name="Missed" xml:space="preserve">
+    <value>از دست رفته</value>
+  </data>
+  <data name="Terminated" xml:space="preserve">
+    <value>اتمام</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>جدید</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>در حال پیگیری</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>بسته شده</value>
+  </data>
+</root>

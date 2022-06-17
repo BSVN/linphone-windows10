@@ -1,0 +1,759 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="CallerSubscriberIdentificationCard" xml:space="preserve">
+    <value>CallerSubscriberIdentificationCard</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="CreatedAt" xml:space="preserve">
+    <value>CreatedAt</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Dossier" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="EffectiveDuration" xml:space="preserve">
+    <value>EffectiveDuration</value>
+  </data>
+  <data name="FinishedAt" xml:space="preserve">
+    <value>FinishedAt</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>FirstName</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="InputRequired" xml:space="preserve">
+    <value>Input Required</value>
+  </data>
+  <data name="IssuedAt" xml:space="preserve">
+    <value>IssuedAt</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>LastName</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Minute</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NationalIdentificationNumber" xml:space="preserve">
+    <value>National Identification Number</value>
+  </data>
+  <data name="NextPage" xml:space="preserve">
+    <value>NextPage</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PreviousPage" xml:space="preserve">
+    <value>PreviousPage</value>
+  </data>
+  <data name="PricingPolicy" xml:space="preserve">
+    <value>Pricing Policy</value>
+  </data>
+  <data name="ReceiverSubscriberIdentificationCard" xml:space="preserve">
+    <value>ReceiverSubscriberIdentificationCard</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>SerialNumber</value>
+  </data>
+  <data name="StartedAt" xml:space="preserve">
+    <value>StartedAt</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="SimCards" xml:space="preserve">
+    <value>sim cards</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="TaxIdentificationNumber" xml:space="preserve">
+    <value>Tax identification number</value>
+  </data>
+  <data name="PrimaryContactPersonName" xml:space="preserve">
+    <value>Primary contact person name</value>
+  </data>
+  <data name="CustomerName" xml:space="preserve">
+    <value>Customer name</value>
+  </data>
+  <data name="SimCardPool" xml:space="preserve">
+    <value>Sim card pool</value>
+  </data>
+  <data name="IsCustomerAssignable" xml:space="preserve">
+    <value>Is customer assignable</value>
+  </data>
+  <data name="PrimaryContactPersonEmail" xml:space="preserve">
+    <value>Primary contact person email</value>
+  </data>
+  <data name="PrimaryContactPersonPhoneNumber" xml:space="preserve">
+    <value>Primary contact person phone number</value>
+  </data>
+  <data name="SimCardPoolName" xml:space="preserve">
+    <value>sim card pool name</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>From date</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>To date</value>
+  </data>
+  <data name="AcquisitionStrategyType" xml:space="preserve">
+    <value>Acquisition Strategy</value>
+  </data>
+  <data name="DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="MostRecentlyUsed" xml:space="preserve">
+    <value>Most recently used</value>
+  </data>
+  <data name="MultiOccupancy" xml:space="preserve">
+    <value>Multi occupancy</value>
+  </data>
+  <data name="Randomized" xml:space="preserve">
+    <value>Randomized</value>
+  </data>
+  <data name="SingleOccupancy" xml:space="preserve">
+    <value>Single occupancy</value>
+  </data>
+  <data name="Sorted" xml:space="preserve">
+    <value>Sorted</value>
+  </data>
+  <data name="SubscriberIdentificationCardPoolType" xml:space="preserve">
+    <value>Subscriber Identification Card pool type</value>
+  </data>
+  <data name="PayPerMinute" xml:space="preserve">
+    <value>Pay per minute</value>
+  </data>
+  <data name="CompensationModel" xml:space="preserve">
+    <value>Compensation Model</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>Row</value>
+  </data>
+  <data name="Simple" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="StepDetails" xml:space="preserve">
+    <value>Step Details</value>
+  </data>
+  <data name="Stepwise" xml:space="preserve">
+    <value>Stepwise</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ReceiverPhoneNumber" xml:space="preserve">
+    <value>Receiver phone number</value>
+  </data>
+  <data name="ReceiverVirtualNumber" xml:space="preserve">
+    <value>Receiver virtual number</value>
+  </data>
+  <data name="SenderPhoneNumber" xml:space="preserve">
+    <value>Sender phone number</value>
+  </data>
+  <data name="SenderVirtualNumber" xml:space="preserve">
+    <value>Sender virtual number</value>
+  </data>
+  <data name="Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="Consumption" xml:space="preserve">
+    <value>Consumption</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>Cost</value>
+  </data>
+  <data name="ReferenceNumber" xml:space="preserve">
+    <value>Reference number</value>
+  </data>
+  <data name="RecordPaymentInformation" xml:space="preserve">
+    <value>Record payment information</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Number of rows</value>
+  </data>
+  <data name="PayableAmount" xml:space="preserve">
+    <value>Payable amount</value>
+  </data>
+  <data name="ReceivedAt" xml:space="preserve">
+    <value>Received at</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Voice" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="PayPerSession" xml:space="preserve">
+    <value>Pay per session</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="PricingPolicyId" xml:space="preserve">
+    <value>Pricing policy id</value>
+  </data>
+  <data name="PoolDisplayName" xml:space="preserve">
+    <value>Pool display name</value>
+  </data>
+  <data name="PolicyModel" xml:space="preserve">
+    <value>Policy model</value>
+  </data>
+  <data name="Toman" xml:space="preserve">
+    <value>Toman</value>
+  </data>
+  <data name="CallerVirtualNumber" xml:space="preserve">
+    <value>Caller virtual number</value>
+  </data>
+  <data name="CalleeVirtualNumber" xml:space="preserve">
+    <value>Callee virtual number</value>
+  </data>
+  <data name="CallBookingId" xml:space="preserve">
+    <value>Call booking id</value>
+  </data>
+  <data name="CallBookingType" xml:space="preserve">
+    <value>Call booking type</value>
+  </data>
+  <data name="UnassignableToCustomer" xml:space="preserve">
+    <value>Unassignable to customer</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="ServiceType" xml:space="preserve">
+    <value>Service type</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>List</value>
+  </data>
+  <data name="BillingCycle" xml:space="preserve">
+    <value>Billing cycle</value>
+  </data>
+  <data name="WalletInformation" xml:space="preserve">
+    <value>Wallet information</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>Balance</value>
+  </data>
+  <data name="AvailableBalance" xml:space="preserve">
+    <value>Available balance</value>
+  </data>
+  <data name="TransactionList" xml:space="preserve">
+    <value>Transaction list</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="TrackingNumber" xml:space="preserve">
+    <value>Tracking number</value>
+  </data>
+  <data name="Temporal" xml:space="preserve">
+    <value>Temporal</value>
+  </data>
+  <data name="Numeral" xml:space="preserve">
+    <value>Numeral</value>
+  </data>
+  <data name="ConsumptionUnit" xml:space="preserve">
+    <value>Consumption unit</value>
+  </data>
+  <data name="ServiceConsumptionUnit" xml:space="preserve">
+    <value>Service consumption unit</value>
+  </data>
+  <data name="MaximumNumberOfCalls" xml:space="preserve">
+    <value>Maximum number of calls</value>
+  </data>
+  <data name="RemainingNumberOfCalls" xml:space="preserve">
+    <value>Remaining number of calls</value>
+  </data>
+  <data name="MaximumCumulativeDurationOfCalls" xml:space="preserve">
+    <value>Maximum cumulative duration of calls</value>
+  </data>
+  <data name="RemainingCumulativeDurationOfCalls" xml:space="preserve">
+    <value>Remaining cumulative duration of calls</value>
+  </data>
+  <data name="CallDirection" xml:space="preserve">
+    <value>Call direction</value>
+  </data>
+  <data name="CallerPhoneNumber" xml:space="preserve">
+    <value>Caller phone number</value>
+  </data>
+  <data name="CalleePhoneNumber" xml:space="preserve">
+    <value>Callee phone number</value>
+  </data>
+  <data name="Lifetime" xml:space="preserve">
+    <value>Lifetime</value>
+  </data>
+  <data name="CalleePhoneNumbers" xml:space="preserve">
+    <value>Callee phone numbers</value>
+  </data>
+  <data name="ActiveCalleePhoneNumber" xml:space="preserve">
+    <value>Active callee phone number</value>
+  </data>
+  <data name="CallBooking" xml:space="preserve">
+    <value>Call booking</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>Second</value>
+  </data>
+  <data name="AXBManagementSystem" xml:space="preserve">
+    <value>AXB management system</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Authentication" xml:space="preserve">
+    <value>Authentication</value>
+  </data>
+  <data name="CallBookingList" xml:space="preserve">
+    <value>Call booking list</value>
+  </data>
+  <data name="SimpleCallBooking" xml:space="preserve">
+    <value>Simple call booking</value>
+  </data>
+  <data name="ChainedCallBooking" xml:space="preserve">
+    <value>Chained call booking</value>
+  </data>
+  <data name="RotaryCallBooking" xml:space="preserve">
+    <value>Rotary call booking</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="CallTerminationReason" xml:space="preserve">
+    <value>Call termination reason</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Current password</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Blacklist" xml:space="preserve">
+    <value>Blacklist</value>
+  </data>
+  <data name="Whitelist" xml:space="preserve">
+    <value>Whitelist</value>
+  </data>
+  <data name="NumberOfSimCards" xml:space="preserve">
+    <value>Number of sim cards</value>
+  </data>
+  <data name="SelectAnOption" xml:space="preserve">
+    <value>Select ...</value>
+  </data>
+  <data name="Credentials" xml:space="preserve">
+    <value>Credentials</value>
+  </data>
+  <data name="CallBookingDefaultSetting" xml:space="preserve">
+    <value>Call booking default setting</value>
+  </data>
+  <data name="AccessLevels" xml:space="preserve">
+    <value>Access levels</value>
+  </data>
+  <data name="PasswordChangedSuccessfully" xml:space="preserve">
+    <value>Password changed successfully</value>
+  </data>
+  <data name="NewCustomerSuccessfullyAdded" xml:space="preserve">
+    <value>New customer successfully added</value>
+  </data>
+  <data name="BalanceSuccessfullyCharged" xml:space="preserve">
+    <value>Balance successfully charged</value>
+  </data>
+  <data name="NewPoolSuccessfullyAdded" xml:space="preserve">
+    <value>New pool successfully added</value>
+  </data>
+  <data name="PoolSeccessfullyUpdated" xml:space="preserve">
+    <value>Pool successfully updated</value>
+  </data>
+  <data name="InputInvalid" xml:space="preserve">
+    <value>Input invalid</value>
+  </data>
+  <data name="NewPricingPolicySuccessfullyAdded" xml:space="preserve">
+    <value>New pricing policy successfully added</value>
+  </data>
+  <data name="NoDataToDisplay" xml:space="preserve">
+    <value>There is no data to display</value>
+  </data>
+  <data name="NoRecordInTheSelectedInterval" xml:space="preserve">
+    <value>no record in the selected interval </value>
+  </data>
+  <data name="SimcardSuccessfullyDeleted" xml:space="preserve">
+    <value>Sim card successfully deleted</value>
+  </data>
+  <data name="CustomerSuccessfullyEnabled" xml:space="preserve">
+    <value>Customer successfully enabled</value>
+  </data>
+  <data name="UserSuccessfullyDisabled" xml:space="preserve">
+    <value>User successfully disabled</value>
+  </data>
+  <data name="UserSuccessfullyEnabled" xml:space="preserve">
+    <value>User successfully enabled</value>
+  </data>
+  <data name="UserSuccessfullyDeleted" xml:space="preserve">
+    <value>User successfully deleted</value>
+  </data>
+  <data name="CustomerSuccessfullyDisabled" xml:space="preserve">
+    <value>Customer successfully disabled</value>
+  </data>
+  <data name="CallBookingDefaultSettingsSuccessfullyUpdated" xml:space="preserve">
+    <value>Call booking default settings successfully updated</value>
+  </data>
+  <data name="PoolSuccessfullyAttachedToCustomer" xml:space="preserve">
+    <value>Pool successfully attached to customer</value>
+  </data>
+  <data name="PoolSuccessfullyDetachedFromCustomer" xml:space="preserve">
+    <value>pool successfully detached from customer</value>
+  </data>
+  <data name="UpdateCompletedSuccessfully" xml:space="preserve">
+    <value>Update completed successfully</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>Week</value>
+  </data>
+  <data name="NumberOfSuccessfulCalls" xml:space="preserve">
+    <value>Number of successful calls</value>
+  </data>
+  <data name="NumberOfTotalCalls" xml:space="preserve">
+    <value>Number of total calls</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Month</value>
+  </data>
+  <data name="NumberOfTotalTextMessages" xml:space="preserve">
+    <value>Number of total text messages</value>
+  </data>
+  <data name="LastPage" xml:space="preserve">
+    <value>Last page</value>
+  </data>
+  <data name="FirstPage" xml:space="preserve">
+    <value>First page</value>
+  </data>
+  <data name="TimesAfter" xml:space="preserve">
+    <value>Times after</value>
+  </data>
+  <data name="TimesBefore" xml:space="preserve">
+    <value>Times before</value>
+  </data>
+  <data name="ActionName" xml:space="preserve">
+    <value>Action name</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>Ip address</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="UnableToAccessTheRequestedResource" xml:space="preserve">
+    <value>Unable to access the requested resource</value>
+  </data>
+  <data name="ViewReport" xml:space="preserve">
+    <value>View report</value>
+  </data>
+  <data name="UserActivitiesList" xml:space="preserve">
+    <value>User activities list</value>
+  </data>
+  <data name="Suspend" xml:space="preserve">
+    <value>Suspend</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="Unsuspend" xml:space="preserve">
+    <value>Unsuspend</value>
+  </data>
+  <data name="Unsuspended" xml:space="preserve">
+    <value>Unsuspended</value>
+  </data>
+  <data name="NumberOfOngoingCalls" xml:space="preserve">
+    <value>Number of ongoing calls</value>
+  </data>
+  <data name="NumberOfOperationalBookings" xml:space="preserve">
+    <value>Number of operational bookings</value>
+  </data>
+  <data name="NonOperational" xml:space="preserve">
+    <value>Non-Operational</value>
+  </data>
+  <data name="NotValidAfter" xml:space="preserve">
+    <value>Not valid after</value>
+  </data>
+  <data name="NotValidBefore" xml:space="preserve">
+    <value>Not valid before</value>
+  </data>
+  <data name="Operational" xml:space="preserve">
+    <value>Operational</value>
+  </data>
+  <data name="Booking" xml:space="preserve">
+    <value>Booking</value>
+  </data>
+  <data name="BookingList" xml:space="preserve">
+    <value>Booking list</value>
+  </data>
+  <data name="ReceivingInformation" xml:space="preserve">
+    <value>Receiving informations</value>
+  </data>
+  <data name="Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="RequestDetails" xml:space="preserve">
+    <value>Request details</value>
+  </data>
+  <data name="Callback" xml:space="preserve">
+    <value>Callback</value>
+  </data>
+  <data name="Question" xml:space="preserve">
+    <value>Question</value>
+  </data>
+  <data name="Objection" xml:space="preserve">
+    <value>Objection</value>
+  </data>
+  <data name="TicketFollowUp" xml:space="preserve">
+    <value>Ticket FollowUp</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="Busy" xml:space="preserve">
+    <value>Busy</value>
+  </data>
+  <data name="Away" xml:space="preserve">
+    <value>Away</value>
+  </data>
+  <data name="OutToLunch" xml:space="preserve">
+    <value>Out to lunch</value>
+  </data>
+  <data name="OnThePhone" xml:space="preserve">
+    <value>On the phone</value>
+  </data>
+  <data name="BeRightBack" xml:space="preserve">
+    <value>Be right back</value>
+  </data>
+  <data name="Extortion" xml:space="preserve">
+    <value>Extortion</value>
+  </data>
+  <data name="Hoarding" xml:space="preserve">
+    <value>Hoarding</value>
+  </data>
+  <data name="LackOfHygiene" xml:space="preserve">
+    <value>Lack of hygiene</value>
+  </data>
+  <data name="Underselling" xml:space="preserve">
+    <value>Underselling</value>
+  </data>
+  <data name="Ringing" xml:space="preserve">
+    <value>Ringing</value>
+  </data>
+  <data name="Accepted" xml:space="preserve">
+    <value>Accepted</value>
+  </data>
+  <data name="Missed" xml:space="preserve">
+    <value>Missed</value>
+  </data>
+  <data name="Terminated" xml:space="preserve">
+    <value>Terminated</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+</root>
