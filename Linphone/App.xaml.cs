@@ -66,12 +66,6 @@ namespace Linphone
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
             IsWebView2Installed();
 
-            //System.IO.Path.Combine(Environment.CurrentDirectory, @"FixedRuntime\102.0.1245.33_x64")
-            //CoreWebView2Environment.CreateWithOptionsAsync(@"FixedRuntime\102.0.1245.33_x64", @"FixedRuntime\102.0.1245.33_x64\UserData", new CoreWebView2EnvironmentOptions()
-            //{
-
-            //}).GetResults();
-
             acceptCall = false;
         }
 
@@ -249,6 +243,7 @@ namespace Linphone
 
         private async void App_CloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
         {
+            // Todo: Unregister before shutting down.
             if (CloseApp) return;
 
             _logger.Information("App_CloseRequested raised omg !!");
@@ -261,7 +256,7 @@ namespace Linphone
                 await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
             
             if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
-                Application.Current.Exit();
+                Current.Exit();
         }
 
         /// <summary>
@@ -347,6 +342,7 @@ namespace Linphone
 
         private bool IsWebView2Installed()
         {
+            // Todo: Working with registry is forbidden for some devices, we should acquire grants needed for this task.
             try
             {
                 using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"))

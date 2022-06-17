@@ -15,7 +15,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 using System;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 namespace Linphone.Controls
@@ -28,13 +27,6 @@ namespace Linphone.Controls
             get { return address.Text; }
             set {
                 address.Text = value;
-                //if(value.Length > 0)
-                //{
-                //    Backspace.IsEnabled = true;
-                //} else
-                //{
-                //    Backspace.IsEnabled = false;
-                //}
             }
         }
 
@@ -42,29 +34,6 @@ namespace Linphone.Controls
         {
             InitializeComponent();
             this.DataContext = this;
-        }
-
-        private void backspace_Hold_1(object sender, RoutedEventArgs e)
-        {
-            address.Text = "";
-        }
-
-        private void backspace_Click_1(object sender, RoutedEventArgs e)
-        {
-            if (address.Text.Length > 0)
-                address.Text = address.Text.Substring(0, address.Text.Length - 1);
-
-        }
-
-        private void address_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            //if(address.Text.Length > 0)
-            //{
-            //    Backspace.IsEnabled = true;
-            //} else
-            //{
-            //    Backspace.IsEnabled = false;
-            //}
         }
     }
 }

@@ -12,7 +12,6 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-
         <TextBox 
             Grid.Column="0"
             x:Name="address"
@@ -28,23 +27,6 @@
             InputScope="EmailSmtpAddress"
             TextChanged="address_TextChanged"
             IsSpellCheckEnabled="false">
-            
         </TextBox>
-
-        <!--<Button 
-            x:Name="Backspace"
-            Grid.Column="1"
-            BorderBrush="Transparent"
-            Background="Transparent"
-            ClickMode="Press" 
-            IsEnabled="False"
-            Style="{StaticResource ButtonStyle}"
-            Click="backspace_Click_1"
-            Holding="backspace_Hold_1">
-                <FontIcon 
-                    FontFamily="Segoe MDL2 Assets" 
-                    Glyph="&#xE750;" 
-                    FontSize="30"/>
-        </Button>-->
     </Grid>
 </UserControl>

@@ -75,15 +75,6 @@ namespace Linphone.Views
 
                 AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
             }
-
-            // TODO: WebView FixedRuntime Approach make installation easier.
-            //CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions();
-            //StorageFolder localFolder = Windows.ApplicationModel.Package.Current.InstalledLocation;
-
-            //string path = Path.Combine(localFolder.Path, "Assets\\FixedRuntime\\102.0.1245.33_x64");
-            //CoreWebView2Environment env = CoreWebView2Environment.CreateWithOptionsAsync(path, "", options).GetResults();
-
-            //Browser.EnsureCoreWebView2Async().GetResults();
         }
 
         /// <summary>
@@ -231,7 +222,9 @@ namespace Linphone.Views
             LinphoneManager.Instance.MessageReceived += MessageReceived;
             LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;
             status.RefreshStatus();
-            /*    if (e.NavigationMode == NavigationMode.New)
+
+            /*    LinPhone Developer Comments:
+             *    if (e.NavigationMode == NavigationMode.New)
                 {
                     if (BugCollector.HasExceptionToReport())
                     {
@@ -315,6 +308,7 @@ namespace Linphone.Views
         protected override void OnNavigatedFrom(NavigationEventArgs nee)
         {
             base.OnNavigatedFrom(nee);
+            // LinPhone Developers Comments:
             // LinphoneManager.Instance.LogUploadProgressIndicationEH -= LogUploadProgressIndication;
             // BugReportUploadPopup.Visibility = Visibility.Collapsed;
         }
@@ -360,12 +354,6 @@ namespace Linphone.Views
 
                 await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(1));
             }
-            // Extra feature disabled 😊
-            //else
-            //{
-            //    string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
-            //    addressBox.Text = lastDialedNumber == null ? "" : lastDialedNumber;
-            //}
         }
 
         private void numpad_Click(object sender, RoutedEventArgs e)
@@ -482,7 +470,8 @@ namespace Linphone.Views
             }
             else if (sender.Source.AbsolutePath.Contains("/api/Operators/UserInfo"))
             {
-                // Literally کثافتکاری                
+                // Literally کثافتکاری
+                // Todo: Interactions with Browser should be revised.
                 try
                 {
                     var html = await Browser.CoreWebView2.ExecuteScriptAsync("document.body.outerHTML");
