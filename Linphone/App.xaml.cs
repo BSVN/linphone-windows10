@@ -92,7 +92,10 @@ namespace Linphone
                 _logger.Information("A command call has been ended.");
 
                 if (CloseApp)
-                    Application.Current.Exit();
+                {
+                    DisableRegisteration();
+                    Current.Exit();
+                }
 
                 CallFlowControl.Instance.CallContext.Direction = CallDirection.Incoming;
                 return;
@@ -256,7 +259,10 @@ namespace Linphone
                 await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
             
             if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+            {
+                DisableRegisteration();
                 Current.Exit();
+            }
         }
 
         /// <summary>
@@ -334,7 +340,7 @@ namespace Linphone
             {
                 // HotPoint #0
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(call.RemoteAddress.AsString());
-                await CallFlowControl.Instance.InitiateIncomingCallAsync(address.GetCanonicalPhoneNumber());
+                await CallFlowControl.Instance.InitiateIncomingCallAsync(address.GetCanonicalPhoneNumber(), call.RemoteAddress.DisplayName);
 
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }

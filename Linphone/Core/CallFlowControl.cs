@@ -34,12 +34,7 @@ namespace BelledonneCommunications.Linphone.Core
             AgentProfile = new PhoneProfile(panelBaseUrl);
         }
 
-        public void SystemRegisteration()
-        {
-
-        }
-
-        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber)
+        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber, string inboundService)
         {
             try
             {
@@ -47,13 +42,15 @@ namespace BelledonneCommunications.Linphone.Core
 
                 CallContext.CallState = CallState.Ringing;
                 CallContext.CallerNumber = callerPhoneNumber;
+                CallContext.InboundService = inboundService;
                 CallContext.CalleeNumber = AgentProfile.SipPhoneNumber;
                 CallContext.Direction = CallDirection.Incoming;
-                CallContext.CallId = default; 
+                CallContext.CallId = default;
 
                 CallsCommandServiceInitiateIncomingResponse response =
                     await _coreClient.InitiateIncomingCallAsync(callerPhoneNumber: callerPhoneNumber,
-                                                                agentPhoneNumber: AgentProfile.SipPhoneNumber);
+                                                                agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                                inboundService: inboundService);
                 if (response != null)
                 {
                     CallContext.CallId = response.Data.Id;
@@ -70,7 +67,8 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string calleePhoneNumber)
+        // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string calleePhoneNumber, string inboundService)
         {
             try
             {
@@ -84,7 +82,8 @@ namespace BelledonneCommunications.Linphone.Core
 
                 CallsCommandServiceInitiateOutgoingResponse response =
                     await _coreClient.InitiateOutgoingCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
-                                                                calleePhoneNumber: calleePhoneNumber);
+                                                                calleePhoneNumber: calleePhoneNumber,
+                                                                inboundService: inboundService);
                 if (response != null)
                 {
                     CallContext.CallId = response.Data.Id;
@@ -137,7 +136,8 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
                 _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber);
+                                                          CallContext.CalleeNumber,
+                                                          CallContext.InboundService);
                 CallContext.Reset();
             }
             // Call missed by agent decline.
@@ -146,7 +146,8 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
                 _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber);
+                                                          CallContext.CalleeNumber,
+                                                          CallContext.InboundService);
                 CallContext.Reset();
             }
 
@@ -163,7 +164,7 @@ namespace BelledonneCommunications.Linphone.Core
                     CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
-                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={HttpUtility.UrlEncode(AgentProfile.PanelBaseUrl + AgentProfile.BrowsingHistory)}";
+                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&CallId={CallContext.CallId}";
                     }
                 }
                 catch (Exception ex)
@@ -195,7 +196,8 @@ namespace BelledonneCommunications.Linphone.Core
                 {
                     // Todo: Call should be ignored in this situation.
                     _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber, 
-                                                              CallContext.CalleeNumber);
+                                                              CallContext.CalleeNumber,
+                                                              CallContext.InboundService);
 
                     AgentProfile.BrowsingHistory = "";
 
@@ -236,18 +238,8 @@ namespace BelledonneCommunications.Linphone.Core
 
         public Uri BuildInCallUri()
         {
-            if (CallContext.Direction == CallDirection.Incoming)
-            {
-                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}");
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&IsIncomingCall=true&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
-                return new Uri(inCallUri);
-            }
-            else
-            {
-                var redirectUrl = HttpUtility.UrlEncode($"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&IsOutgoingCall=true&IsIncomingCall=false&CallId={CallContext.CallId}"); 
-                var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&IsOutgoingCall=true&IsIncomingCall=false&CallId={CallContext.CallId}&RedirectUrl={redirectUrl}";
-                return new Uri(inCallUri);
-            }
+            var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&CallId={CallContext.CallId}";
+            return new Uri(inCallUri);
         }
 
         public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentSettings()
@@ -348,6 +340,8 @@ namespace BelledonneCommunications.Linphone.Core
         public string CallerNumber { get; set; }
 
         public string CalleeNumber { get; set; }
+
+        public string InboundService { get; set; }
 
         public Guid CallId { get; set; }
 

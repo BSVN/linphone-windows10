@@ -38,8 +38,9 @@ namespace Linphone.Views
 
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
-        private const string HEAD_OF_HOUSEHOLD_SERVICE_PHONENUMBER = "99970";
+        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
         private const string SELLERS_SERVICE_PHONENUMBER = "99971";
+        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
 
         public Dialer()
         {
@@ -331,14 +332,14 @@ namespace Linphone.Views
 
             if (addressBox.Text.Length > 0)
             {
-                string ServicePhoneNumber;
+                string inboundService;
                 if (OutgoingChannel.SelectedIndex == 0)
                 {
-                    ServicePhoneNumber = HEAD_OF_HOUSEHOLD_SERVICE_PHONENUMBER;
+                    inboundService = HEAD_OF_HOUSEHOLD_SERVICE;
                 }   
                 else
                 {
-                    ServicePhoneNumber = SELLERS_SERVICE_PHONENUMBER;
+                    inboundService = SELLERS_SERVICE_PHONENUMBER;
                 }
 
                 string normalizedAddres = addressBox.Text;
@@ -350,9 +351,9 @@ namespace Linphone.Views
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-                LinphoneManager.Instance.NewOutgoingCall($"{ServicePhoneNumber}*{normalizedAddres}");
+                LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
 
-                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(1));
+                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
             }
         }
 

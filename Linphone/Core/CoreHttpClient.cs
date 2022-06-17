@@ -19,7 +19,7 @@ namespace BelledonneCommunications.Linphone.Core
             _logger = Log.Logger.ForContext("SourceContext", nameof(CoreHttpClient));
         }
 
-        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber)
+        public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber, string inboundService)
         {
             try
             {
@@ -29,6 +29,7 @@ namespace BelledonneCommunications.Linphone.Core
                 { 
                     AgentPhoneNumber = agentPhoneNumber,
                     CallerPhoneNumber = callerPhoneNumber,
+                    InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
                 HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Incoming/Initiate", content);
@@ -46,7 +47,7 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber)
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber, string inboundService)
         {
             try
             {
@@ -55,7 +56,8 @@ namespace BelledonneCommunications.Linphone.Core
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceInitiateOutgoingRequest
                 {
                     AgentPhoneNumber = agentPhoneNumber,
-                    CalleePhoneNumber = calleePhoneNumber
+                    CalleePhoneNumber = calleePhoneNumber,
+                    InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
                 HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Outgoing/Initiate", content);
@@ -105,7 +107,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// </summary>
         /// <param name="callerPhoneNumber">Caller PhoneNumber.</param>
         /// <param name="agentPhoneNumber">Callee PhoneNumber</param>
-        public async Task SubmitMissedIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber)
+        public async Task SubmitMissedIncomingCallAsync(string callerPhoneNumber, string agentPhoneNumber, string inboundservice)
         {
             try
             {
@@ -114,7 +116,8 @@ namespace BelledonneCommunications.Linphone.Core
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceSubmitMissedIncomingRequest
                 {
                     CallerPhoneNumber = callerPhoneNumber,
-                    AgentPhoneNumber = agentPhoneNumber
+                    AgentPhoneNumber = agentPhoneNumber,
+                    InboundService = inboundservice
                 }), System.Text.Encoding.UTF8, "application/json");
 
                 HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Incoming/Missed", content);
@@ -134,7 +137,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// </summary>
         /// <param name="callerPhoneNumber">Caller PhoneNumber.</param>
         /// <param name="agentPhoneNumber">Callee PhoneNumber</param>
-        public async Task SubmitMissedOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber)
+        public async Task SubmitMissedOutgoingCallAsync(string agentPhoneNumber, string calleePhoneNumber, string inboundService)
         {
             try
             {
@@ -143,7 +146,8 @@ namespace BelledonneCommunications.Linphone.Core
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceSubmitMissedOutgoingRequest
                 {
                     AgentSoftPhoneNumber = agentPhoneNumber,
-                    CalleePhoneNumber = calleePhoneNumber
+                    CalleePhoneNumber = calleePhoneNumber,
+                    InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
                 HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Outgoing/Missed", content);

@@ -27,6 +27,7 @@ namespace Linphone.Views
 {
     public partial class IncomingCall : Page
     {
+        private const string PHONE_ADDRESS_PREFIX = "sip:";
         private string _callerNumber;
 
         public IncomingCall()
@@ -75,12 +76,12 @@ namespace Linphone.Views
         {
             base.OnNavigatedTo(nee);
 
-            if ((nee.Parameter as String).Contains("sip"))
+            if ((nee.Parameter as string).Contains(PHONE_ADDRESS_PREFIX))
             {
-                _callerNumber = (nee.Parameter as String);
-                if (_callerNumber.StartsWith("sip:"))
+                _callerNumber = (nee.Parameter as string);
+                if (_callerNumber.StartsWith(PHONE_ADDRESS_PREFIX))
                 {
-                    _callerNumber = _callerNumber.Substring(4);
+                    _callerNumber = _callerNumber.Substring(PHONE_ADDRESS_PREFIX.Length);
                 }
 
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
