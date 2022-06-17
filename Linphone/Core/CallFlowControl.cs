@@ -23,9 +23,8 @@ namespace BelledonneCommunications.Linphone.Core
 
         private CallFlowControl()
         {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            object settingValue = localSettings.Values["PanelUrl"];
-            string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9012" : settingValue as string;
+            // Todo: Reading this from app.config is so much strightforward.
+            string panelBaseUrl = "http://10.19.82.133:9011";
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
@@ -166,6 +165,8 @@ namespace BelledonneCommunications.Linphone.Core
                     {
                         AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
                     }
+
+                    CallContext.Reset();
                 }
                 catch (Exception ex)
                 {
@@ -226,6 +227,7 @@ namespace BelledonneCommunications.Linphone.Core
             else
             {
                 _logger.Information("Unexpected call termination situation, CallContext: {CallContext}.", CallContext.SerializeToJson());
+                CallContext.Reset();
             }
         }
 
