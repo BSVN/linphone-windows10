@@ -268,6 +268,8 @@ namespace Linphone
                 
                 Current.Exit();
             }
+
+            differal.Complete();
         }
 
         /// <summary>
