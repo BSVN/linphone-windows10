@@ -28,5 +28,23 @@
             TextChanged="address_TextChanged"
             IsSpellCheckEnabled="false">
         </TextBox>
+
+        <Button 
+            x:Name="Backspace"
+            Grid.Column="1"
+            BorderBrush="Transparent"
+            Background="Transparent"
+            ClickMode="Press" 
+            IsEnabled="False"
+            Margin="5 0 0 0"
+            Padding="0"
+            Style="{StaticResource ButtonStyle}"
+            Click="backspace_Click_1"
+            Holding="backspace_Hold_1">
+            <FontIcon 
+                    FontFamily="Segoe MDL2 Assets" 
+                    Glyph="&#xE750;" 
+                    FontSize="30"/>
+        </Button>
     </Grid>
 </UserControl>
