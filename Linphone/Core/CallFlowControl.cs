@@ -164,7 +164,7 @@ namespace BelledonneCommunications.Linphone.Core
                     CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
-                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CallerNumber}&CallId={CallContext.CallId}";
+                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
                     }
                 }
                 catch (Exception ex)
@@ -238,7 +238,7 @@ namespace BelledonneCommunications.Linphone.Core
 
         public Uri BuildInCallUri()
         {
-            var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?customerPhoneNumber={CallContext.CalleeNumber}&CallId={CallContext.CallId}";
+            var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
             return new Uri(inCallUri);
         }
 
