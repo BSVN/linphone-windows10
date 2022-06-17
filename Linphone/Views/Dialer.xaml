@@ -8,7 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
-    xmlns:webui="using:Microsoft.UI.Xaml.Controls"    
+    xmlns:webui="using:Microsoft.UI.Xaml.Controls"
     Background="{ThemeResource AppBarBackgroundThemeBrush}"
     mc:Ignorable="d">
     <Grid>
@@ -16,7 +16,6 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-
 
         <Grid Width="250" Grid.Column="0" HorizontalAlignment="Left" >
             <Grid.RowDefinitions>
@@ -27,10 +26,6 @@
             <StackPanel Grid.Row="0">
                 <controls:StatusBar x:Name="status" Tapped="status_Tapped"/>
                 <Grid Margin="10">
-                    <!--<Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="auto"/>
-                    </Grid.ColumnDefinitions>-->
                     <ComboBox Grid.Column="0"
                               x:Name="AgentStatus"
                               SelectionChanged="AgentStatus_SelectionChanged"
@@ -56,10 +51,6 @@
                             </ComboBoxItem.Content>
                         </ComboBoxItem>
                     </ComboBox>
-
-                    <!--<TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="5 0 0 0">وضعیت: </TextBlock>-->
-
-                    <!--<FontIcon Grid.Column="1" Margin="10 0 0 0" FontFamily="Segoe MDL2 Assets" Glyph="&#xE77B;" FontSize="20"/>-->
                 </Grid>
             </StackPanel>
 
@@ -71,11 +62,10 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel 
-                x:Name="numpad" 
-                Grid.Row="1" 
-                VerticalAlignment="Bottom" 
-                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <StackPanel x:Name="numpad" 
+                            Grid.Row="1" 
+                            VerticalAlignment="Bottom" 
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                     <StackPanel Grid.Row="0" Margin="10">
                         <controls:AddressBox x:Name="addressBox"
                                              Margin="0,0,0,0"
@@ -124,21 +114,19 @@
                             <ColumnDefinition Width="12" />
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="1" 
-                            Grid.Row="1"  
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Tag="1" 
-                            Click="numpad_Click"
-                            Holding="VoicemailClick"
-                            Grid.ColumnSpan="2">
-
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Tag="1" 
+                                Click="numpad_Click"
+                                Holding="VoicemailClick"
+                                Grid.ColumnSpan="2">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="1" Style="{StaticResource DialpadNumberStyle}"/>
                                 <FontIcon FontFamily="Segoe MDL2 Assets"
-                                      FontWeight="ExtraLight"
-                                      Glyph="&#xE77C;" 
-                                      RenderTransformOrigin="0.5,0.5" 
-                                      Height="14.8">
+                                          FontWeight="ExtraLight"
+                                          Glyph="&#xE77C;" 
+                                          RenderTransformOrigin="0.5,0.5" 
+                                          Height="14.8">
                                     <FontIcon.RenderTransform>
                                         <CompositeTransform ScaleX="1" ScaleY="1"/>
                                     </FontIcon.RenderTransform>
@@ -147,10 +135,10 @@
                         </Button>
 
                         <Button Grid.Column="3" 
-                            Grid.Row="1" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="2">
+                                Grid.Row="1" 
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="2">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="2" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="ABC" Style="{StaticResource DialpadLetterStyle}"/>
@@ -158,22 +146,21 @@
                         </Button>
 
                         <Button Grid.Column="4" 
-                            Grid.Row="1" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="3">
+                                Grid.Row="1" 
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="3">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="3" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="DEF" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="1" 
-                            Grid.Row="2" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="4" 
-                            Grid.ColumnSpan="2">
+                        <Button Grid.Row="2" Grid.Column="1" 
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="4" 
+                                Grid.ColumnSpan="2">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="4" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="GHI" Style="{StaticResource DialpadLetterStyle}"/>
@@ -191,80 +178,73 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="4" 
-                            Grid.Row="2"
-                            Click="numpad_Click"
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Tag="6">
+                        <Button Grid.Row="2" Grid.Column="4"
+                                Click="numpad_Click"
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Tag="6">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="6" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="MNO" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="1" 
-                            Grid.Row="3" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="7" 
-                            Grid.ColumnSpan="2">
+                        <Button Grid.Row="3" Grid.Column="1"
+                                Grid.ColumnSpan="2"
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="7">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="7" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="PQRS" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="3" 
-                            Grid.Row="3" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="8">
+                        <Button Grid.Row="3" Grid.Column="3"
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="8">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="8" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="TUV" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="4" 
-                            Grid.Row="3" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Click="numpad_Click"
-                            Tag="9">
+                        <Button Grid.Row="3" Grid.Column="4" 
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Click="numpad_Click"
+                                Tag="9">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="9" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="WXYZ" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="1" 
-                            Grid.Row="4" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Tag="*" 
-                            Click="numpad_Click" 
-                            Grid.ColumnSpan="2">
+                        <Button Grid.Row="4" Grid.Column="1"
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Tag="*" 
+                                Click="numpad_Click" 
+                                Grid.ColumnSpan="2">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="*" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="," Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="3" 
-                            Grid.Row="4" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Tag="0"
-                            Holding="zero_Hold"
-                            Click="numpad_Click">
+                        <Button Grid.Row="4" Grid.Column="3"  
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Tag="0"
+                                Holding="zero_Hold"
+                                Click="numpad_Click">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="0" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text="+" Style="{StaticResource DialpadLetterStyle}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Column="4" 
-                            Grid.Row="4" 
-                            Style="{StaticResource DialpadButtonStyle}"
-                            Tag="#" 
-                            Click="numpad_Click">
+                        <Button Grid.Row="4" Grid.Column="4" 
+                                Style="{StaticResource DialpadButtonStyle}"
+                                Tag="#" 
+                                Click="numpad_Click">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="#" Style="{StaticResource DialpadNumberStyle}"/>
                                 <TextBlock Text=";" Style="{StaticResource DialpadLetterStyle}"/>
@@ -272,11 +252,40 @@
                         </Button>
                     </Grid>
 
-                    <Button
-                        x:Name="CallButton"
-                    Click="call_Click" 
-                     Style="{StaticResource AccentLongButtonStyle}">
-
+                    <Button x:Name="CallButton"
+                            Click="call_Click" 
+                            Style="{StaticResource AccentLongButtonStyle}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
+                                        <FontIcon.RenderTransform>
+                                            <CompositeTransform ScaleX=".75" ScaleY=".75"/>
+                                        </FontIcon.RenderTransform>
+                                    </FontIcon>
+                                    <TextBlock x:Name="call" Grid.Row="1"
+                                               Text="برقراری تماس"
+                                               FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                               Margin="0,4,0,0"
+                                               LineHeight="14"
+                                               Style="{StaticResource TextStyle}"
+                                               HorizontalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button x:Name="Callback" 
+                            Visibility="Collapsed"
+                            Style="{StaticResource AccentLongButtonStyle}" 
+                            Click="Callback_Click">
+                        <Button.Background>
+                            <!-- TODO: Please use StaticResouces and Style -->
+                            <SolidColorBrush Color="#FF9990D6"/>
+                        </Button.Background>
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -290,7 +299,7 @@
                                         </FontIcon.RenderTransform>
                                     </FontIcon>
                                     <TextBlock x:Name="call"
-                                           Text="برقراری تماس"
+                                           Text="پاسخ گویی به صف درخواست تماس"
                                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                                            Grid.Row="1"
                                            Margin="0,4,0,0"
@@ -301,53 +310,17 @@
                             </DataTemplate>
                         </Button.ContentTemplate>
                     </Button>
-					<Button x:Name="Callback" 
-                            Visibility="Collapsed"
-                            Style="{StaticResource AccentLongButtonStyle}" 
-                            Click="Callback_Click">
-						<Button.Background>
-                            <!-- TODO: Please use StaticResouces and Style -->
-							<SolidColorBrush Color="#FF9990D6"/>
-						</Button.Background>
-						<Button.ContentTemplate>
-							<DataTemplate>
-								<Grid>
-									<Grid.RowDefinitions>
-										<RowDefinition Height="Auto" />
-										<RowDefinition Height="*" />
-									</Grid.RowDefinitions>
-									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
-										<FontIcon.RenderTransform>
-											<CompositeTransform ScaleX=".75" ScaleY=".75"/>
-										</FontIcon.RenderTransform>
-									</FontIcon>
-									<TextBlock x:Name="call"
-                                           Text="پاسخ گویی به صف درخواست تماس"
-                                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
-                                           Grid.Row="1"
-                                           Margin="0,4,0,0"
-                                           LineHeight="14"
-                                           Style="{StaticResource TextStyle}"
-                                           HorizontalAlignment="Center" />
-								</Grid>
-							</DataTemplate>
-						</Button.ContentTemplate>
-					</Button>
                 </StackPanel>
 
-                <Grid x:Name="BugReportUploadPopup"
-                Grid.Row="2" Margin="0,20,0,20" Visibility="Collapsed">
-                    <StackPanel
-                Background="Black"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
-                        <ProgressBar
-                        x:Name="BugReportUploadProgressBar"
-                        Grid.Row="0"
-                        Margin="20,0"
-                        IsIndeterminate="False"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"/>
+                <Grid x:Name="BugReportUploadPopup" Grid.Row="2" Margin="0,20,0,20" Visibility="Collapsed">
+                    <StackPanel Background="Black"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch">
+                        <ProgressBar x:Name="BugReportUploadProgressBar" Grid.Row="0"
+                                     Margin="20,0"
+                                     IsIndeterminate="False"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -359,13 +332,12 @@
                             <FontIcon FontFamily="Segoe MDL2 Assets" 
                             Glyph="&#xE121;" 
                             FontSize="20"/>
-                            <TextBlock 
-                            x:Name="MissedCallText"
-                            Visibility="Collapsed"
-                            Text="{Binding MissedCallCount, Mode = TwoWay}"
-                            HorizontalAlignment="Right"
-                            Style="{StaticResource TextStyle}"
-                            FontSize="12"/>
+                            <TextBlock  x:Name="MissedCallText"
+                                        Visibility="Collapsed"
+                                        Text="{Binding MissedCallCount, Mode = TwoWay}"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource TextStyle}"
+                                        FontSize="12"/>
                         </Grid>
                     </AppBarButton.Content>
                 </AppBarButton>
@@ -392,9 +364,9 @@
                 </CommandBar.SecondaryCommands>
             </CommandBar>
 
-            <ContentDialog x:Name="AdminPasswordDialog"                           
+            <ContentDialog x:Name="AdminPasswordDialog"
                            FlowDirection="RightToLeft"
-                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"                           
+                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                            PrimaryButtonText="ورود">
                 <Grid Width="200" VerticalAlignment="Center">
                     <Grid.RowDefinitions>
@@ -413,9 +385,8 @@
             </ContentDialog>
         </Grid>
 
-        <webui:WebView2 x:Name="Browser" 
-                        Grid.Column="1"
-                        NavigationCompleted="Browser_NavigationCompleted"
+        <webui:WebView2 x:Name="Browser" Grid.Column="1"                        
+                        NavigationCompleted="Browser_NavigationCompleted" 
                         Loaded="Browser_Loaded"/>
     </Grid>
 </Page>
