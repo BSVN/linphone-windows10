@@ -424,25 +424,14 @@ namespace Linphone.Views
             }
         }
 
-        private void Browser_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
-        {
-            BrowserIsNavigating = true;
-        }
 
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
-            if (BrowserReloadIsRequired)
-            {
-                BrowserReloadIsRequired = false;
-                Browser.CoreWebView2.Reload();
-            }    
-
             // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
                 CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
-                BrowserIsNavigating = false;
             }
             else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
             {
@@ -478,10 +467,6 @@ namespace Linphone.Views
                 }
 
                 Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
-            }
-            else
-            {
-                BrowserIsNavigating = false;
             }
         }
 
@@ -585,14 +570,7 @@ namespace Linphone.Views
                     await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
                 }
 
-                if (BrowserIsNavigating)
-                {
-                    BrowserReloadIsRequired = true;
-                }
-                else
-                {
-                    Browser.CoreWebView2.Reload();
-                }
+                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
             }
             catch (Exception ex)
             {
@@ -600,8 +578,6 @@ namespace Linphone.Views
             }
         }
 
-        private bool BrowserIsNavigating = false;
-        private bool BrowserReloadIsRequired = false; 
         private readonly ILogger _logger;
         private ConnectionMultiplexer connectionMultiplexer;
         private IDatabase database;
