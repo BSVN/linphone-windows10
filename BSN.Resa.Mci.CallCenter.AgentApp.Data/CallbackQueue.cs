@@ -8,7 +8,13 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 	using DataModels;
 	using StackExchange.Redis;
 
-	public class CallbackQueue
+	public interface ICallbackQueue
+	{
+		CallbackDto Pop();
+		void Push(CallbackDto callback);
+	}
+
+	public class CallbackQueue : ICallbackQueue
 	{
 		public CallbackQueue(DatabaseFactory databaseFactory)
 		{
