@@ -28,40 +28,50 @@ using System.Collections.Generic;
 using Linphone.Views;
 using System.Net.Http;
 using BelledonneCommunications.Linphone.Presentation.Dto;
-using BelledonneCommunications.Linphone;
 using Serilog;
 using PCLAppConfig;
+using Prism.Unity.Windows;
+using System.Threading.Tasks;
+using Prism.Windows.Navigation;
+using Microsoft.Practices.Unity;
+using Prism.Windows.AppModel;
+using Prism.Events;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using Windows.ApplicationModel.Resources;
 
 namespace Linphone
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application, CallControllerListener
+    sealed partial class App : PrismUnityApplication, CallControllerListener
     {
         Frame rootFrame;
         bool acceptCall;
         String sipAddress;
         HttpClient httpClient;
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
-        public App()
+		public new IEventAggregator EventAggregator { get; set; }
+
+		/// <summary>
+		/// Initializes the singleton application object.  This is the first line of authored code
+		/// executed, and as such is the logical equivalent of main() or WinMain().
+		/// </summary>
+		public App()
         {
             httpClient = new HttpClient();
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
-            this.Suspending += OnSuspending;
 
             ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
 
             SettingsManager.InstallConfigFile();
-            Logger.ConfigureLogger();
-            Log.Logger.Error("Here is the usage.");
+
+            BelledonneCommunications.Linphone.Logger.ConfigureLogger();
+			Log.Logger.Error("Here is the usage.");
         }
 
+        // TODO: Please replace with Prism equiavalent
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
             Log.Logger.Error(e.Exception, "Catched Exception.");
@@ -69,6 +79,7 @@ namespace Linphone
             e.Handled = true;
         }
 
+        // TODO: Please replace with Prism equiavalent
         private void Back_requested(object sender, BackRequestedEventArgs e)
         {
             if (rootFrame.CanGoBack)
@@ -141,23 +152,65 @@ namespace Linphone
             //     this.PauseListener.PauseStateChanged(call, isCallPaused, isCallPausedByRemote);
         }
 
+        public void CallIncoming(Call call)
+        {
+            if (acceptCall)
+            {
+                if (sipAddress != "")
+                {
+                    Address addr = LinphoneManager.Instance.Core.InterpretUrl(sipAddress);
+                    if (addr != null && addr.AsStringUriOnly().Equals(call.RemoteAddress.AsStringUriOnly()))
+                    {
+                        call.Accept();
+                        List<String> parameters = new List<String>();
+                        parameters.Add(call.RemoteAddress.AsString());
+                        rootFrame.Navigate(typeof(Views.InCall), parameters);
+                        acceptCall = false;
+                    }
+                }
+            }
+            else
+            {
+                rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
+            }
+        }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override Task OnLaunchApplicationAsync(LaunchActivatedEventArgs e)
         {
             Initialize(e, null);
+            return Task.FromResult<object>(null);
         }
 
-        private void Initialize(IActivatedEventArgs e, String args)
+		protected override Task OnInitializeAsync(IActivatedEventArgs args)
+		{
+            EventAggregator = new EventAggregator();
+
+            Container.RegisterInstance<INavigationService>(NavigationService);
+            Container.RegisterInstance<ISessionStateService>(SessionStateService);
+			Container.RegisterInstance<IEventAggregator>(EventAggregator);
+			Container.RegisterInstance<IResourceLoader>(new ResourceLoaderAdapter(new ResourceLoader()));
+
+			// Register repositories
+			Container.RegisterType<ICallbackQueue, CallbackQueue>(new ContainerControlledLifetimeManager());
+
+			// Register child view models
+
+
+			return base.OnInitializeAsync(args);
+		}
+
+		private void Initialize(IActivatedEventArgs e, String args)
         {
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                this.DebugSettings.EnableFrameRateCounter = false;
+                //this.DebugSettings.EnableFrameRateCounter = false;
             }
 #endif
             //Start linphone
@@ -197,6 +250,7 @@ namespace Linphone
                     if (args.StartsWith("chat"))
                     {
                         var sipAddr = args.Split('=')[1];
+                        // TODO: Please replace with Prism equiavalent
                         rootFrame.Navigate(typeof(Views.Chat), sipAddr);
                     }
                     else
@@ -246,17 +300,13 @@ namespace Linphone
         /// without knowing whether the application will be terminated or resumed with the contents
         /// of memory still intact.
         /// </summary>
-        /// <param name="sender">The source of the suspend request.</param>
-        /// <param name="e">Details about the suspend request.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
-        {
-            var deferral = e.SuspendingOperation.GetDeferral();
-
+        protected override Task OnSuspendingApplicationAsync()
+		{
             //TODO: Save application state and stop any background activity
             DisableRegisteration();
 
-            deferral.Complete();
-        }
+            return Task.CompletedTask;
+		}
 
         private static void DisableRegisteration()
         {
@@ -283,27 +333,5 @@ namespace Linphone
             }
         }
 
-        public void CallIncoming(Call call)
-        {
-            if (acceptCall)
-            {
-                if (sipAddress != "")
-                {
-                    Address addr = LinphoneManager.Instance.Core.InterpretUrl(sipAddress);
-                    if (addr != null && addr.AsStringUriOnly().Equals(call.RemoteAddress.AsStringUriOnly()))
-                    {
-                        call.Accept();
-                        List<String> parameters = new List<String>();
-                        parameters.Add(call.RemoteAddress.AsString());
-                        rootFrame.Navigate(typeof(Views.InCall), parameters);
-                        acceptCall = false;
-                    }
-                }
-            }
-            else
-            {
-                rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
-            }
-        }
     }
 }
