@@ -250,7 +250,9 @@ namespace Linphone
             if (CloseApp) return;
 
             _logger.Information("App_CloseRequested raised omg !!");
-            
+
+            var differal = e.GetDeferral();
+
             e.Handled = true;
             
             CloseApp = true;
@@ -261,6 +263,9 @@ namespace Linphone
             if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
             {
                 DisableRegisteration();
+                
+                differal.Complete();
+                
                 Current.Exit();
             }
         }
