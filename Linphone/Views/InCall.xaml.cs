@@ -211,7 +211,7 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
                 Contact.Text = calledNumber;
 
                 // HotPoint #3
-                Browser.Source = CallFlowControl.Instance.BuildInCallUri();
+                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallFlowControl.Instance.CallContext.CallId}");
 
                 if (calledNumber != null && calledNumber.Length > 0) {
                     // ContactManager cm = ContactManager.Instance;
