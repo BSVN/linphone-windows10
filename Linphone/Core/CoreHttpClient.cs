@@ -183,6 +183,27 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentInfoByUserId(string userId)
+        {
+            try
+            {
+                _logger.Information("Attemting to query sip settings for agent using user id: {UserId}.", userId);
+
+                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Operators/UserId/{userId}");
+
+                OperatorsQueryServiceGetByExternalIdResponse deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<OperatorsQueryServiceGetByExternalIdResponse>();
+
+                _logger.Information("Attemting to retrieved sip settings with payload: {Payload}.", deserializedResponse.SerializeToJson());
+
+                return deserializedResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error while getting sip settings from server.");
+                throw ex;
+            }
+        }
+
         public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentInfo(string sipUsername)
         {
             try

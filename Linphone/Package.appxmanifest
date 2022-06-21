@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"  xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"  xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2" IgnorableNamespaces="uap mp uap3 uap4 uap2">
-	<Identity Name="Yar" Publisher="CN=2D80E0B6-DE43-45FF-97F7-D17E115F1D12" Version="1.1.18.0" />
+	<Identity Name="Yar" Publisher="CN=2D80E0B6-DE43-45FF-97F7-D17E115F1D12" Version="1.1.20.0" />
 	<mp:PhoneIdentity PhoneProductId="ed47fa26-a45b-4bda-82e1-cdc792d1d9bd" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 	<Properties>
 		<DisplayName>Linphone</DisplayName>

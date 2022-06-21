@@ -215,6 +215,7 @@
     <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
     <Compile Include="Presentation.Dto\Infrastructure.cs" />
+    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetByExternalIdResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">

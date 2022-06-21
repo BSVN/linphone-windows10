@@ -332,6 +332,19 @@ namespace BelledonneCommunications.Linphone.Core
         }
 
 
+        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentSettingByUserId(string userId)
+        {
+            try
+            {
+                return await _coreClient.GetAgentInfoByUserId(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while getting settings for the agent by id.");
+                return null;
+            }
+        }
+
         private readonly CoreHttpClient _coreClient;
         private readonly ILogger _logger;
     }
@@ -369,6 +382,11 @@ namespace BelledonneCommunications.Linphone.Core
         public CallState CallState { get; set; }
 
         public CallDirection Direction { get; set; }
+
+        public CallContext()
+        {
+            CallState = CallState.Ready;
+        }
 
         internal void Reset()
         {
