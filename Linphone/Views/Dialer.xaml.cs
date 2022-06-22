@@ -351,9 +351,9 @@ namespace Linphone.Views
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-                LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
-
                 await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
+                
+                LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
         }
 
