@@ -32,6 +32,9 @@ using BelledonneCommunications.Linphone.Core;
 using Serilog;
 using System.Threading.Tasks;
 using BelledonneCommunications.Linphone.Presentation.Dto;
+using System.Text.RegularExpressions;
+using System.Linq;
+using System.Text;
 
 namespace Linphone.Views
 {
@@ -41,6 +44,7 @@ namespace Linphone.Views
         private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
         private const string SELLERS_SERVICE_PHONENUMBER = "99971";
         private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
+        private static int UserInfoRetryLimit = 4;
 
         public Dialer()
         {
@@ -72,7 +76,7 @@ namespace Linphone.Views
                 else if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break)
                 {
                     AgentStatus.SelectedValue = OnBreakAgentComboItem;
-                }               
+                }
 
                 AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
             }
@@ -336,7 +340,7 @@ namespace Linphone.Views
                 if (OutgoingChannel.SelectedIndex == 0)
                 {
                     inboundService = HEAD_OF_HOUSEHOLD_SERVICE;
-                }   
+                }
                 else
                 {
                     inboundService = SELLERS_SERVICE_PHONENUMBER;
@@ -453,8 +457,15 @@ namespace Linphone.Views
             }
         }
 
+        public static String StripUnicodeCharactersFromString(string inputValue)
+        {
+            return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
+        }
+
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
+            _logger.Information("Browser path: {Path}.", sender.Source.AbsolutePath);
+
             // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
@@ -469,18 +480,88 @@ namespace Linphone.Views
 
                 Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
             }
+            else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == true)
+            {
+                if (string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.SipPhoneNumber))
+                {
+                    _logger.Information("Backup solution for loading sip settings.");
+
+                    string html = await Browser.CoreWebView2.ExecuteScriptAsync("document.body.outerHTML");
+                    string pattern = "\\\\u003Cinput\\s*name=\\\\\"Username\\\\\"\\s*type=\\\\\"hidden\\\\\"\\s*value=\\\\\"(\\w|-)*\\\\\">";
+
+                    Regex regex = new Regex(pattern);
+                    MatchCollection matches = regex.Matches(html);
+                    Match match = matches.FirstOrDefault();
+                    string a = StripUnicodeCharactersFromString(html);
+                    
+                    if (match != null)
+                    {
+                        var matchedValue = "";
+                        try
+                        {
+                            matchedValue = match.Value;
+                            matchedValue = matchedValue.Replace(" ", "").Replace("\\u003Cinput name=\\\"Username\\\" type=\\\"hidden\\\" value=\\\"".Replace(" ", ""), "");
+                            matchedValue = matchedValue.Replace("\\\">", "");
+                            matchedValue = matchedValue.Trim();
+                        }
+                        catch(Exception ex)
+                        {
+                            _logger.Error(ex, "Backup solution for loading sip setting is not working at all !.");
+                        }
+
+                        var userSettings = await CallFlowControl.Instance.GetAgentSettingByUserId(matchedValue);
+                        CallFlowControl.Instance.AgentProfile.SipPhoneNumber = userSettings.Data.SipProfile.Username;
+
+                        LoadSipSettings(userSettings.Data.SipProfile);
+
+                        AgentStatus.IsEnabled = true;
+
+                        await AgentStatus.Dispatcher.RunIdleAsync(P =>
+                        {
+                            AgentStatus.SelectedIndex = 0;
+                        });
+                    }
+                    else
+                    {
+                        _logger.Error("Our backup solution has been fucked up !!!.");
+                    }
+                }
+            }
             else if (sender.Source.AbsolutePath.Contains("/api/Operators/UserInfo"))
             {
                 // Literally کثافتکاری
                 // Todo: Interactions with Browser should be revised.
+                // This try and error may not works in some ways. i placed another backup solution for loading sip settings on Dashboard navigation completion.
                 try
                 {
-                    var html = await Browser.CoreWebView2.ExecuteScriptAsync("document.body.outerHTML");
-                    string content = html.Substring(html.IndexOf("sipProfile"));
-                    content = content.Substring(content.IndexOf("username"));
-                    content = content.Substring(content.IndexOf(":") + 1);
+                    if (UserInfoRetryLimit == 0)
+                    {
+                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+                        return;
+                    }
 
-                    CallFlowControl.Instance.AgentProfile.SipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
+                    string html = "";
+                    string sipPhoneNumber = "";
+
+                    try
+                    {
+                        html = await Browser.CoreWebView2.ExecuteScriptAsync("document.body.outerHTML");
+                        string content = html.Substring(html.IndexOf("sipProfile"));
+                        content = content.Substring(content.IndexOf("username"));
+                        content = content.Substring(content.IndexOf(":") + 1);
+                        sipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "UserInfo parsing problem.");
+                        _logger.Error("Loaded Html content: {Html}", html);
+
+                        UserInfoRetryLimit -= 1;
+                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+                        return;
+                    }
+
+                    CallFlowControl.Instance.AgentProfile.SipPhoneNumber = sipPhoneNumber;
 
                     LoadSipSettings();
 
@@ -506,6 +587,45 @@ namespace Linphone.Views
             {
                 UpdateSettings();
             });
+        }
+
+        private async void LoadSipSettings(SipProfileViewModel sipProfileViewModel)
+        {
+            await LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+            {
+                UpdateSettings(sipProfileViewModel);
+            });
+        }
+
+        private async void UpdateSettings(SipProfileViewModel sipProfileViewModel)
+        {
+            try
+            {
+                _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                {
+                    SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
+
+                    settings.Load();
+
+                    settings.Username = string.IsNullOrWhiteSpace(sipProfileViewModel.Username) ? "" : sipProfileViewModel.Username;
+                    settings.UserId = string.IsNullOrWhiteSpace(sipProfileViewModel.UserId) ? "" : sipProfileViewModel.UserId;
+                    settings.Password = string.IsNullOrWhiteSpace(sipProfileViewModel.Password) ? "" : sipProfileViewModel.Password;
+                    settings.Domain = string.IsNullOrWhiteSpace(sipProfileViewModel.Domain) ? "10.19.82.3" : sipProfileViewModel.Domain;
+                    settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
+                    settings.OutboundProxy = settings.OutboundProxy;
+                    settings.DisplayName = string.IsNullOrWhiteSpace(sipProfileViewModel.Username) ? "" : sipProfileViewModel.Username;
+                    settings.Transports = (sipProfileViewModel.Protocol == 0) ? "TCP" : sipProfileViewModel.Protocol.ToString("g");
+                    settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
+                    settings.AVPF = settings.AVPF;
+                    settings.ICE = settings.ICE;
+
+                    settings.Save();
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while updating agent settings.");
+            }
         }
 
         private async void UpdateSettings()

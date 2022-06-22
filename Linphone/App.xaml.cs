@@ -291,12 +291,6 @@ namespace Linphone
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             _logger.Debug("OnSuspending.");
-            //var deferral = e.SuspendingOperation.GetDeferral();
-
-            ////TODO: Save application state and stop any background activity
-            //DisableRegisteration();
-
-            //deferral.Complete();
         }
 
         private static void DisableRegisteration()

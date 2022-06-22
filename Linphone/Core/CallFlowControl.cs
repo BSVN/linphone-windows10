@@ -4,12 +4,11 @@ using Linphone.Views;
 using Serilog;
 using System;
 using System.Threading.Tasks;
-using System.Web;
-using Windows.Storage;
 
 namespace BelledonneCommunications.Linphone.Core
 {
-    // Todo: Mention: Sip login on shayan side, means that "I am ready for accept incoming calls" and does nothing to outgoing calls.
+    // Mention: Sip login on shayan side, means that "I am ready for accept incoming calls" and does nothing to outgoing calls.
+    // Todo: Draw and double check state transition on the phone events to prevent unpredicted situations.
     internal class CallFlowControl
     {
         private static readonly CallFlowControl _instance = new CallFlowControl();
@@ -21,11 +20,14 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public PhoneProfile AgentProfile { get; private set; }
+
+        public CallContext CallContext { get; private set; }
+
         private CallFlowControl()
         {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            object settingValue = localSettings.Values["PanelUrl"];
-            string panelBaseUrl = settingValue == null ? "http://10.19.82.133:9012" : settingValue as string;
+            // Todo: Reading this from app.config is so much strightforward.
+            string panelBaseUrl = "http://10.19.82.133:9011";
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
@@ -34,6 +36,12 @@ namespace BelledonneCommunications.Linphone.Core
             AgentProfile = new PhoneProfile(panelBaseUrl);
         }
 
+        /// <summary>
+        /// Initiate an incoming call by submitting a record.
+        /// </summary>
+        /// <param name="callerPhoneNumber">Either a customer's phonenumber or another operator's phonenumber (in inter-callcenter call scenario).</param>
+        /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
+        /// <returns></returns>
         public async Task<CallsCommandServiceInitiateIncomingResponse> InitiateIncomingCallAsync(string callerPhoneNumber, string inboundService)
         {
             try
@@ -67,9 +75,15 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
+        /// <summary>
+        /// Initiate an outgoing call by submitting a record.
+        /// </summary>
+        /// <param name="calleePhoneNumber">Either a customer phonenumber or inter-callcenter phonenumber.</param>
+        /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
+        /// <returns></returns>
         public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string calleePhoneNumber, string inboundService)
         {
+            // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
             try
             {
                 _logger.Information("Initiation outgoing call to: {CallePhoneNumber}.", calleePhoneNumber);
@@ -100,6 +114,9 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        /// <summary>
+        /// Send established message of the current call.
+        /// </summary>
         public void CallEstablished()
         {
             try
@@ -121,6 +138,9 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        /// <summary>
+        /// Update state of the call on declining.
+        /// </summary>
         public void IncomingCallDeclined()
         {
             _logger.Information("Incoming call declined by agent.");
@@ -128,6 +148,10 @@ namespace BelledonneCommunications.Linphone.Core
             CallContext.CallState = CallState.DeclinedByAgent;
         }
 
+        /// <summary>
+        /// Do post-termination actions for the current call.
+        /// </summary>
+        /// <returns>Task of async actions.</returns>
         public async Task TerminateCall()
         {
             // Call missed by caller departure.
@@ -166,6 +190,8 @@ namespace BelledonneCommunications.Linphone.Core
                     {
                         AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
                     }
+
+                    CallContext.Reset();
                 }
                 catch (Exception ex)
                 {
@@ -226,22 +252,14 @@ namespace BelledonneCommunications.Linphone.Core
             else
             {
                 _logger.Information("Unexpected call termination situation, CallContext: {CallContext}.", CallContext.SerializeToJson());
+                CallContext.Reset();
             }
         }
 
-        public void HangUpByAgent()
-        {
-            _logger.Information("Agent has ended the call.");
-
-            //CallContext.CallState = CallState.AgentHangUp;
-        }
-
-        public Uri BuildInCallUri()
-        {
-            var inCallUri = $"{AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
-            return new Uri(inCallUri);
-        }
-
+        /// <summary>
+        /// Get sip settings of the current agent.
+        /// </summary>
+        /// <returns>Agent's sip settings.</returns>
         public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentSettings()
         {
             try
@@ -255,6 +273,11 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        /// <summary>
+        /// Notify agent status change to the telephony system and the phone's back-end service.
+        /// </summary>
+        /// <param name="status">New state of the agent.</param>
+        /// <returns>Determines whether the update was successful or not.</returns>
         public async Task<bool> UpdateAgentStatusAsync(AgentStatus status)
         {
             try
@@ -309,9 +332,20 @@ namespace BelledonneCommunications.Linphone.Core
         }
 
 
-        public PhoneProfile AgentProfile { get; private set; }
-        public CallContext CallContext { get; private set; }
-        private CoreHttpClient _coreClient;
+        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentSettingByUserId(string userId)
+        {
+            try
+            {
+                return await _coreClient.GetAgentInfoByUserId(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while getting settings for the agent by id.");
+                return null;
+            }
+        }
+
+        private readonly CoreHttpClient _coreClient;
         private readonly ILogger _logger;
     }
 
@@ -345,9 +379,14 @@ namespace BelledonneCommunications.Linphone.Core
 
         public Guid CallId { get; set; }
 
-        public CallState CallState { get; set; } = CallState.Ready;
+        public CallState CallState { get; set; }
 
         public CallDirection Direction { get; set; }
+
+        public CallContext()
+        {
+            CallState = CallState.Ready;
+        }
 
         internal void Reset()
         {
