@@ -195,6 +195,12 @@
       <DependentUpon>TextBoxChatBubble.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\CoreHttpClient.cs" />
+    <Compile Include="Dialogs\SettingsPasswordDialog.xaml.cs">
+      <DependentUpon>SettingsPasswordDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\MicrophonePermissionRequestDialog.xaml.cs">
+      <DependentUpon>MicrophonePermissionRequestDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="Model\AlphaKeyGroup.cs" />
     <Compile Include="Model\ContactItem.cs" />
@@ -218,6 +224,7 @@
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetByExternalIdResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
+    <Compile Include="Utility.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
@@ -362,6 +369,14 @@
     <Page Include="Controls\TextBoxChatBubble.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\SettingsPasswordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\MicrophonePermissionRequestDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\Light.xaml">
       <SubType>Designer</SubType>

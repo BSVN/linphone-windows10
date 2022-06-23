@@ -14,24 +14,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone;
 using BelledonneCommunications.Linphone.Core;
-using BelledonneCommunications.Linphone.Presentation.Dto;
-using Linphone;
+using BelledonneCommunications.Linphone.Dialogs;
 using Linphone.Model;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Devices.Sensors;
 using Windows.Graphics.Display;
 using Windows.Media.Capture;
-using Windows.Phone.Media.Devices;
-using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
@@ -40,7 +35,8 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
     public partial class InCall : Page {
         private DispatcherTimer oneSecondTimer;
         private Timer fadeTimer;
@@ -104,8 +100,8 @@ namespace Linphone.Views {
         //----------------------------------------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------------------------
 
-#region Buttons
-private async void buttons_VideoClick(object sender, bool isVideoOn) {
+        #region Buttons ...
+        private async void buttons_VideoClick(object sender, bool isVideoOn) {
             // Workaround to pop the camera permission window
             await openCameraPopup();
 
@@ -194,9 +190,18 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
         }
         #endregion
 
-        protected override void OnNavigatedTo(NavigationEventArgs nee) {
-            List<string> parameters;
+        protected override async void OnNavigatedTo(NavigationEventArgs nee) 
+        {
             base.OnNavigatedTo(nee);
+
+            if (!await Utility.IsMicrophoneAvailable())
+            {
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
+            }
+
+            List<string> parameters;
             parameters = nee.Parameter as List<string>;
 
             LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;

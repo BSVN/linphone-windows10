@@ -24,7 +24,6 @@ using Linphone.Model;
 using System.Diagnostics;
 using Windows.UI.Core;
 using System.Collections.Generic;
-using System.Net.Http;
 using BelledonneCommunications.Linphone;
 using Serilog;
 using BelledonneCommunications.Linphone.Core;
@@ -87,6 +86,7 @@ namespace Linphone
 
         public async void CallEnded(Call call)
         {
+            bool wasAnOutgoingCall = CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing;
             if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("A command call has been ended.");
@@ -103,6 +103,12 @@ namespace Linphone
             else
             {
                 await CallFlowControl.Instance.TerminateCall();
+            }
+
+            if (wasAnOutgoingCall)
+            {
+                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                    CallFlowControl.Instance.JoinIntoIncomingCallQueue();
             }
 
             if (rootFrame.CanGoBack)
@@ -228,7 +234,7 @@ namespace Linphone
             }
 
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += App_CloseRequested;
-
+            //Window.Current.VisibilityChanged += new WindowVisibilityChangedEventHandler(WindowVisibilityChanged);
             Window.Current.Activate();
 
             DisableRegisteration();
@@ -267,8 +273,10 @@ namespace Linphone
                 
                 Current.Exit();
             }
-
-            differal.Complete();
+            else
+            {
+                differal.Complete();
+            }
         }
 
         /// <summary>

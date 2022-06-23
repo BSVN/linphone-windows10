@@ -45,6 +45,7 @@
 		<uap:Capability Name="phoneCall"/>
 		<uap2:Capability Name="phoneCallHistoryPublic"/>
 		<uap:Capability Name="userAccountInformation"/>
+		<uap3:Capability Name="backgroundMediaPlayback"/>
 		<DeviceCapability Name="microphone" />
 		<DeviceCapability Name="webcam" />
 	</Capabilities>

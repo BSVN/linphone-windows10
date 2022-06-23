@@ -35,6 +35,8 @@ using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
+using BelledonneCommunications.Linphone.Dialogs;
+using BelledonneCommunications.Linphone;
 
 namespace Linphone.Views
 {
@@ -218,9 +220,16 @@ namespace Linphone.Views
             UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
+            if (!await Utility.IsMicrophoneAvailable())
+            {
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
+            }
 
             LinphoneManager.Instance.CoreDispatcher = Dispatcher;
             LinphoneManager.Instance.RegistrationChanged += RegistrationChanged;
@@ -328,6 +337,32 @@ namespace Linphone.Views
                 return;
             }
 
+            if (CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
+            {
+                CallFlowControl.Instance.LeaveIncomingCallQueue();
+                TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+                while (true)
+                {
+                    timeout = timeout - TimeSpan.FromMilliseconds(500);
+                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(500);
+                }
+            }
+
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                _logger.Information("Cant start a call because of a still running command.");
+                _logger.Information("Critical Situation.");
+
+                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+                
+                return;
+            }
+
             if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
             {
                 _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
@@ -356,7 +391,7 @@ namespace Linphone.Views
                 }
 
                 await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
-                
+
                 LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
         }
@@ -399,14 +434,15 @@ namespace Linphone.Views
 
         private async void settings_Click(object sender, RoutedEventArgs e)
         {
-            var result = await AdminPasswordDialog.ShowAsync();
-            if (AdminPassword.Password == "Noei@Sip#")
+            var passwordDialog = new SettingsPasswordDialog();
+            await passwordDialog.ShowAsync();
+            if (passwordDialog.Password == "Noei@Sip#")
             {
                 Frame.Navigate(typeof(Views.Settings), null);
             }
             else
             {
-                _logger.Information("Unsuccessful attempt to enter settings password with: {Password}", AdminPassword.Password);
+                _logger.Information("Unsuccessful attempt to enter settings password with: {Password}", passwordDialog.Password);
             }
         }
 
@@ -493,7 +529,7 @@ namespace Linphone.Views
                     MatchCollection matches = regex.Matches(html);
                     Match match = matches.FirstOrDefault();
                     string a = StripUnicodeCharactersFromString(html);
-                    
+
                     if (match != null)
                     {
                         var matchedValue = "";
@@ -504,7 +540,7 @@ namespace Linphone.Views
                             matchedValue = matchedValue.Replace("\\\">", "");
                             matchedValue = matchedValue.Trim();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             _logger.Error(ex, "Backup solution for loading sip setting is not working at all !.");
                         }
@@ -527,6 +563,7 @@ namespace Linphone.Views
                     }
                 }
             }
+            // TODO: It will never works on first try in production !!! 
             else if (sender.Source.AbsolutePath.Contains("/api/Operators/UserInfo"))
             {
                 // Literally کثافتکاری
@@ -550,6 +587,7 @@ namespace Linphone.Views
                         content = content.Substring(content.IndexOf("username"));
                         content = content.Substring(content.IndexOf(":") + 1);
                         sipPhoneNumber = content.Substring(0, content.IndexOf(",")).Replace("\"", "").Replace("\\", "");
+                        _logger.Information("Successfully catched the sip number.");
                     }
                     catch (Exception ex)
                     {

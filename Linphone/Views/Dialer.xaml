@@ -363,26 +363,6 @@
                     <AppBarButton FlowDirection="RightToLeft" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Label="درباره ما" Click="about_Click"/>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
-
-            <ContentDialog x:Name="AdminPasswordDialog"
-                           FlowDirection="RightToLeft"
-                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
-                           PrimaryButtonText="ورود">
-                <Grid Width="200" VerticalAlignment="Center">
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,10,0,0">
-                        <TextBlock FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="رمز عبور مدیر"></TextBlock>
-                        <PasswordBox x:Name="AdminPassword"></PasswordBox>
-                        <TextBlock TextWrapping="Wrap" MaxLines="2" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Foreground="DimGray">
-                               برای اعمال تغییر در تنظیمات نیاز به دسترسی مدیر دارید.
-                        </TextBlock>
-                    </StackPanel>
-                </Grid>
-            </ContentDialog>
         </Grid>
 
         <webui:WebView2 x:Name="Browser" Grid.Column="1"                        

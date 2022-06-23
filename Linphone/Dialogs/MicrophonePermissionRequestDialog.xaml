@@ -1,0 +1,43 @@
+﻿<ContentDialog
+    x:Class="BelledonneCommunications.Linphone.Dialogs.MicrophonePermissionRequestDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BelledonneCommunications.Linphone.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FlowDirection="RightToLeft"
+    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    DefaultButton="Primary"
+    PrimaryButtonText="متوجه شدم">
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <FontIcon Margin="0 0 10 0" Foreground="Orange" FontSize="50" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7BA;"/>
+                <TextBlock VerticalAlignment="Bottom" FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="اشکال در دسترسی به میکروفون"/>
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+    <Grid VerticalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,10,0,0">
+            <TextBlock Margin="0 5 0 0"
+                       MaxLines="3"
+                       TextWrapping="Wrap"
+                       FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" 
+                       FontSize="15"
+                       LineHeight="40"
+                       Foreground="Black">
+                <Run>1. لطفاً از اتصال میکروفون اطمینان حاصل نمائید.</Run>
+                <LineBreak/><Run>2. مجوز دسترسی به میکروفون را برای</Run>
+                            <Run Foreground="Red">"</Run><Run Foreground="Green">سامانه پشتیبانی کلابرگ الکترونیک</Run><Run Foreground="Red">"</Run>
+                <LineBreak/><Run>بررسی و از فعال بودن آن اطمینان حاصل نمائید.</Run>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</ContentDialog>

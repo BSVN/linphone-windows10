@@ -1,6 +1,7 @@
 ﻿using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone.Model;
 using Linphone.Views;
+using PCLAppConfig;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -26,8 +27,7 @@ namespace BelledonneCommunications.Linphone.Core
 
         private CallFlowControl()
         {
-            // Todo: Reading this from app.config is so much strightforward.
-            string panelBaseUrl = "http://10.19.82.133:9011";
+            string panelBaseUrl = ConfigurationManager.AppSettings["PanelAddress"];
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
@@ -307,16 +307,15 @@ namespace BelledonneCommunications.Linphone.Core
                 switch (status)
                 {
                     case AgentStatus.Ready:
-                        CallContext.Direction = CallDirection.Command;
-                        LinphoneManager.Instance.NewOutgoingCall("agent-login");
+                        JoinIntoIncomingCallQueue();
                         break;
                     case AgentStatus.Break:
-                        CallContext.Direction = CallDirection.Command;
-                        LinphoneManager.Instance.NewOutgoingCall("agent-on-break");
+                        LeaveIncomingCallQueue();
                         break;
                     case AgentStatus.Offline:
                         CallContext.Direction = CallDirection.Command;
                         LinphoneManager.Instance.NewOutgoingCall("agent-logoff");
+                        AgentProfile.JoinedIntoIncomingCallQueue = false;
                         break;
                 }
 
@@ -331,6 +330,19 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public void LeaveIncomingCallQueue()
+        {
+            CallContext.Direction = CallDirection.Command;
+            LinphoneManager.Instance.NewOutgoingCall("agent-on-break");
+            AgentProfile.JoinedIntoIncomingCallQueue = false;
+        }
+
+        public void JoinIntoIncomingCallQueue()
+        {
+            CallContext.Direction = CallDirection.Command;
+            LinphoneManager.Instance.NewOutgoingCall("agent-login");
+            AgentProfile.JoinedIntoIncomingCallQueue = true;
+        }
 
         public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentSettingByUserId(string userId)
         {
@@ -354,6 +366,7 @@ namespace BelledonneCommunications.Linphone.Core
         public PhoneProfile(string panelBaseUrl)
         {
             PanelBaseUrl = panelBaseUrl;
+            JoinedIntoIncomingCallQueue = false;
         }
 
         public string OutgoingCallChannelName { get; set; }
@@ -363,6 +376,8 @@ namespace BelledonneCommunications.Linphone.Core
         public string SipPhoneNumber { get; set; }
 
         public string BrowsingHistory { get; set; }
+
+        public bool JoinedIntoIncomingCallQueue { get; set; }
 
         public bool IsLoggedIn { get; set; }
         

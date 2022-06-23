@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using BelledonneCommunications.Linphone.Core;
 using Linphone;
 using Linphone.Model;
+using PCLAppConfig;
 using System.Collections.Generic;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
@@ -30,7 +31,6 @@ namespace Linphone.Views {
 
     public partial class AccountSettings : Page {
         private SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
         private bool saveSettingsOnLeave = false;
         private bool linphoneAccount = false;
@@ -43,6 +43,7 @@ namespace Linphone.Views {
             SystemNavigationManager.GetForCurrentView().BackRequested += back_Click;
             
             _settings.Load();
+
             Username.Text = _settings.Username ?? "";
             UserId.Text = _settings.UserId ?? "";
             Password.Password = _settings.Password ?? "";
@@ -52,7 +53,7 @@ namespace Linphone.Views {
             DisplayName.Text = _settings.DisplayName ?? "";
             Expires.Text = _settings.Expires ?? "";
 
-            PanelUrl.Text = CallFlowControl.Instance.AgentProfile.PanelBaseUrl;
+            PanelAddress.Text = ConfigurationManager.AppSettings["PanelAddress"];
 
             List<string> transports = new List<string>
             {
@@ -74,8 +75,6 @@ namespace Linphone.Views {
                 }
                 Domain.Text = Domain.Text.Split(':')[0];
             }
-            
-            localSettings.Values["PanelUrl"] = PanelUrl.Text;
 
             _settings.Username = Username.Text;
             _settings.UserId = UserId.Text;

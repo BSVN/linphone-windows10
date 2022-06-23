@@ -22,6 +22,8 @@ using Windows.UI.Xaml;
 using Windows.UI.Core;
 using System.Collections.Generic;
 using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone;
+using BelledonneCommunications.Linphone.Dialogs;
 
 namespace Linphone.Views
 {
@@ -75,6 +77,13 @@ namespace Linphone.Views
         protected override async void OnNavigatedTo(NavigationEventArgs nee)
         {
             base.OnNavigatedTo(nee);
+
+            if (!await Utility.IsMicrophoneAvailable())
+            {
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
+            }
 
             if ((nee.Parameter as string).Contains(PHONE_ADDRESS_PREFIX))
             {
