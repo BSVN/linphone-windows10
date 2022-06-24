@@ -167,6 +167,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Commons\AddressExtensions.cs" />
+    <Compile Include="Commons\SipAccountSettingsManagerExtensions.cs" />
     <Compile Include="Core\CallFlowControl.cs" />
     <Compile Include="Controls\AddressBox.xaml.cs">
       <DependentUpon>AddressBox.xaml</DependentUpon>

@@ -15,6 +15,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using Linphone.Model;
 using PCLAppConfig;
 using System.Collections.Generic;
@@ -79,19 +80,17 @@ namespace Linphone.Views
                 Domain.Text = Domain.Text.Split(':')[0];
             }
 
-            _settings.Username = Username.Text;
-            _settings.UserId = UserId.Text;
-            _settings.Password = Password.Password;
-            _settings.Domain = Domain.Text;
-            _settings.Proxy = Proxy.Text;
-            _settings.OutboundProxy = OutboundProxy.IsOn;
-            _settings.DisplayName = DisplayName.Text;
-            _settings.Transports = Transport.SelectedItem.ToString();
-            _settings.Expires = Expires.Text;
-            _settings.AVPF = AVPF.IsOn;
-            _settings.ICE = IceSwitch.IsOn;
-
-            _settings.Save();
+            _settings.Update(username: Username.Text,
+                             userId: UserId.Text,
+                             password: Password.Password,
+                             domain: Domain.Text,
+                             proxy: Proxy.Text,
+                             outboundProxy: OutboundProxy.IsOn,
+                             displayName: DisplayName.Text,
+                             transports: Transport.SelectedItem.ToString(),
+                             expires: Expires.Text,
+                             aVPF: AVPF.IsOn,
+                             iCE: IceSwitch.IsOn);
 
             if (linphoneAccount)
             {

@@ -40,14 +40,8 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Linphone.Views
 {
-
     public sealed partial class Dialer : Page, INotifyPropertyChanged
     {
-        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
-        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
-        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
-        private static int UserInfoRetryLimit = 4;
-
         public Dialer()
         {
             this.InitializeComponent();
@@ -642,22 +636,7 @@ namespace Linphone.Views
                 _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
                 {
                     SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
-
-                    settings.Load();
-
-                    settings.Username = string.IsNullOrWhiteSpace(sipProfileViewModel.Username) ? "" : sipProfileViewModel.Username;
-                    settings.UserId = string.IsNullOrWhiteSpace(sipProfileViewModel.UserId) ? "" : sipProfileViewModel.UserId;
-                    settings.Password = string.IsNullOrWhiteSpace(sipProfileViewModel.Password) ? "" : sipProfileViewModel.Password;
-                    settings.Domain = string.IsNullOrWhiteSpace(sipProfileViewModel.Domain) ? "10.19.82.3" : sipProfileViewModel.Domain;
-                    settings.Proxy = string.IsNullOrWhiteSpace(settings.Proxy) ? "" : settings.Proxy;
-                    settings.OutboundProxy = settings.OutboundProxy;
-                    settings.DisplayName = string.IsNullOrWhiteSpace(sipProfileViewModel.Username) ? "" : sipProfileViewModel.Username;
-                    settings.Transports = (sipProfileViewModel.Protocol == 0) ? "TCP" : sipProfileViewModel.Protocol.ToString("g");
-                    settings.Expires = string.IsNullOrWhiteSpace(settings.Expires) ? "500" : settings.Expires;
-                    settings.AVPF = settings.AVPF;
-                    settings.ICE = settings.ICE;
-
-                    settings.Save();
+                    settings.Update(sipProfileViewModel);
                 });
             }
             catch (Exception ex)
@@ -766,6 +745,11 @@ namespace Linphone.Views
             }
         }
 
+
+        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
+        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
+        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
+        private static int UserInfoRetryLimit = 4;
 
         private readonly ILogger _logger;
         private ConnectionMultiplexer connectionMultiplexer;
