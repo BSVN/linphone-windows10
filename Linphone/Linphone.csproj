@@ -208,11 +208,13 @@
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
     <Compile Include="Model\Utils.cs" />
+    <Compile Include="NavigationService.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceGetByIdResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceInitiateIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceSubmitMissedIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceTerminateIncomingResponse.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
+    <Compile Include="ViewModels\DialerViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
@@ -463,11 +465,17 @@
     <PackageReference Include="BSN.Commons.PresentationInfrastructure">
       <Version>1.7.1</Version>
     </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.0.0-preview4</Version>
+    </PackageReference>
     <PackageReference Include="LinphoneSDK">
       <Version>5.1.36</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.ApplicationInsights">
-      <Version>2.16.0</Version>
+      <Version>2.20.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
+      <Version>6.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.11</Version>
@@ -481,11 +489,8 @@
     <PackageReference Include="Microsoft.Web.WebView2">
       <Version>1.0.1248-prerelease</Version>
     </PackageReference>
-    <PackageReference Include="Prism.Unity">
-      <Version>6.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="Prism.Windows">
-      <Version>6.3.0</Version>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Uwp.Managed">
+      <Version>2.0.1</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
       <Version>2.11.0</Version>

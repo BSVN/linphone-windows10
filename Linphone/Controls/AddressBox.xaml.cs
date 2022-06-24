@@ -23,10 +23,32 @@ namespace Linphone.Controls
 
     public partial class AddressBox : UserControl
     {
-        public String Text
+        public AddressBox()
         {
-            get { return address.Text; }
-            set {
+            InitializeComponent();
+            this.DataContext = this;
+        }
+
+		/// <summary>
+		/// The <see cref="DependencyProperty"/> backing <see cref="Text"/>.
+		/// </summary>
+		public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
+			nameof(Text),
+			typeof(string),
+			typeof(AddressBox),
+            new PropertyMetadata(default(string)));
+
+		/// <summary>
+		/// Gets or sets the <see cref="string"/> representing the text to display.
+		/// </summary>
+		public string Text
+		{
+            get
+            {
+                return (string)GetValue(TextProperty);
+            }
+            set
+            {
                 address.Text = value;
                 if(value.Length > 0)
                 {
@@ -35,14 +57,9 @@ namespace Linphone.Controls
                 {
                     Backspace.IsEnabled = false;
                 }
+                SetValue(TextProperty, value);
             }
-        }
-
-        public AddressBox()
-        {
-            InitializeComponent();
-            this.DataContext = this;
-        }
+		}
 
         private void backspace_Hold_1(object sender, RoutedEventArgs e)
         {

@@ -34,11 +34,13 @@ using System.Diagnostics;
 using Windows.UI.Popups;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data;
 using StackExchange.Redis;
+using BelledonneCommunications.Linphone.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace Linphone.Views
 {
 
-    public sealed partial class Dialer : Page, INotifyPropertyChanged
+    public sealed partial class Dialer : Page
     {
         // TODO: Please remove it, and use _settings
         ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
@@ -67,7 +69,7 @@ namespace Linphone.Views
             this.InitializeComponent();
             httpClient = new HttpClient();
 
-			DataContext = this;
+			DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
             ContactsManager contactsManager = ContactsManager.Instance;
             addressBox.KeyDown += (sender, args) =>
             {
@@ -76,74 +78,24 @@ namespace Linphone.Views
                     call_Click(null, null);
                 }
             };
+
         }
 
-        /// <summary>
-        /// Raises right after page unloading 
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
-        {
-            if (Browser.Source.OriginalString.Length > BrowserBaseUrl.Length)
-                BrowserCurrentUrlOffset = Browser.Source.OriginalString.Substring(BrowserBaseUrl.Length);
+        public DialerViewModel ViewModel => (DialerViewModel)DataContext;
 
-            base.OnNavigatingFrom(e); 
-        }
-
-        private int unreadMessageCount;
-        public int UnreadMessageCount
-        {
-            get
-            {
-                return unreadMessageCount;
-            }
-
-            set
-            {
-                unreadMessageCount = value;
-                if (unreadMessageCount > 0)
-                {
-                    unreadMessageText.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    unreadMessageText.Visibility = Visibility.Collapsed;
-                }
-
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs("UnreadMessageCount"));
-                }
-            }
-        }
-
-		private int missedCallCount;
-		public int MissedCallCount
+		protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
 		{
-			get
-			{
-				return missedCallCount;
-            }
+			base.OnNavigatingFrom(e);
+            ViewModel.OnNavigatingFrom(e);
+		}
 
-            set
-            {
-                missedCallCount = value;
-                if (missedCallCount > 0)
-                {
-                    MissedCallText.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    MissedCallText.Visibility = Visibility.Collapsed;
-                }
+		protected override void OnNavigatedTo(NavigationEventArgs e)
+		{
+			base.OnNavigatedTo(e);
+            ViewModel.OnNavigatedTo(e);
+		}
 
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MissedCallCount"));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void LogUploadProgressIndication(int offset, int total)
+		private void LogUploadProgressIndication(int offset, int total)
         {
             /* base.UIDispatcher.BeginInvoke(() =>
              {
@@ -153,111 +105,6 @@ namespace Linphone.Views
                      BugReportUploadProgressBar.Value = offset;
                  }
              });*/
-        }
-
-        private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
-        {
-            status.RefreshStatus();
-        }
-
-        private void MessageReceived(ChatRoom room, ChatMessage message)
-        {
-            UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
-        }
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            LinphoneManager.Instance.CoreDispatcher = Dispatcher;
-            LinphoneManager.Instance.RegistrationChanged += RegistrationChanged;
-            LinphoneManager.Instance.MessageReceived += MessageReceived;
-            LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;
-            status.RefreshStatus();
-            /*    if (e.NavigationMode == NavigationMode.New)
-                {
-                    if (BugCollector.HasExceptionToReport())
-                    {
-                        // Allow to report exceptions before the creation of the core in case the problem is in there
-                        CustomMessageBox reportIssueDialog = new CustomMessageBox()
-                        {
-                            Caption = AppResources.ReportCrashDialogCaption,
-                            Message = AppResources.ReportCrashDialogMessage,
-                            LeftButtonContent = AppResources.ReportCrash,
-                            RightButtonContent = AppResources.Close
-                        };
-
-                        reportIssueDialog.Dismissed += (s, ev) =>
-                        {
-                            switch (ev.Result)
-                            {
-                                case CustomMessageBoxResult.LeftButton:
-                                    BugReportUploadProgressBar.Minimum = 0;
-                                    BugReportUploadProgressBar.Maximum = 100;
-                                    BugReportUploadPopup.Visibility = Visibility.Visible;
-                                    LinphoneManager.Instance.LogUploadProgressIndicationEH += LogUploadProgressIndication;
-                                    LinphoneManager.Instance.LinphoneCore.UploadLogCollection();
-                                    break;
-                                case CustomMessageBoxResult.RightButton:
-                                    BugCollector.DeleteFile();
-                                    break;
-                            }
-                        };
-
-                        reportIssueDialog.Show();
-                    }
-                    else
-                    {
-                        BugReportUploadPopup.Visibility = Visibility.Collapsed;
-                    }
-                }*/
-
-            if (LinphoneManager.Instance.Core.CallsNb > 0)
-            {
-                Call call = LinphoneManager.Instance.Core.CurrentCall;
-                if( call != null){
-                    List<String> parameters = new List<String>();
-                    parameters.Add(call.RemoteAddress.AsStringUriOnly());
-                    Frame.Navigate(typeof(Views.InCall), parameters);
-                }
-            }
-
-            if (LinphoneManager.Instance.GetUnreadMessageCount() > 0)
-            {
-                UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
-            }
-
-            if (LinphoneManager.Instance.Core.MissedCallsCount > 0)
-            {
-                MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
-            }
-
-            if (e.Parameter is String && (e.Parameter as String)?.Length > 0 && e.NavigationMode != NavigationMode.Back)
-            {
-                String arguments = e.Parameter as String;
-                addressBox.Text = arguments;
-                try
-                {
-                    Address address = LinphoneManager.Instance.Core.InterpretUrl(e.Parameter as String);
-                    String sipAddressToCall = address.AsStringUriOnly();
-                    addressBox.Text = sipAddressToCall;
-                }
-                catch (Exception exception)
-                {
-                }
-            }
-        }
-
-        private void CallStateChanged(Call call, CallState state)
-        {
-            MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs nee)
-        {
-            base.OnNavigatedFrom(nee);
-            // LinphoneManager.Instance.LogUploadProgressIndicationEH -= LogUploadProgressIndication;
-            // BugReportUploadPopup.Visibility = Visibility.Collapsed;
         }
 
         private async void call_Click(object sender, RoutedEventArgs e)

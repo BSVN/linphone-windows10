@@ -4,12 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Linphone"
     xmlns:controls="using:Linphone.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:uwpcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
     xmlns:webui="using:Microsoft.UI.Xaml.Controls"
     Background="{ThemeResource AppBarBackgroundThemeBrush}"
+    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -27,7 +30,8 @@
 
             <controls:StatusBar 
             x:Name="status" 
-            Grid.Row="0" 
+            Grid.Row="0"
+            RefreshCommand="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
             Tapped="status_Tapped"/>
 
             <Grid x:Name="ContentPanel" Grid.Row="1">
@@ -43,6 +47,7 @@
                 Grid.Row="0"
                 Margin="12,0,0,0"
                 BorderThickness="0"
+                Text="{x:Bind ViewModel.AddressBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 FontSize="40"/>
 
                 <StackPanel 
@@ -359,6 +364,7 @@
         <webui:WebView2 x:Name="Browser" 
                         Grid.Column="1"
                         NavigationCompleted="Browser_NavigationCompleted"
-                        Loaded="Browser_Loaded"/>
+                        Loaded="Browser_Loaded"
+						Source="{Binding SourceUri}"/>
     </Grid>
 </Page>
