@@ -15,21 +15,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using BelledonneCommunications.Linphone.Core;
-using Linphone;
+using BelledonneCommunications.Linphone.Commons;
 using Linphone.Model;
 using PCLAppConfig;
 using System.Collections.Generic;
 using Windows.ApplicationModel.Resources;
-using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
 
-    public partial class AccountSettings : Page {
+    public partial class AccountSettings : Page
+    {
         private SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
 
         private bool saveSettingsOnLeave = false;
@@ -38,10 +38,11 @@ namespace Linphone.Views {
         /// <summary>
         /// Public constructor.
         /// </summary>
-        public AccountSettings() {
+        public AccountSettings()
+        {
             this.InitializeComponent();
             SystemNavigationManager.GetForCurrentView().BackRequested += back_Click;
-            
+
             _settings.Load();
 
             Username.Text = _settings.Username ?? "";
@@ -68,29 +69,31 @@ namespace Linphone.Views {
             IceSwitch.IsOn = (_settings.ICE != null) ? (bool)_settings.ICE : false;
         }
 
-        private void Save() {
-            if (Domain.Text.Contains(":")) {
-                if (Proxy.Text.Length == 0) {
+        private void Save()
+        {
+            if (Domain.Text.Contains(":"))
+            {
+                if (Proxy.Text.Length == 0)
+                {
                     Proxy.Text = Domain.Text;
                 }
                 Domain.Text = Domain.Text.Split(':')[0];
             }
 
-            _settings.Username = Username.Text;
-            _settings.UserId = UserId.Text;
-            _settings.Password = Password.Password;
-            _settings.Domain = Domain.Text;
-            _settings.Proxy = Proxy.Text;
-            _settings.OutboundProxy = OutboundProxy.IsOn;
-            _settings.DisplayName = DisplayName.Text;
-            _settings.Transports = Transport.SelectedItem.ToString();
-            _settings.Expires = Expires.Text;
-            _settings.AVPF = AVPF.IsOn;
-            _settings.ICE = IceSwitch.IsOn;
+            _settings.Update(username: Username.Text,
+                             userId: UserId.Text,
+                             password: Password.Password,
+                             domain: Domain.Text,
+                             proxy: Proxy.Text,
+                             outboundProxy: OutboundProxy.IsOn,
+                             displayName: DisplayName.Text,
+                             transports: Transport.SelectedItem.ToString(),
+                             expires: Expires.Text,
+                             aVPF: AVPF.IsOn,
+                             iCE: IceSwitch.IsOn);
 
-            _settings.Save();
-
-            if (linphoneAccount) {
+            if (linphoneAccount)
+            {
                 NetworkSettingsManager networkSettings = new NetworkSettingsManager();
                 networkSettings.Load();
                 networkSettings.MEncryption = "SRTP";
@@ -104,30 +107,38 @@ namespace Linphone.Views {
         /// <summary>
         /// Method called when the user is navigation away from this page
         /// </summary>
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e) {
-            if (saveSettingsOnLeave) {
-                LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) => {
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            if (saveSettingsOnLeave)
+            {
+                LinphoneManager.Instance.CoreDispatcher.RunIdleAsync((args) =>
+                {
                     Save();
                 });
             }
             base.OnNavigatingFrom(e);
         }
 
-        private void delete_Click_1(object sender, RoutedEventArgs e) {
+        private void delete_Click_1(object sender, RoutedEventArgs e)
+        {
             _settings.Delete();
-            if (Frame.CanGoBack) {
+            if (Frame.CanGoBack)
+            {
                 Frame.GoBack();
             }
         }
 
-        private void save_Click_1(object sender, RoutedEventArgs e) {
+        private void save_Click_1(object sender, RoutedEventArgs e)
+        {
             saveSettingsOnLeave = true;
-            if (Frame.CanGoBack) {
+            if (Frame.CanGoBack)
+            {
                 Frame.GoBack();
             }
         }
 
-        private void linphone_Click_1(object sender, RoutedEventArgs e) {
+        private void linphone_Click_1(object sender, RoutedEventArgs e)
+        {
             Domain.Text = "sip.linphone.org";
             Transport.SelectedItem = ResourceLoader.GetForCurrentView().GetString("TransportTLS");
             Proxy.Text = "sip.linphone.org";
@@ -138,8 +149,10 @@ namespace Linphone.Views {
             linphoneAccount = true;
         }
 
-        private void back_Click(object sender, BackRequestedEventArgs e) {
-            if (Frame.CanGoBack) {
+        private void back_Click(object sender, BackRequestedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+            {
                 e.Handled = true;
                 Frame.GoBack();
             }

@@ -166,6 +166,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Commons\AddressExtensions.cs" />
+    <Compile Include="Commons\SipAccountSettingsManagerExtensions.cs" />
     <Compile Include="Core\CallFlowControl.cs" />
     <Compile Include="Controls\AddressBox.xaml.cs">
       <DependentUpon>AddressBox.xaml</DependentUpon>
@@ -201,7 +203,7 @@
     <Compile Include="Dialogs\MicrophonePermissionRequestDialog.xaml.cs">
       <DependentUpon>MicrophonePermissionRequestDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Logger.cs" />
+    <Compile Include="Commons\Logger.cs" />
     <Compile Include="Model\AlphaKeyGroup.cs" />
     <Compile Include="Model\ContactItem.cs" />
     <Compile Include="Model\BaseModel.cs" />
@@ -215,7 +217,6 @@
     <Compile Include="Model\InCallModel.cs" />
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
-    <Compile Include="Model\Utils.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
@@ -224,7 +225,7 @@
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetByExternalIdResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
-    <Compile Include="Utility.cs" />
+    <Compile Include="Commons\Utility.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
@@ -262,7 +263,7 @@
     <Compile Include="Views\History.xaml.cs">
       <DependentUpon>History.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HttpContentExtensions.cs" />
+    <Compile Include="Commons\HttpContentExtensions.cs" />
     <Compile Include="Views\InCall.xaml.cs">
       <DependentUpon>InCall.xaml</DependentUpon>
     </Compile>

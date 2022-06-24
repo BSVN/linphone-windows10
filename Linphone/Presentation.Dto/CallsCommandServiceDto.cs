@@ -35,7 +35,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         public string AgentPhoneNumber { get; set; }
 
         public string CalleePhoneNumber { get; set; }
-        
+
         public string InboundService { get; set; }
     }
 
@@ -46,7 +46,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         public string CallerPhoneNumber { get; set; }
 
         public string AgentPhoneNumber { get; set; }
-        
+
         public string InboundService { get; set; }
     }
 

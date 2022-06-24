@@ -20,7 +20,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Linphone.Views
+namespace BelledonneCommunications.Linphone.Commons
 {
     public static class HttpContentExtensions
     {
@@ -43,7 +43,7 @@ namespace Linphone.Views
     {
         public static string SerializeToJson(this object obj)
         {
-            return System.Text.Json.JsonSerializer.Serialize(obj);
+            return JsonSerializer.Serialize(obj);
         }
     }
 }

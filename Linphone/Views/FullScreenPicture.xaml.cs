@@ -19,6 +19,7 @@ using Linphone.Model;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Controls;
+using BelledonneCommunications.Linphone.Commons;
 
 namespace Linphone.Views {
     /// <summary>
@@ -36,7 +37,7 @@ namespace Linphone.Views {
 
             if (e.Parameter is String) {
                 _fileName = (e.Parameter as String);
-                BitmapImage image = await Utils.ReadImageFromTempStorage(_fileName);
+                BitmapImage image = await Utility.ReadImageFromTempStorage(_fileName);
                 if (image != null) {
                     Image.Source = image;
                 } else {
@@ -46,8 +47,8 @@ namespace Linphone.Views {
         }
 
         private async void Save_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e) {
-            bool result = await Utils.SavePictureInMediaLibrary(_fileName);
-            //MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK); bool result = Utils.SavePictureInMediaLibrary(_fileName);
+            bool result = await Utility.SavePictureInMediaLibrary(_fileName);
+            //MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK); bool result = Utility.SavePictureInMediaLibrary(_fileName);
         }
     }
 }

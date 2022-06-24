@@ -15,6 +15,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 using BelledonneCommunications.Linphone;
+using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Dialogs;
 using Linphone.Model;
@@ -210,10 +211,10 @@ namespace Linphone.Views
                 return;
 
             if (parameters.Count >= 1 && parameters[0].Contains("sip")) {
-                String calledNumber = parameters[0];
+                string calledNumber = parameters[0];
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(calledNumber);
-                calledNumber = String.Format("{0}@{1}", address.Username, address.Domain);
-                Contact.Text = calledNumber;
+
+                Contact.Text = calledNumber.GetCanonicalPhoneNumber();
 
                 // HotPoint #3
                 Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallFlowControl.Instance.CallContext.CallId}");

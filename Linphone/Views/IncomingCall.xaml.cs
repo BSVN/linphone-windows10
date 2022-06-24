@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone;
 using BelledonneCommunications.Linphone.Dialogs;
+using BelledonneCommunications.Linphone.Commons;
 
 namespace Linphone.Views
 {
@@ -94,7 +95,7 @@ namespace Linphone.Views
                 }
 
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
-                Contact.Text = _callerNumber;
+                Contact.Text = _callerNumber.GetCanonicalPhoneNumber();
 
                 if (_callerNumber != null && _callerNumber.Length > 0)
                 {

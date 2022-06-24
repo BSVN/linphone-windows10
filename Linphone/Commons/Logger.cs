@@ -19,7 +19,7 @@ using Serilog;
 using System.IO;
 using Windows.Storage;
 
-namespace BelledonneCommunications.Linphone
+namespace BelledonneCommunications.Linphone.Commons
 {
     public class Logger
     {
@@ -29,8 +29,8 @@ namespace BelledonneCommunications.Linphone
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(logFilePath, 
-                              rollingInterval: RollingInterval.Day, 
+                .WriteTo.File(logFilePath,
+                              rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {TraceId} {SourceContext} {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
