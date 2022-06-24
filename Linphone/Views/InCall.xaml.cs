@@ -214,7 +214,7 @@ namespace Linphone.Views
                 string calledNumber = parameters[0];
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(calledNumber);
 
-                Contact.Text = calledNumber.GetCanonicalPhoneNumber();
+                Contact.Text = address.GetCanonicalPhoneNumber();
 
                 // HotPoint #3
                 Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallFlowControl.Instance.CallContext.CallId}");

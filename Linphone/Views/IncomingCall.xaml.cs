@@ -93,9 +93,10 @@ namespace Linphone.Views
                 {
                     _callerNumber = _callerNumber.Substring(PHONE_ADDRESS_PREFIX.Length);
                 }
-
+                
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
-                Contact.Text = _callerNumber.GetCanonicalPhoneNumber();
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callerNumber);
+                Contact.Text = address.GetCanonicalPhoneNumber();
 
                 if (_callerNumber != null && _callerNumber.Length > 0)
                 {
