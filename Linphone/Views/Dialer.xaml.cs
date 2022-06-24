@@ -15,28 +15,28 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Windows.UI.Xaml.Controls;
+using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Dialogs;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone.Model;
-using Windows.UI.Xaml.Navigation;
-using System;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Input;
-using System.ComponentModel;
-using System.Collections.Generic;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
-using System.Diagnostics;
-using StackExchange.Redis;
-using Windows.UI.Popups;
-using BelledonneCommunications.Linphone.Core;
 using Serilog;
-using System.Threading.Tasks;
-using BelledonneCommunications.Linphone.Presentation.Dto;
-using System.Text.RegularExpressions;
+using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using BelledonneCommunications.Linphone.Dialogs;
-using BelledonneCommunications.Linphone;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Windows.UI.Popups;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
 
 namespace Linphone.Views
 {
@@ -359,7 +359,7 @@ namespace Linphone.Views
                 _logger.Information("Critical Situation.");
 
                 CallFlowControl.Instance.JoinIntoIncomingCallQueue();
-                
+
                 return;
             }
 

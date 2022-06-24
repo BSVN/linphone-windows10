@@ -14,24 +14,24 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Windows;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
     /// <summary>
     /// Base setting page, provides access to each detailled settings + debug setting.
     /// </summary>
-    public partial class Settings : Page {
+    public partial class Settings : Page
+    {
 
         /// <summary>
         /// Public constructor.
         /// </summary>
-        public Settings() {
+        public Settings()
+        {
             this.InitializeComponent();
             SystemNavigationManager.GetForCurrentView().BackRequested += back_Click;
         }
@@ -39,32 +39,40 @@ namespace Linphone.Views {
         /// <summary>
         /// Method called when the page is displayed.
         /// </summary>
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
             base.OnNavigatedTo(e);
         }
 
-        private void account_Click_1(object sender, RoutedEventArgs e) {
+        private void account_Click_1(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.AccountSettings), null);
         }
 
-        private void audio_Click_1(object sender, RoutedEventArgs e) {
+        private void audio_Click_1(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.AudioSettings), null);
         }
 
-        private void video_Click_1(object sender, RoutedEventArgs e) {
+        private void video_Click_1(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.VideoSettings), null);
         }
 
-        private void advanced_Click_1(object sender, RoutedEventArgs e) {
+        private void advanced_Click_1(object sender, RoutedEventArgs e)
+        {
             Frame.Navigate(typeof(Views.AdvancedSettings), null);
         }
 
-        private async void LockScreenSettings_Click_1(object sender, RoutedEventArgs e) {
+        private async void LockScreenSettings_Click_1(object sender, RoutedEventArgs e)
+        {
             // var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
 
-        private void back_Click(object sender, BackRequestedEventArgs e) {
-            if (Frame.CanGoBack) {
+        private void back_Click(object sender, BackRequestedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+            {
                 e.Handled = true;
                 Frame.GoBack();
             }

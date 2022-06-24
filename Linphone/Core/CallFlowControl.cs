@@ -1,6 +1,6 @@
-﻿using BelledonneCommunications.Linphone.Presentation.Dto;
+﻿using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone.Model;
-using Linphone.Views;
 using PCLAppConfig;
 using Serilog;
 using System;
@@ -144,7 +144,7 @@ namespace BelledonneCommunications.Linphone.Core
         public void IncomingCallDeclined()
         {
             _logger.Information("Incoming call declined by agent.");
-            
+
             CallContext.CallState = CallState.DeclinedByAgent;
         }
 
@@ -221,7 +221,7 @@ namespace BelledonneCommunications.Linphone.Core
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber, 
+                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
                                                               CallContext.CalleeNumber,
                                                               CallContext.InboundService);
 
@@ -241,7 +241,7 @@ namespace BelledonneCommunications.Linphone.Core
                 {
                     // Todo: Call should be ignored in this situation.
                     _coreClient.TerminateCallAsync(CallContext.CallId);
-                    
+
                     CallContext.Reset();
                 }
                 catch (Exception ex)
@@ -266,7 +266,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 return await _coreClient.GetAgentInfo(AgentProfile.SipPhoneNumber);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error(ex, "Error while getting settings for the agent.");
                 return null;
@@ -320,10 +320,10 @@ namespace BelledonneCommunications.Linphone.Core
                 }
 
                 _logger.Information("Successfully updated agent status.");
-                
+
                 return response;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error(ex, "Internal error while updating agent status.");
                 return false;
@@ -380,7 +380,7 @@ namespace BelledonneCommunications.Linphone.Core
         public bool JoinedIntoIncomingCallQueue { get; set; }
 
         public bool IsLoggedIn { get; set; }
-        
+
         public AgentStatus Status { get; set; }
     }
 

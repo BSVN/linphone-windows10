@@ -14,17 +14,18 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Linphone;
+using BelledonneCommunications.Linphone.Commons;
 using System;
-using System.Diagnostics;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace Linphone.Model {
+namespace Linphone.Model
+{
     /// <summary>
     /// Object representing a call log.
     /// Keeps a reference to a C++/CX CallLog object and provides some useful methods.
     /// </summary>
-    public class CallLogModel {
+    public class CallLogModel
+    {
         private static BitmapImage _incomingIcon = new BitmapImage(new Uri("/Assets/call_status_incoming.png", UriKind.Relative));
         private static BitmapImage _outgoingIcon = new BitmapImage(new Uri("/Assets/call_status_outgoing.png", UriKind.Relative));
         private static BitmapImage _missedIcon = new BitmapImage(new Uri("/Assets/call_status_missed.png", UriKind.Relative));
@@ -33,11 +34,14 @@ namespace Linphone.Model {
         /// <summary>
         /// C++/CX call log object.
         /// </summary>
-        public Object NativeLog {
-            get {
+        public Object NativeLog
+        {
+            get
+            {
                 return _nativeLog;
             }
-            set {
+            set
+            {
                 _nativeLog = value;
             }
         }
@@ -46,11 +50,14 @@ namespace Linphone.Model {
         /// <summary>
         /// Call initiator name or address.
         /// </summary>
-        public String From {
-            get {
+        public String From
+        {
+            get
+            {
                 return _from;
             }
-            set {
+            set
+            {
                 _from = value;
             }
         }
@@ -59,11 +66,14 @@ namespace Linphone.Model {
         /// <summary>
         /// Call receiver name or address.
         /// </summary>
-        public String To {
-            get {
+        public String To
+        {
+            get
+            {
                 return _to;
             }
-            set {
+            set
+            {
                 _to = value;
             }
         }
@@ -72,11 +82,14 @@ namespace Linphone.Model {
         /// <summary>
         /// For the user, has the call been outgoing or incoming.
         /// </summary>
-        public bool IsIncoming {
-            get {
+        public bool IsIncoming
+        {
+            get
+            {
                 return _isIncoming;
             }
-            set {
+            set
+            {
                 _isIncoming = value;
             }
         }
@@ -85,11 +98,14 @@ namespace Linphone.Model {
         /// <summary>
         /// Indicated whether or not the call has been missed by the user.
         /// </summary>
-        public bool IsMissed {
-            get {
+        public bool IsMissed
+        {
+            get
+            {
                 return _isMissed;
             }
-            set {
+            set
+            {
                 _isMissed = value;
             }
         }
@@ -97,14 +113,18 @@ namespace Linphone.Model {
         /// <summary>
         /// Returns a BitmapImage representing the status of the call (incoming, outgoing or missed).
         /// </summary>
-        public BitmapImage StatusIcon {
-            get {
-                if (_isIncoming) {
+        public BitmapImage StatusIcon
+        {
+            get
+            {
+                if (_isIncoming)
+                {
                     if (_isMissed)
                         return _missedIcon;
                     else
                         return _incomingIcon;
-                } else
+                }
+                else
                     return _outgoingIcon;
             }
         }
@@ -112,15 +132,19 @@ namespace Linphone.Model {
         /// <summary>
         /// Returns a string representing the status of the call (incoming, outgoing or missed).
         /// </summary>
-        public String StatusText {
-            get {
+        public String StatusText
+        {
+            get
+            {
                 var loader = new Windows.ApplicationModel.Resources.ResourceLoader();
-                if (_isIncoming) {
+                if (_isIncoming)
+                {
                     if (_isMissed)
                         return loader.GetString("HistoryMissed");
                     else
                         return loader.GetString("HistoryIncoming");
-                } else
+                }
+                else
                     return loader.GetString("HistoryOutgoing");
             }
         }
@@ -130,11 +154,14 @@ namespace Linphone.Model {
         /// <summary>
         /// Named displayed for the caller/callee.
         /// </summary>
-        public String DisplayedName {
-            get {
+        public String DisplayedName
+        {
+            get
+            {
                 return _displayName;
             }
-            set {
+            set
+            {
                 _displayName = value;
             }
         }
@@ -143,8 +170,10 @@ namespace Linphone.Model {
         /// <summary>
         /// Details text about call
         /// </summary>
-        public String DetailsText {
-            get {
+        public String DetailsText
+        {
+            get
+            {
                 DateTime now = DateTime.Now;
                 if (now.Year == _startDate.Year && now.Month == _startDate.Month && now.Day == _startDate.Day)
                     return String.Format("{0:HH:mm}", _startDate);
@@ -155,17 +184,21 @@ namespace Linphone.Model {
             }
         }
 
-        public CallLogModel(Object nativeLog, String from, String to, bool isIncoming, bool isMissed, long startDate) {
+        public CallLogModel(Object nativeLog, String from, String to, bool isIncoming, bool isMissed, long startDate)
+        {
             _nativeLog = nativeLog;
             _from = from;
             _to = to;
             _isIncoming = isIncoming;
             _isMissed = isMissed;
 
-            if (_isIncoming) {
-                _displayName = Utils.GetUsernameFromAddress((nativeLog as CallLog).FromAddress);
-            } else {
-                _displayName = Utils.GetUsernameFromAddress((nativeLog as CallLog).ToAddress);
+            if (_isIncoming)
+            {
+                _displayName = ((nativeLog as CallLog).FromAddress).GetUsernameFromAddress();
+            }
+            else
+            {
+                _displayName = ((nativeLog as CallLog).ToAddress).GetUsernameFromAddress();
             }
 
 

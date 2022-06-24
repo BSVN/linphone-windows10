@@ -1,5 +1,5 @@
-﻿using BelledonneCommunications.Linphone.Presentation.Dto;
-using Linphone.Views;
+﻿using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 using Serilog;
 using System;
 using System.Net.Http;
@@ -26,7 +26,7 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Attempting to deliver incoming call initation from {CallerNumber} to {CalleeNumber}.", callerPhoneNumber, agentPhoneNumber);
 
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceInitiateIncomingRequest
-                { 
+                {
                     AgentPhoneNumber = agentPhoneNumber,
                     CallerPhoneNumber = callerPhoneNumber,
                     InboundService = inboundService
@@ -89,11 +89,11 @@ namespace BelledonneCommunications.Linphone.Core
             try
             {
                 _logger.Information("Attemting to deliver call established event, for call id: {CallId}.", callId);
-                
+
                 HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Establish/{callId}", null);
 
                 CallsCommandServiceEstablishResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceEstablishResponse>();
-                
+
                 _logger.Information("Successfully delivered call established event with response payload: {Payload}.", response.SerializeToJson());
             }
             catch (Exception ex)
@@ -163,7 +163,7 @@ namespace BelledonneCommunications.Linphone.Core
         }
 
         public async Task<CallsCommandServiceTerminateResponse> TerminateCallAsync(Guid callId)
-        {            
+        {
             try
             {
                 _logger.Information("Attemting to deliver call termination event, for call id: {CallId}.", callId);

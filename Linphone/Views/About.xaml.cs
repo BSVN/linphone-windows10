@@ -14,14 +14,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Linphone.Model;
-using System.Reflection;
 using Windows.UI.Xaml.Controls;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
 
-    public partial class About : Page {
-        public About() {
+    public partial class About : Page
+    {
+        public About()
+        {
             this.InitializeComponent();
 
             var packageId = Windows.ApplicationModel.Package.Current.Id;

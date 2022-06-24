@@ -15,18 +15,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 using System;
-using System.IO;
 using Windows.ApplicationModel.Contacts;
-using Windows.Storage.Streams;
 using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Media.Imaging;
 
-namespace Linphone.Model {
+namespace Linphone.Model
+{
     /// <summary>
     /// Converter to get contacts' images without having to call Contact object methods
     /// </summary>
-    public class ContactPictureConverter : IValueConverter {
-        public object Convert(object value, Type targetType, object parameter, string language) {
+    public class ContactPictureConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
             Contact c = value as Contact;
             if (c == null)
                 return null;
@@ -35,7 +35,8 @@ namespace Linphone.Model {
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
             throw new NotImplementedException();
         }
     }
@@ -43,8 +44,10 @@ namespace Linphone.Model {
     /// <summary>
     /// Converter to get contacts' images without having to call Contact object methods
     /// </summary>
-    public class ContactNameConverter : IValueConverter {
-        public object Convert(object value, Type targetType, object parameter, string language) {
+    public class ContactNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
             Contact c = value as Contact;
             if (c == null)
                 return null;
@@ -53,7 +56,8 @@ namespace Linphone.Model {
             ;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
             throw new NotImplementedException();
         }
     }

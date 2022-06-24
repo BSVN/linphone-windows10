@@ -14,16 +14,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using System;
+using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Dialogs;
 using Linphone.Model;
+using System;
+using System.Collections.Generic;
+using Windows.UI.Core;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Windows.UI.Xaml;
-using Windows.UI.Core;
-using System.Collections.Generic;
-using BelledonneCommunications.Linphone.Core;
-using BelledonneCommunications.Linphone;
-using BelledonneCommunications.Linphone.Dialogs;
 
 namespace Linphone.Views
 {
@@ -94,6 +94,7 @@ namespace Linphone.Views
                 }
 
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
+                _callerNumber = _callerNumber.GetCanonicalPhoneNumber();
                 Contact.Text = _callerNumber;
 
                 if (_callerNumber != null && _callerNumber.Length > 0)
@@ -146,7 +147,7 @@ namespace Linphone.Views
         {
             CallFlowControl.Instance.IncomingCallDeclined();
             LinphoneManager.Instance.EndCurrentCall();
-            
+
             if (Frame.CanGoBack)
             {
                 Frame.GoBack();

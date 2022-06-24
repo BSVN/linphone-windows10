@@ -14,107 +14,134 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Linphone.Model;
-using Windows.UI.Xaml.Media.Imaging;
+using BelledonneCommunications.Linphone.Commons;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using Linphone;
+using Windows.UI.Xaml.Media.Imaging;
 
-namespace Linphone.Controls {
-    public partial class OutgoingChatBubble : UserControl {
+namespace Linphone.Controls
+{
+    public partial class OutgoingChatBubble : UserControl
+    {
         private ChatMessage _message;
 
-        public ChatMessage ChatMessage {
-            get {
+        public ChatMessage ChatMessage
+        {
+            get
+            {
                 return _message;
             }
-            set {
+            set
+            {
                 _message = value;
             }
         }
 
-        public OutgoingChatBubble(ChatMessage message) {
+        public OutgoingChatBubble(ChatMessage message)
+        {
             InitializeComponent();
 
             ChatMessage = message;
             this.Holding += Bubble_Holding;
             string fileName = null;
-            if (message.FileTransferInformation != null && message.FileTransferInformation.Name != null) {
+            if (message.FileTransferInformation != null && message.FileTransferInformation.Name != null)
+            {
                 fileName = message.FileTransferInformation.Name;
                 int end = message.FileTransferInformation.Name.IndexOf('.');
                 if (end > 0)
                     fileName = fileName.Substring(0, end);
             }
             bool isImageMessage = fileName != null && fileName.Length > 0;
-            if (isImageMessage) {
+            if (isImageMessage)
+            {
                 Message.Visibility = Visibility.Collapsed;
                 //Copy.Visibility = Visibility.Collapsed;
                 Image.Visibility = Visibility.Visible;
                 //Save.Visibility = Visibility.Visible;
                 SetImage(fileName);
-            } else {
+            }
+            else
+            {
                 Message.Visibility = Visibility.Visible;
-                Message.Blocks.Add(Utils.FormatText(message.TextContent));
+                Message.Blocks.Add(Utility.FormatText(message.TextContent));
                 Image.Visibility = Visibility.Collapsed;
             }
 
             Timestamp.Text = HumanFriendlyTimeStamp;
         }
 
-        private async void SetImage(string name) {
-            BitmapImage image = await Utils.ReadImageFromTempStorage(name);
+        private async void SetImage(string name)
+        {
+            BitmapImage image = await Utility.ReadImageFromTempStorage(name);
             Image.Source = image;
         }
 
-        public string HumanFriendlyTimeStamp {
-            get {
-                return Utils.FormatDate(ChatMessage.Time);
+        public string HumanFriendlyTimeStamp
+        {
+            get
+            {
+                return Utility.FormatDate(ChatMessage.Time);
             }
         }
 
-        public void UpdateStatus(ChatMessageState state) {
-            if (state == ChatMessageState.InProgress) {
+        public void UpdateStatus(ChatMessageState state)
+        {
+            if (state == ChatMessageState.InProgress)
+            {
                 Status.Glyph = "\uE72A";
-            } else if (state == ChatMessageState.NotDelivered) {
+            }
+            else if (state == ChatMessageState.NotDelivered)
+            {
                 Status.Glyph = "\uE711";
-            } else {
+            }
+            else
+            {
                 Status.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void Bubble_Holding(object sender, HoldingRoutedEventArgs e) {
+        private void Bubble_Holding(object sender, HoldingRoutedEventArgs e)
+        {
             FrameworkElement senderElement = sender as FrameworkElement;
             FlyoutMenu.ShowAt(senderElement);
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e) {
-            if (MessageDeleted != null) {
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageDeleted != null)
+            {
                 MessageDeleted(this, ChatMessage);
             }
         }
 
-        private void Copy_Click(object sender, RoutedEventArgs e) {
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
             //  Clipboard.SetText(ChatMessage.Text);
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e) {
-            // bool result = Utils.SavePictureInMediaLibrary(ChatMessage.AppData);
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            // bool result = Utility.SavePictureInMediaLibrary(ChatMessage.AppData);
             //  MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK);
         }
 
-        public void MessageStateChanged(ChatMessage message, ChatMessageState state) {
+        public void MessageStateChanged(ChatMessage message, ChatMessageState state)
+        {
         }
 
         /// <summary>
         /// Displays the image in the bubble
         /// </summary>
-        public void RefreshImage() {
+        public void RefreshImage()
+        {
             string fileName = (ChatMessage.FileTransferInformation != null) ? ChatMessage.FileTransferInformation.Name : null;
             bool isImageMessage = fileName != null && fileName.Length > 0;
-            if (isImageMessage) {
+            if (isImageMessage)
+            {
                 string filePath = ChatMessage.Contents.GetEnumerator().Current.FilePath;
-                if (filePath != null && filePath.Length > 0) {
+                if (filePath != null && filePath.Length > 0)
+                {
                     Image.Visibility = Visibility.Visible;
                     SetImage(ChatMessage.Appdata);
                 }

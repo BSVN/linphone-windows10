@@ -43,7 +43,7 @@ namespace Linphone.Controls
                     Backspace.IsEnabled = false;
                 }
             }
-        }        
+        }
 
         private void Backspace_Hold(object sender, RoutedEventArgs e)
         {

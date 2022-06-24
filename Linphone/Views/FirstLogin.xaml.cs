@@ -14,43 +14,45 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Windows;
 using Linphone.Model;
+using System.Linq;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Windows.UI.Xaml;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
     /// <summary>
     /// Handles the first login and the account creation
     /// </summary>
-    public partial class FirstLogin : Page {
+    public partial class FirstLogin : Page
+    {
         private SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
 
         /// <summary>
         /// Public constructor
         /// </summary>
-        public FirstLogin() {
+        public FirstLogin()
+        {
             this.InitializeComponent();
         }
 
         /// <summary>
         /// Method called when the page is displayed.
         /// </summary>
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
             base.OnNavigatedTo(e);
 
-            if (LinphoneManager.Instance.Core.ProxyConfigList.Count() > 0) {
+            if (LinphoneManager.Instance.Core.ProxyConfigList.Count() > 0)
+            {
                 // NavigationService.Navigate(new Uri("/Views/Dialer.xaml", UriKind.RelativeOrAbsolute));
                 // NavigationService.RemoveBackEntry(); // Prevent a back to this screen from the dialer
             }
         }
 
-        private void LogIn_Click(object sender, RoutedEventArgs e) {
+        private void LogIn_Click(object sender, RoutedEventArgs e)
+        {
             /* ErrorMessage.Text = "";
              if (Username.Text.Length > 0 && Domain.Text.Length > 0)
              {
@@ -87,16 +89,19 @@ namespace Linphone.Views {
              }*/
         }
 
-        private void Register_Click(object sender, RoutedEventArgs e) {
+        private void Register_Click(object sender, RoutedEventArgs e)
+        {
             //TODO
         }
 
-        private void LinphoneLogIn_Click(object sender, RoutedEventArgs e) {
+        private void LinphoneLogIn_Click(object sender, RoutedEventArgs e)
+        {
             /* Domain.Text = "sip.linphone.org";
              LinphoneLogIn.IsEnabled = false;*/
         }
 
-        private void Skip_Click(object sender, RoutedEventArgs e) {
+        private void Skip_Click(object sender, RoutedEventArgs e)
+        {
             // NavigationService.Navigate(new Uri("/Views/Dialer.xaml", UriKind.RelativeOrAbsolute));
             // NavigationService.RemoveBackEntry(); // Prevent a back to this screen from the dialer
         }

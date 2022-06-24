@@ -14,40 +14,49 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using System;
-using Linphone.Model;
-using Windows.UI.Xaml.Navigation;
-using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Navigation;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
     /// <summary>
     /// Displays on full screen received or sent pictures
     /// </summary>
-    public partial class FullScreenPicture : Page {
+    public partial class FullScreenPicture : Page
+    {
         private String _fileName;
 
-        public FullScreenPicture() {
+        public FullScreenPicture()
+        {
             InitializeComponent();
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e) {
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
             base.OnNavigatedTo(e);
 
-            if (e.Parameter is String) {
+            if (e.Parameter is String)
+            {
                 _fileName = (e.Parameter as String);
-                BitmapImage image = await Utils.ReadImageFromTempStorage(_fileName);
-                if (image != null) {
+                BitmapImage image = await Utility.ReadImageFromTempStorage(_fileName);
+                if (image != null)
+                {
                     Image.Source = image;
-                } else {
+                }
+                else
+                {
                     //TODO ?
                 }
             }
         }
 
-        private async void Save_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e) {
-            bool result = await Utils.SavePictureInMediaLibrary(_fileName);
-            //MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK); bool result = Utils.SavePictureInMediaLibrary(_fileName);
+        private async void Save_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            bool result = await Utility.SavePictureInMediaLibrary(_fileName);
+            //MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK); bool result = Utility.SavePictureInMediaLibrary(_fileName);
         }
     }
 }

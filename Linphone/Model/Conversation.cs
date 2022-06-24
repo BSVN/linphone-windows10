@@ -14,37 +14,41 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Linphone;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Windows.ApplicationModel.Resources;
 using Windows.UI.Xaml;
 
-namespace Linphone.Model {
+namespace Linphone.Model
+{
     /// <summary>
     /// Represents a chat conversation between the user and someone else.
     /// </summary>
-    public class Conversation {
+    public class Conversation
+    {
         /// <summary>
         /// Display name of the remote contact.
         /// </summary>
-        public string DisplayedName {
+        public string DisplayedName
+        {
             get; set;
         }
 
         /// <summary>
         /// SIP address of the remote contact.
         /// </summary>
-        public string SipAddress {
+        public string SipAddress
+        {
             get; set;
         }
 
         /// <summary>
         /// Latest message (can be troncated) received or sent.
         /// </summary>
-        public string LatestMessage {
-            get {
+        public string LatestMessage
+        {
+            get
+            {
                 string lastText = Messages.Last().TextContent;
                 if (lastText == null || lastText.Length <= 0 || Messages.Last().Appdata != null)
                 {
@@ -57,8 +61,10 @@ namespace Linphone.Model {
         /// <summary>
         /// Date of the latest message received or sent.
         /// </summary>
-        public string LatestMessageDate {
-            get {
+        public string LatestMessageDate
+        {
+            get
+            {
                 return FormatDate(Messages.Last().Time);
             }
         }
@@ -66,25 +72,34 @@ namespace Linphone.Model {
         /// <summary>
         /// Returns true if the last message hasn't been read yet by the user, otherwise returns false
         /// </summary>
-        public bool IsLastMessageUnread {
-            get {
+        public bool IsLastMessageUnread
+        {
+            get
+            {
                 return !Messages.Last().IsRead;
             }
         }
 
-        public Visibility IsLastMessageImage {
-            get {
+        public Visibility IsLastMessageImage
+        {
+            get
+            {
                 if (Messages.Last().IsFileTransfer || Messages.Last().Appdata != null ||
-                     (Messages.Last().FileTransferInformation != null && Messages.Last().FileTransferInformation.Name != null)) {
+                     (Messages.Last().FileTransferInformation != null && Messages.Last().FileTransferInformation.Name != null))
+                {
                     return Visibility.Visible;
-                }else {
+                }
+                else
+                {
                     return Visibility.Collapsed;
                 }
             }
         }
 
-        public Visibility IsLastMessageText {
-            get {
+        public Visibility IsLastMessageText
+        {
+            get
+            {
                 return (IsLastMessageImage == Visibility.Visible) ? Visibility.Collapsed : Visibility.Visible;
             }
         }
@@ -92,23 +107,27 @@ namespace Linphone.Model {
         /// <summary>
         /// List of messages sent and received.
         /// </summary>
-        public IList<ChatMessage> Messages {
+        public IList<ChatMessage> Messages
+        {
             get; set;
         }
 
         /// <summary>
         /// Public constructor.
         /// </summary>
-        public Conversation(string sipAddress, string displayName, IEnumerable<ChatMessage> messages) {
+        public Conversation(string sipAddress, string displayName, IEnumerable<ChatMessage> messages)
+        {
             SipAddress = sipAddress;
             DisplayedName = displayName;
             Messages = new List<ChatMessage>();
-            foreach (ChatMessage msg in messages) {
+            foreach (ChatMessage msg in messages)
+            {
                 Messages.Add(msg);
             }
         }
 
-        private string FormatDate(long timestamp) {
+        private string FormatDate(long timestamp)
+        {
             DateTime date;
             DateTime now = DateTime.Now;
 

@@ -15,10 +15,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 using System;
-using System.Windows;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace Linphone.Controls
 {
@@ -85,8 +83,8 @@ namespace Linphone.Controls
 
         public RoutedEventHandler Click
         {
-            set 
-            { 
+            set
+            {
                 button.Click += value;
                 button.Tag = NumberOrAddress;
             }

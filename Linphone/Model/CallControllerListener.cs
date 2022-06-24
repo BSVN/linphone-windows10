@@ -14,13 +14,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using Linphone;
-
-namespace Linphone.Model {
+namespace Linphone.Model
+{
     /// <summary>
     /// Interface for a basic call (start, end) listener.
     /// </summary>
-    public interface CallControllerListener {
+    public interface CallControllerListener
+    {
         /// <summary>
         /// Called when a new call is started.
         /// </summary>

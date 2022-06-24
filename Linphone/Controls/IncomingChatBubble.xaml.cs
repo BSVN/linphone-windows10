@@ -14,13 +14,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using System;
-using Linphone.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Input;
-using Linphone;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Linphone.Controls
 {
@@ -75,13 +74,13 @@ namespace Linphone.Controls
                 Message.Visibility = Visibility.Visible;
                 Image.Visibility = Visibility.Collapsed;
                 Download.Visibility = Visibility.Collapsed;
-                Message.Blocks.Add(Utils.FormatText(message.TextContent));
+                Message.Blocks.Add(Utility.FormatText(message.TextContent));
             }
         }
 
         private async void SetImage(string name)
         {
-            BitmapImage image = await Utils.ReadImageFromTempStorage(name);
+            BitmapImage image = await Utility.ReadImageFromTempStorage(name);
             Image.Source = image;
         }
 
@@ -106,7 +105,7 @@ namespace Linphone.Controls
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            // bool result = await Utils.SavePictureInMediaLibrary(ChatMessage.AppData);
+            // bool result = await Utility.SavePictureInMediaLibrary(ChatMessage.AppData);
             // MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK);
         }
 
@@ -144,7 +143,7 @@ namespace Linphone.Controls
         {
             get
             {
-                return Utils.FormatDate(ChatMessage.Time);
+                return Utility.FormatDate(ChatMessage.Time);
             }
         }
 

@@ -14,23 +14,23 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Core;
+using Linphone.Model;
+using Microsoft.Win32;
+using PCLAppConfig;
+using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.UI.Core;
+using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Linphone.Model;
-using System.Diagnostics;
-using Windows.UI.Core;
-using System.Collections.Generic;
-using BelledonneCommunications.Linphone;
-using Serilog;
-using BelledonneCommunications.Linphone.Core;
-using Microsoft.Win32;
-using System.Threading.Tasks;
-using Windows.UI.Core.Preview;
-using PCLAppConfig;
 
 namespace Linphone
 {
@@ -49,7 +49,7 @@ namespace Linphone
         /// </summary>
         public App()
         {
-            this.InitializeComponent();            
+            this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
             this.Suspending += OnSuspending;
 
@@ -60,7 +60,7 @@ namespace Linphone
             Logger.ConfigureLogger();
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(App));
-            
+
             // TODO: Use this code check current version of WebView.
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
             IsWebView2Installed();
@@ -259,18 +259,18 @@ namespace Linphone
             var differal = e.GetDeferral();
 
             e.Handled = true;
-            
+
             CloseApp = true;
-            
+
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                 await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
-            
+
             if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
             {
                 DisableRegisteration();
-                
+
                 differal.Complete();
-                
+
                 Current.Exit();
             }
             else
@@ -393,8 +393,8 @@ namespace Linphone
                 return false;
             }
         }
-        
+
         bool CloseApp = false;
-        private readonly ILogger _logger; 
+        private readonly ILogger _logger;
     }
 }

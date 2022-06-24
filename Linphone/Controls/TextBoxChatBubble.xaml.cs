@@ -17,22 +17,28 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace Linphone.Controls {
+namespace Linphone.Controls
+{
 
-    public partial class TextBoxChatBubble : UserControl {
-        public string Text {
+    public partial class TextBoxChatBubble : UserControl
+    {
+        public string Text
+        {
             get; set;
         }
 
-        public string ImageName {
+        public string ImageName
+        {
             get; set;
         }
 
-        public string ImageLocalPath {
+        public string ImageLocalPath
+        {
             get; set;
         }
 
-        public string ImageType {
+        public string ImageType
+        {
             get; set;
         }
 
@@ -42,12 +48,14 @@ namespace Linphone.Controls {
         public delegate void SendMessageClickEventHandler(object sender);
         public event SendMessageClickEventHandler SendMessageClick;
 
-        public TextBoxChatBubble() {
+        public TextBoxChatBubble()
+        {
             InitializeComponent();
             SendMessage.IsEnabled = false;
         }
 
-        public void Reset() {
+        public void Reset()
+        {
             Message.Text = "";
             Text = null;
             ImageName = null;
@@ -57,15 +65,18 @@ namespace Linphone.Controls {
             Image.Visibility = Visibility.Collapsed;
         }
 
-        private void Message_TextChanged(object sender, TextChangedEventArgs e) {
+        private void Message_TextChanged(object sender, TextChangedEventArgs e)
+        {
             Text = Message.Text;
             SendMessage.IsEnabled = (Text.Length > 0 ? true : false || Image.Visibility == Visibility.Visible);
-            if (TextChanged != null) {
+            if (TextChanged != null)
+            {
                 TextChanged(this, Message.Text);
             }
         }
 
-        public void SetImage(BitmapImage image) {
+        public void SetImage(BitmapImage image)
+        {
             Image.Source = image;
             Image.Visibility = Visibility.Visible;
             Message.Visibility = Visibility.Collapsed;
@@ -73,7 +84,8 @@ namespace Linphone.Controls {
             SendMessage.IsEnabled = true;
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e) {
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
             string previousText = Text;
             Reset();
             Text = previousText;
@@ -84,11 +96,13 @@ namespace Linphone.Controls {
 
         public event TextChangedEventHandler TextChanged;
 
-        private void SendFile_Click(object sender, RoutedEventArgs e) {
+        private void SendFile_Click(object sender, RoutedEventArgs e)
+        {
             SendFileClick(this);
         }
 
-        private void SendMessage_Click(object sender, RoutedEventArgs e) {
+        private void SendMessage_Click(object sender, RoutedEventArgs e)
+        {
             SendMessageClick(this);
         }
     }
