@@ -31,7 +31,6 @@
             <controls:StatusBar 
             x:Name="status" 
             Grid.Row="0"
-            RefreshCommand="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
             Tapped="status_Tapped"/>
 
             <Grid x:Name="ContentPanel" Grid.Row="1">
@@ -224,7 +223,7 @@
                     </Grid>
 
                     <Button
-                    Click="call_Click" 
+                    Command="{x:Bind ViewModel.CallCommand}"
                      Style="{StaticResource AccentLongButtonStyle}">
 
                         <Button.ContentTemplate>
@@ -361,10 +360,15 @@
             </ContentDialog>
         </Grid>
 
-        <webui:WebView2 x:Name="Browser" 
+		<webui:WebView2 x:Name="Browser" 
                         Grid.Column="1"
                         NavigationCompleted="Browser_NavigationCompleted"
-                        Loaded="Browser_Loaded"
-						Source="{Binding SourceUri}"/>
-    </Grid>
+						Source="{x:Bind ViewModel.SourceUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+			<interactivity:Interaction.Behaviors>
+				<core:EventTriggerBehavior EventName="Loaded">
+					<core:InvokeCommandAction Command="{x:Bind ViewModel.BrowserLoadedCommand}" />
+				</core:EventTriggerBehavior>
+			</interactivity:Interaction.Behaviors>
+		</webui:WebView2>
+	</Grid>
 </Page>

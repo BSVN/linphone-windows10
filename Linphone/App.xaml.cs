@@ -91,22 +91,22 @@ namespace Linphone
         {
             Debug.WriteLine("[CallListener] Call ended, can go back ? " + rootFrame.CanGoBack);
 
-            if (Dialer.IsIncomingCall && Dialer.CallId != default)
+            if (DialerViewModel.IsIncomingCall && DialerViewModel.CallId != default)
             {
                 try
                 {
-                    var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/TerminateIncoming/{Dialer.CallId}");
+                    var response = await httpClient.GetAsync($"{DialerViewModel.BrowserBaseUrl}/api/Calls/TerminateIncoming/{DialerViewModel.CallId}");
                     var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateIncomingResponse>();
                     if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
                     {
-                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={Dialer.BrowserBaseUrl}{Dialer.BrowserCurrentUrlOffset}";
-                        Dialer.BrowserCurrentUrlOffset = dialerNewSource;
-                        Dialer.HasUnfinishedCall = true;
+                        var dialerNewSource = $"/CallRespondingAgents/Dashboard?customerPhoneNumber={Dialer.CallerId}&IsIncomingCall=true&CallId={DialerViewModel.CallId}&RedirectUrl={DialerViewModel.BrowserBaseUrl}{DialerViewModel.BrowserCurrentUrlOffset}";
+                        DialerViewModel.BrowserCurrentUrlOffset = dialerNewSource;
+                        DialerViewModel.HasUnfinishedCall = true;
                     }
                 }
                 catch
                 {
-                    Dialer.HasUnfinishedCall = false;
+                    DialerViewModel.HasUnfinishedCall = false;
                 }
             }
 

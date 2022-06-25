@@ -1,13 +1,18 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using BelledonneCommunications.Linphone.Presentation.Dto;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Linphone;
 using Linphone.Model;
+using Linphone.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.Core;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
 
@@ -18,13 +23,31 @@ namespace BelledonneCommunications.Linphone.ViewModels
         public DialerViewModel(INavigationService navigationService)
         {
             this.navigationService = navigationService;
+            CallCommand = new RelayCommand(CallClick);
+            BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
+            httpClient = new HttpClient();
         }
 
-		public Uri SourceUri { get; set; }
+        private Uri sourceUri;
+		public Uri SourceUri
+        {
+            get => sourceUri;
+            set => SetProperty(ref this.sourceUri, value);
+        }
+
+        // TODO: Please remove it, and use _settings
+        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
 		// TODO: Please remove all static variable
         public static string BrowserCurrentUrlOffset = null;
         public static string BrowserBaseUrl = null;
+        public static bool HasUnfinishedCall = false;
+        public static Guid CallId = default;
+
+        public static bool IsIncomingCall { get; set; } = false;
+
+        public ICommand CallCommand { get; }
+        public ICommand BrowserLoadedCommand { get; }
 
         // FIXME
         public ICommand RefreshCommand
@@ -190,9 +213,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
         {
-            throw new NotImplementedException();
-            // FIXME
-            // status.RefreshStatus();
+            RefreshCommand.Execute(null);
         }
 
         private void MessageReceived(ChatRoom room, ChatMessage message)
@@ -200,12 +221,53 @@ namespace BelledonneCommunications.Linphone.ViewModels
             UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
         }
 
-        private void CallStateChanged(Call call, CallState state)
+        private void CallStateChanged(Call call, global::Linphone.CallState state)
         {
             MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
         }
 
+        private async void CallClick()
+        {
+            if (HasUnfinishedCall)
+            {
+                var response = await httpClient.GetAsync($"{BrowserBaseUrl}/api/Calls/{CallId}");
+                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
+                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
+                    return;
+                else
+                    HasUnfinishedCall = false;
+            }
+
+            if (AddressBoxText.Length > 0)
+            {
+                IsIncomingCall = false;
+                LinphoneManager.Instance.NewOutgoingCall(AddressBoxText);
+            }
+            else
+            {
+                string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
+                AddressBoxText = lastDialedNumber == null ? "" : lastDialedNumber;
+            }
+        }
+
+        private void OnLoadedBrowser()
+		{
+            if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
+            {
+                object settingValue = localSettings.Values["PanelUrl"];
+                BrowserBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
+                SourceUri = new Uri($"{BrowserBaseUrl}{BrowserCurrentUrlOffset}");
+            }
+            else
+            {
+                object settingValue = localSettings.Values["PanelUrl"];
+                string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
+                SourceUri = new Uri(loadingUrl);
+                BrowserBaseUrl = loadingUrl;
+            }
+		}
 
         private readonly INavigationService navigationService;
+        private readonly HttpClient httpClient;
 	}
 }

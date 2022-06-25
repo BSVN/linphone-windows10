@@ -42,23 +42,12 @@ namespace Linphone.Views
 
     public sealed partial class Dialer : Page
     {
-        // TODO: Please remove it, and use _settings
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-
-        public static string BrowserCurrentUrlOffset = null;
-        public static string BrowserBaseUrl = null;
-
-        public static bool IsIncomingCall { get; set; } = false;
-
         public static string CallerId = null;
 
         public static string CalleeId = null;
 
-        public static Guid CallId = default;
-
         public static bool IsLoggedIn = false;
 
-        public static bool HasUnfinishedCall = false;
 
         private DatabaseFactory databaseFactory;
         private readonly HttpClient httpClient;
@@ -70,12 +59,14 @@ namespace Linphone.Views
             httpClient = new HttpClient();
 
 			DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
+            ViewModel.RefreshCommand = status.RefreshCommand;
+
             ContactsManager contactsManager = ContactsManager.Instance;
             addressBox.KeyDown += (sender, args) =>
             {
                 if (args.Key == Windows.System.VirtualKey.Enter)
                 {
-                    call_Click(null, null);
+                    ViewModel.CallCommand.Execute(null);
                 }
             };
 
@@ -105,30 +96,6 @@ namespace Linphone.Views
                      BugReportUploadProgressBar.Value = offset;
                  }
              });*/
-        }
-
-        private async void call_Click(object sender, RoutedEventArgs e)
-        {
-            if (HasUnfinishedCall)
-            {
-                var response = await httpClient.GetAsync($"{Dialer.BrowserBaseUrl}/api/Calls/{Dialer.CallId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
-                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                    return;
-                else
-                    HasUnfinishedCall = false;
-            }
-
-            if (addressBox.Text.Length > 0)
-            {
-                IsIncomingCall = false;
-                LinphoneManager.Instance.NewOutgoingCall(addressBox.Text);
-            }
-            else
-            {
-                string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
-                addressBox.Text = lastDialedNumber == null ? "" : lastDialedNumber;
-            }
         }
 
         private void numpad_Click(object sender, RoutedEventArgs e)
@@ -207,23 +174,6 @@ namespace Linphone.Views
         {
             if (IsLoggedIn)
                 LinphoneManager.Instance.Core.RefreshRegisters();
-        }
-
-        private void Browser_Loaded(object sender, RoutedEventArgs e)
-        {            
-            if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
-            {
-                object settingValue = localSettings.Values["PanelUrl"];
-                BrowserBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                Browser.Source = new Uri($"{BrowserBaseUrl}{BrowserCurrentUrlOffset}");
-            }
-            else
-            {
-                object settingValue = localSettings.Values["PanelUrl"];
-                string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                Browser.Source = new Uri(loadingUrl);
-                BrowserBaseUrl = loadingUrl;
-            }
         }
 
         private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)

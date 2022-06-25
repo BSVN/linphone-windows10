@@ -38,6 +38,7 @@ namespace Linphone.Controls
 			typeof(AddressBox),
             new PropertyMetadata(default(string)));
 
+
 		/// <summary>
 		/// Gets or sets the <see cref="string"/> representing the text to display.
 		/// </summary>
@@ -49,7 +50,6 @@ namespace Linphone.Controls
             }
             set
             {
-                address.Text = value;
                 if(value.Length > 0)
                 {
                     Backspace.IsEnabled = true;
@@ -63,13 +63,13 @@ namespace Linphone.Controls
 
         private void backspace_Hold_1(object sender, RoutedEventArgs e)
         {
-            address.Text = "";
+            Text = "";
         }
 
         private void backspace_Click_1(object sender, RoutedEventArgs e)
         {
-            if (address.Text.Length > 0)
-                address.Text = address.Text.Substring(0, address.Text.Length - 1);
+            if (Text.Length > 0)
+                Text = Text.Substring(0, Text.Length - 1);
 
         }
 
