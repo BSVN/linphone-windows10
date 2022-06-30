@@ -26,6 +26,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             CallCommand = new RelayCommand(CallClick);
             BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
             httpClient = new HttpClient();
+            _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }
 
         private Uri sourceUri;
@@ -207,8 +208,18 @@ namespace BelledonneCommunications.Linphone.ViewModels
 		/// <param name="e"></param>
 		public void OnNavigatingFrom(NavigatingCancelEventArgs e)
 		{
-            if (SourceUri.OriginalString.Length > BrowserBaseUrl.Length)
-                BrowserCurrentUrlOffset = SourceUri.OriginalString.Substring(BrowserBaseUrl.Length);
+            _logger.Debug("OnNavigatingFrom");
+
+            try
+            {
+                if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
+                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = Browser.Source.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while updating dialer browser's history.");
+                CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
+            }
 		}
 
         private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
@@ -228,46 +239,94 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         private async void CallClick()
         {
-            if (HasUnfinishedCall)
+            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
+
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
             {
-                var response = await httpClient.GetAsync($"{BrowserBaseUrl}/api/Calls/{CallId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceGetByIdResponse>();
-                if (!result.Result.Data.CallReason.HasValue && !result.Result.Data.TicketId.HasValue)
-                    return;
-                else
-                    HasUnfinishedCall = false;
+                _logger.Information("Cant start a call because of a running command.");
+                return;
             }
 
-            if (AddressBoxText.Length > 0)
+            if (CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
             {
-                IsIncomingCall = false;
-                LinphoneManager.Instance.NewOutgoingCall(AddressBoxText);
+                CallFlowControl.Instance.LeaveIncomingCallQueue();
+                TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+                while (true)
+                {
+                    timeout = timeout - TimeSpan.FromMilliseconds(500);
+                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(500);
+                }
             }
-            else
+
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
             {
-                string lastDialedNumber = LinphoneManager.Instance.GetLastCalledNumber();
-                AddressBoxText = lastDialedNumber == null ? "" : lastDialedNumber;
+                _logger.Information("Cant start a call because of a still running command.");
+                _logger.Information("Critical Situation.");
+
+                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+
+                return;
+            }
+
+            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
+            {
+                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
+                return;
+            }
+
+            if (addressBox.Text.Length > 0)
+            {
+                string inboundService;
+                if (OutgoingChannel.SelectedIndex == 0)
+                {
+                    inboundService = HEAD_OF_HOUSEHOLD_SERVICE;
+                }
+                else
+                {
+                    inboundService = SELLERS_SERVICE_PHONENUMBER;
+                }
+
+                string normalizedAddres = addressBox.Text;
+                if (!normalizedAddres.StartsWith("00"))
+                {
+                    if (normalizedAddres.StartsWith('0'))
+                        normalizedAddres = "0" + normalizedAddres;
+                    else
+                        normalizedAddres = "00" + normalizedAddres;
+                }
+
+                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
+
+                LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
         }
 
         private void OnLoadedBrowser()
 		{
-            if (BrowserCurrentUrlOffset != null && !BrowserCurrentUrlOffset.StartsWith("/Account/Login"))
+            // HotPoint #4
+            if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
+                && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
             {
-                object settingValue = localSettings.Values["PanelUrl"];
-                BrowserBaseUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                SourceUri = new Uri($"{BrowserBaseUrl}{BrowserCurrentUrlOffset}");
+                SourceUri = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");
             }
             else
             {
-                object settingValue = localSettings.Values["PanelUrl"];
-                string loadingUrl = settingValue == null ? "http://localhost:9011" : settingValue as string;
-                SourceUri = new Uri(loadingUrl);
-                BrowserBaseUrl = loadingUrl;
+                SourceUri = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
             }
 		}
 
+        public static String StripUnicodeCharactersFromString(string inputValue)
+        {
+            return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
+        }
+
         private readonly INavigationService navigationService;
         private readonly HttpClient httpClient;
+        private readonly ILogger _logger;
 	}
 }
