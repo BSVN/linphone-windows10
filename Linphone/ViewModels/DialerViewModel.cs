@@ -1,9 +1,11 @@
-﻿using BelledonneCommunications.Linphone.Presentation.Dto;
+﻿using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Presentation.Dto;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Linphone;
 using Linphone.Model;
 using Linphone.Views;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -212,8 +214,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
             try
             {
-                if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
-                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = Browser.Source.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
+                if (SourceUri.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
+                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
             }
             catch (Exception ex)
             {
@@ -279,7 +281,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 return;
             }
 
-            if (addressBox.Text.Length > 0)
+            if (AddressBoxText.Length > 0)
             {
                 string inboundService;
                 if (OutgoingChannel.SelectedIndex == 0)
@@ -291,7 +293,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                     inboundService = SELLERS_SERVICE_PHONENUMBER;
                 }
 
-                string normalizedAddres = addressBox.Text;
+                string normalizedAddres = AddressBoxText;
                 if (!normalizedAddres.StartsWith("00"))
                 {
                     if (normalizedAddres.StartsWith('0'))
@@ -300,7 +302,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
+				await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
 
                 LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
@@ -328,5 +330,9 @@ namespace BelledonneCommunications.Linphone.ViewModels
         private readonly INavigationService navigationService;
         private readonly HttpClient httpClient;
         private readonly ILogger _logger;
+
+        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
+        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
+        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
 	}
 }

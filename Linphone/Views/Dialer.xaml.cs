@@ -58,9 +58,7 @@ namespace Linphone.Views
         public static bool IsLoggedIn = false;
 
 
-        private DatabaseFactory databaseFactory;
         private readonly HttpClient httpClient;
-        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
 
 		public Dialer()
         {
@@ -217,11 +215,6 @@ namespace Linphone.Views
         {
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                 LinphoneManager.Instance.Core.RefreshRegisters();
-        }
-
-        private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
-        {
-            return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
         }
 
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
@@ -493,9 +486,6 @@ namespace Linphone.Views
         }
 
 
-        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
-        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
-        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
         private static int UserInfoRetryLimit = 4;
 
         private readonly ILogger _logger;
