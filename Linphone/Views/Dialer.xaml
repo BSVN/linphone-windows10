@@ -78,7 +78,7 @@
                         <ComboBox x:Name="OutgoingChannel"
                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                                   FlowDirection="RightToLeft" 
-                                  SelectedIndex="0"
+                                  SelectedIndex="{x:Bind ViewModel.OutgoingChannelSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   PlaceholderText="سرویس"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem>
@@ -283,7 +283,6 @@
                         </Button.ContentTemplate>
                     </Button>
                     <Button x:Name="Callback" 
-                            Visibility="Collapsed"
                             Style="{StaticResource AccentLongButtonStyle}" 
                             Click="Callback_Click">
                         <Button.Background>

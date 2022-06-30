@@ -107,7 +107,7 @@ namespace Linphone.Views
             ViewModel.OnNavigatingFrom(e);
 		}
 
-		protected override void OnNavigatedTo(NavigationEventArgs e)
+		protected override async void OnNavigatedTo(NavigationEventArgs e)
 		{
 			base.OnNavigatedTo(e);
 
@@ -247,7 +247,7 @@ namespace Linphone.Views
                     Regex regex = new Regex(pattern);
                     MatchCollection matches = regex.Matches(html);
                     Match match = matches.FirstOrDefault();
-                    string a = ViewModel.StripUnicodeCharactersFromString(html);
+                    string a = DialerViewModel.StripUnicodeCharactersFromString(html);
 
                     if (match != null)
                     {

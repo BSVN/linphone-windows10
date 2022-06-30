@@ -38,8 +38,10 @@ namespace BelledonneCommunications.Linphone.ViewModels
             set => SetProperty(ref this.sourceUri, value);
         }
 
-        // TODO: Please remove it, and use _settings
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+		public int OutgoingChannelSelectedIndex { get; set; }
+
+		// TODO: Please remove it, and use _settings
+		ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
 		// TODO: Please remove all static variable
         public static string BrowserCurrentUrlOffset = null;
@@ -284,7 +286,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             if (AddressBoxText.Length > 0)
             {
                 string inboundService;
-                if (OutgoingChannel.SelectedIndex == 0)
+                if (OutgoingChannelSelectedIndex == 0)
                 {
                     inboundService = HEAD_OF_HOUSEHOLD_SERVICE;
                 }

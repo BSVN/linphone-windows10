@@ -62,21 +62,20 @@ namespace Linphone.Controls
             }
 		}
 
-        private void Backspace_Click(object sender, RoutedEventArgs e)
-        {
+        private void Backspace_Hold(object sender, RoutedEventArgs e)
+		{
             Text = string.Empty;
-        }
+		}
 
-        private void backspace_Click_1(object sender, RoutedEventArgs e)
+        private void Backspace_Click(object sender, RoutedEventArgs e)
         {
             if (Text.Length > 0)
                 Text = Text.Substring(0, Text.Length - 1);
-
         }
 
         private void address_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if(address.Text.Length > 0)
+            if(Text.Length > 0)
             {
                 Backspace.IsEnabled = true;
             } else

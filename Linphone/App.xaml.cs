@@ -74,7 +74,6 @@ namespace Linphone
 
             SettingsManager.InstallConfigFile();
 
-            BelledonneCommunications.Linphone.Logger.ConfigureLogger();
 			Log.Logger.Error("Here is the usage.");
 
             Logger.ConfigureLogger();
