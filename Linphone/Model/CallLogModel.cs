@@ -14,6 +14,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using Linphone;
 using System;
 using System.Diagnostics;
@@ -163,9 +164,9 @@ namespace Linphone.Model {
             _isMissed = isMissed;
 
             if (_isIncoming) {
-                _displayName = Utils.GetUsernameFromAddress((nativeLog as CallLog).FromAddress);
+                _displayName = ((nativeLog as CallLog).FromAddress).GetUsernameFromAddress();
             } else {
-                _displayName = Utils.GetUsernameFromAddress((nativeLog as CallLog).ToAddress);
+                _displayName = ((nativeLog as CallLog).ToAddress).GetUsernameFromAddress();
             }
 
 

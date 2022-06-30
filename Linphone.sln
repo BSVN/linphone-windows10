@@ -17,6 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BSN.Resa.Mci.CallCenter.Age
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSN.Resa.Mci.CallCenter.AgentApp.Domain", "BSN.Resa.Mci.CallCenter.AgentApp.Domain\BSN.Resa.Mci.CallCenter.AgentApp.Domain.csproj", "{A443294E-EA76-456F-BBB5-D17E84CE259F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{169EEAAF-79AC-4CCD-9AF7-6851351E2F0D}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Call State Transition in Agent Panel.vsdx = Documentation\Call State Transition in Agent Panel.vsdx
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

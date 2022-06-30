@@ -59,7 +59,7 @@
                     Grid.Row="3"
                     FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                     x:Name="Status"
-                    Text="????? ????"
+                    Text=""
                     Style="{StaticResource ListItemStyle}"
                     HorizontalAlignment="Center"
                     Margin="12,0,12,0"

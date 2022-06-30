@@ -1,5 +1,6 @@
 ﻿/*
 AddressBox.xaml.cs
+Copyright (C) 2022  Resa Co.
 Copyright (C) 2016  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,7 +15,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -53,7 +53,8 @@ namespace Linphone.Controls
                 if(value.Length > 0)
                 {
                     Backspace.IsEnabled = true;
-                } else
+                }
+                else
                 {
                     Backspace.IsEnabled = false;
                 }
@@ -61,9 +62,9 @@ namespace Linphone.Controls
             }
 		}
 
-        private void backspace_Hold_1(object sender, RoutedEventArgs e)
+        private void Backspace_Click(object sender, RoutedEventArgs e)
         {
-            Text = "";
+            Text = string.Empty;
         }
 
         private void backspace_Click_1(object sender, RoutedEventArgs e)

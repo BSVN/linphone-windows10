@@ -17,34 +17,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using System;
 using Linphone.Model;
 using Windows.UI.Xaml.Controls;
-using System.ComponentModel;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml;
 using Windows.UI.Core;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using BelledonneCommunications.Linphone.Presentation.Dto;
+using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone;
+using BelledonneCommunications.Linphone.Dialogs;
+using BelledonneCommunications.Linphone.Commons;
 
 namespace Linphone.Views
 {
-
     public partial class IncomingCall : Page
     {
-        private String _callingNumber;
-        private HttpClient httpClient;
-        private string UserId;
+        private const string PHONE_ADDRESS_PREFIX = "sip:";
+        private string _callerNumber;
 
         public IncomingCall()
         {
             this.InitializeComponent();
-
-            SIPAccountSettingsManager _settings = new SIPAccountSettingsManager();
-            _settings.Load();
-            UserId = _settings.UserId;
-
-            httpClient = new HttpClient();
 
             SystemNavigationManager.GetForCurrentView().BackRequested += Back_requested;
             if (!LinphoneManager.Instance.Core.VideoSupported() || !LinphoneManager.Instance.Core.VideoCaptureEnabled)
@@ -88,43 +79,30 @@ namespace Linphone.Views
         {
             base.OnNavigatedTo(nee);
 
-            if ((nee.Parameter as String).Contains("sip"))
+            if (!await Utility.IsMicrophoneAvailable())
             {
-                _callingNumber = (nee.Parameter as String);
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
+            }
 
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-				BelledonneCommunications.Linphone.ViewModels.DialerViewModel.CallId = default;
-                Dialer.CallerId = address.GetCanonicalPhoneNumber();
-                Dialer.CalleeId = UserId;
-
-                if (_callingNumber.StartsWith("sip:"))
+            if ((nee.Parameter as string).Contains(PHONE_ADDRESS_PREFIX))
+            {
+                _callerNumber = (nee.Parameter as string);
+                if (_callerNumber.StartsWith(PHONE_ADDRESS_PREFIX))
                 {
-                    _callingNumber = _callingNumber.Substring(4);
+                    _callerNumber = _callerNumber.Substring(PHONE_ADDRESS_PREFIX.Length);
                 }
-
+                
                 // While we dunno if the number matches a contact one, we consider it won't and we display the phone number as username
-                Contact.Text = _callingNumber;
+                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callerNumber);
+                Contact.Text = address.GetCanonicalPhoneNumber();
 
-                if (_callingNumber != null && _callingNumber.Length > 0)
+                if (_callerNumber != null && _callerNumber.Length > 0)
                 {
                     //ContactManager cm = ContactManager.Instance;
                     //cm.ContactFound += cm_ContactFound;
                     //cm.FindContact(_callingNumber);
-                }
-
-                try
-                {
-                    HttpResponseMessage response = await httpClient.GetAsync($"{BelledonneCommunications.Linphone.ViewModels.DialerViewModel.BrowserBaseUrl}/api/Calls/InitiateIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
-                    var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
-                    if (result != null)
-                    {
-						BelledonneCommunications.Linphone.ViewModels.DialerViewModel.IsIncomingCall = true;
-						BelledonneCommunications.Linphone.ViewModels.DialerViewModel.CallId = result.Result.Data.Id;
-                    }
-                }
-                catch
-                {
-
                 }
             }
         }
@@ -152,22 +130,11 @@ namespace Linphone.Views
         {
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
-                if (BelledonneCommunications.Linphone.ViewModels.DialerViewModel.CallId != default)
-                {
-                    try
-                    {
-                        Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                        var response = await httpClient.GetAsync($"{BelledonneCommunications.Linphone.ViewModels.DialerViewModel.BrowserBaseUrl}/api/Calls/AcceptIncoming/{BelledonneCommunications.Linphone.ViewModels.DialerViewModel.CallId}");
-                        var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
-                    }
-                    catch
-                    {
-
-                    }
-                }
+                // HotPoint #1
+                CallFlowControl.Instance.CallEstablished();
 
                 List<string> parameters = new List<string>();
-                parameters.Add(_callingNumber);
+                parameters.Add(_callerNumber);
                 parameters.Add("incomingCall");
                 Frame.Navigate(typeof(Views.InCall), parameters);
             }
@@ -179,23 +146,9 @@ namespace Linphone.Views
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                Address address = LinphoneManager.Instance.Core.InterpretUrl(_callingNumber);
-                var response = await httpClient.GetAsync($"{BelledonneCommunications.Linphone.ViewModels.DialerViewModel.BrowserBaseUrl}/api/Calls/MissedIncoming?CustomerPhoneNumber={address.GetCanonicalPhoneNumber()}&OperatorSoftPhoneNumber={UserId}");
-                var result = response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
-                if (result != null)
-                {
-					BelledonneCommunications.Linphone.ViewModels.DialerViewModel.IsIncomingCall = true;
-					BelledonneCommunications.Linphone.ViewModels.DialerViewModel.CallId = default;
-                }
-            }
-            catch
-            {
-
-            }
-
+            CallFlowControl.Instance.IncomingCallDeclined();
             LinphoneManager.Instance.EndCurrentCall();
+            
             if (Frame.CanGoBack)
             {
                 Frame.GoBack();

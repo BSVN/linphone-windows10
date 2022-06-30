@@ -20,6 +20,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Linphone;
+using BelledonneCommunications.Linphone.Commons;
 
 namespace Linphone.Controls {
     public partial class OutgoingChatBubble : UserControl {
@@ -55,7 +56,7 @@ namespace Linphone.Controls {
                 SetImage(fileName);
             } else {
                 Message.Visibility = Visibility.Visible;
-                Message.Blocks.Add(Utils.FormatText(message.TextContent));
+                Message.Blocks.Add(Utility.FormatText(message.TextContent));
                 Image.Visibility = Visibility.Collapsed;
             }
 
@@ -63,13 +64,13 @@ namespace Linphone.Controls {
         }
 
         private async void SetImage(string name) {
-            BitmapImage image = await Utils.ReadImageFromTempStorage(name);
+            BitmapImage image = await Utility.ReadImageFromTempStorage(name);
             Image.Source = image;
         }
 
         public string HumanFriendlyTimeStamp {
             get {
-                return Utils.FormatDate(ChatMessage.Time);
+                return Utility.FormatDate(ChatMessage.Time);
             }
         }
 
@@ -99,7 +100,7 @@ namespace Linphone.Controls {
         }
 
         private void Save_Click(object sender, RoutedEventArgs e) {
-            // bool result = Utils.SavePictureInMediaLibrary(ChatMessage.AppData);
+            // bool result = Utility.SavePictureInMediaLibrary(ChatMessage.AppData);
             //  MessageBox.Show(result ? AppResources.FileSavingSuccess : AppResources.FileSavingFailure, AppResources.FileSaving, MessageBoxButton.OK);
         }
 

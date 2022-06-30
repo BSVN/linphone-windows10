@@ -8,8 +8,10 @@
 .vs/
 ARM/
 Win32/
-x64/
-x86/
+x64/*
+!x64/EmbeddedBrowserWebView.dll
+x86/*
+!x86/EmbeddedBrowserWebView.dll
 Debug/
 Release/
 AppPackages/
@@ -34,3 +36,4 @@ prepare.conf
 *.nupkg
 *.un~
 *~
+!FixedRuntime/

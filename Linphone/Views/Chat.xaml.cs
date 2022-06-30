@@ -34,6 +34,7 @@ using Windows.Storage.Streams;
 using Windows.UI.Xaml.Media.Imaging;
 using System.Threading.Tasks;
 using Linphone;
+using BelledonneCommunications.Linphone.Commons;
 
 namespace Linphone.Views {
     public interface MessageReceivedListener {
@@ -399,7 +400,7 @@ namespace Linphone.Views {
                 bm.SaveJpeg(ms, w, h, 0, 100);
                 image.SetSource(ms);
             }*/
-            string filename = await Utils.SaveImageInLocalFolder(file);
+            string filename = await Utility.SaveImageInLocalFolder(file);
             MessageBox.SetImage(image);
             MessageBox.ImageName = filename;
             MessageBox.ImageType = file.FileType.Substring(1);
@@ -457,7 +458,7 @@ namespace Linphone.Views {
 
         public async void bubble_DownloadImage(object sender, ChatMessage message) {
             EnableDownloadButtons(false);
-            string fileName = Utils.GetFileName();
+            string fileName = Utility.GetFileName();
             message.Contents.GetEnumerator().Current.FilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, fileName);
             message.Appdata = fileName;
             message.Listener.OnMsgStateChanged = MessageStateChanged;

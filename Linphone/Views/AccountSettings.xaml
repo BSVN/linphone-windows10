@@ -9,7 +9,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     FlowDirection="RightToLeft"
     mc:Ignorable="d">
-    
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,7 +41,7 @@
                 <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,10,0,0">
                     <TextBlock Text="آدرس پنل">
                     </TextBlock>
-                    <TextBox x:Name="PanelUrl">
+                    <TextBox x:Name="PanelAddress" IsReadOnly="true">
                     </TextBox>
                 </StackPanel>
                 
