@@ -427,43 +427,6 @@ namespace Linphone.Views
             }
         }
 
-        private void Callback_Click(object sender, RoutedEventArgs e)
-        {
-            const string QUEUE_NAME = "cbq";
-
-            /*
-            if (Database == null)
-                return;
-
-            while (true)
-            {
-                SortedSetEntry? callback = Database.SortedSetPop(QUEUE_NAME);
-                if (callback == null || !callback.HasValue)
-                    break;
-
-                Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-
-				// Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
-				if (_settings.OutgoingCallEnabled)
-				{
-					string number = "0" + callback.Value.Element;
-					LinphoneManager.Instance.NewOutgoingCall(number);
-				}
-                else
-                {
-					string number = callback.Value.Element;
-					LinphoneManager.Instance.NewOutgoingCall(number);
-				}	
-                Call call = LinphoneManager.Instance.GetCurrentCall();
-                if (call == null)
-                    break;
-                if (call.State == CallState.End)
-                    Debug.WriteLine($"Call to {call.ToAddress} is ended");
-                break;
-			}
-            */
-		}
-
         private async void AgentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try

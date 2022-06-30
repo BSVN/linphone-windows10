@@ -284,7 +284,7 @@
                     </Button>
                     <Button x:Name="Callback" 
                             Style="{StaticResource AccentLongButtonStyle}" 
-                            Click="Callback_Click">
+                            Command="{x:Bind ViewModel.CallbackCommand}">
                         <Button.Background>
                             <!-- TODO: Please use StaticResouces and Style -->
                             <SolidColorBrush Color="#FF9990D6"/>

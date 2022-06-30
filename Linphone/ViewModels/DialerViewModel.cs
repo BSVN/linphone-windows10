@@ -26,6 +26,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
         {
             this.navigationService = navigationService;
             CallCommand = new RelayCommand(CallClick);
+            CallbackCommand = new RelayCommand(CallbackClick);
             BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
             httpClient = new HttpClient();
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
@@ -38,7 +39,12 @@ namespace BelledonneCommunications.Linphone.ViewModels
             set => SetProperty(ref this.sourceUri, value);
         }
 
-		public int OutgoingChannelSelectedIndex { get; set; }
+        private int outgoingChannelSelectedIndex;
+		public int OutgoingChannelSelectedIndex
+        {
+            get => outgoingChannelSelectedIndex;
+            set => SetProperty(ref this.outgoingChannelSelectedIndex, value);
+        }
 
 		// TODO: Please remove it, and use _settings
 		ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
@@ -52,6 +58,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
         public static bool IsIncomingCall { get; set; } = false;
 
         public ICommand CallCommand { get; }
+        public ICommand CallbackCommand { get; }
         public ICommand BrowserLoadedCommand { get; }
 
         // FIXME
@@ -241,7 +248,14 @@ namespace BelledonneCommunications.Linphone.ViewModels
             MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
         }
 
-        private async void CallClick()
+        private async void CallbackClick()
+		{
+			string normalizedAddres = AddressBoxText;
+
+			LinphoneManager.Instance.NewOutgoingCall($"{normalizedAddres}");
+		}
+
+		private async void CallClick()
         {
             if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
 
