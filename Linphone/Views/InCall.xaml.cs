@@ -14,22 +14,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-using BelledonneCommunications.Linphone.Presentation.Dto;
-using Linphone;
+using BelledonneCommunications.Linphone;
+using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Dialogs;
 using Linphone.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Devices.Sensors;
 using Windows.Graphics.Display;
 using Windows.Media.Capture;
-using Windows.Phone.Media.Devices;
-using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
@@ -38,12 +36,10 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
-namespace Linphone.Views {
+namespace Linphone.Views
+{
     public partial class InCall : Page {
         private DispatcherTimer oneSecondTimer;
-        private HttpClient httpClient;
-        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-
         private Timer fadeTimer;
         private Boolean askingVideo;
         private Call pausedCall;
@@ -60,7 +56,6 @@ namespace Linphone.Views {
 
         public InCall() {
             this.InitializeComponent();
-            httpClient = new HttpClient();
             this.DataContext = new InCallModel();
             askingVideo = false;
             //------------------------------------------------------------------------
@@ -106,8 +101,8 @@ namespace Linphone.Views {
         //----------------------------------------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------------------------
 
-#region Buttons
-private async void buttons_VideoClick(object sender, bool isVideoOn) {
+        #region Buttons ...
+        private async void buttons_VideoClick(object sender, bool isVideoOn) {
             // Workaround to pop the camera permission window
             await openCameraPopup();
 
@@ -184,14 +179,30 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             statsVisible = areStatsVisible;
         }
 
-        private async void buttons_HangUpClick(object sender) {            
+        private async void buttons_HangUpClick(object sender) 
+        {            
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing 
+                && CallFlowControl.Instance.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
+            {
+                CallFlowControl.Instance.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
+            }
+
             LinphoneManager.Instance.EndCurrentCall();
         }
         #endregion
 
-        protected override void OnNavigatedTo(NavigationEventArgs nee) {
-            List<string> parameters;
+        protected override async void OnNavigatedTo(NavigationEventArgs nee) 
+        {
             base.OnNavigatedTo(nee);
+
+            if (!await Utility.IsMicrophoneAvailable())
+            {
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
+            }
+
+            List<string> parameters;
             parameters = nee.Parameter as List<string>;
 
             LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;
@@ -199,17 +210,14 @@ private async void buttons_VideoClick(object sender, bool isVideoOn) {
             if (parameters == null)
                 return;
 
-            //http://localhost:9011/Agents?customerPhoneNumber=09193620380
-
             if (parameters.Count >= 1 && parameters[0].Contains("sip")) {
-                String calledNumber = parameters[0];
+                string calledNumber = parameters[0];
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(calledNumber);
-                calledNumber = String.Format("{0}@{1}", address.Username, address.Domain);
-                Contact.Text = calledNumber;
 
-                var browserSource = localSettings.Values["PanelUrl"] == null ? "Http://localhost:9011" : localSettings.Values["PanelUrl"] as string;
-                browserSource = $"{browserSource}/CallRespondingAgents/Dashboard?customerPhoneNumber={address.GetCanonicalPhoneNumber()}&IsIncomingCall=true&CallId={Dialer.CallId}&RedirectUrl={browserSource}{Dialer.BrowserCurrentUrlOffset}";
-                Browser.Source = new Uri(browserSource);
+                Contact.Text = address.GetCanonicalPhoneNumber();
+
+                // HotPoint #3
+                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallFlowControl.Instance.CallContext.CallId}");
 
                 if (calledNumber != null && calledNumber.Length > 0) {
                     // ContactManager cm = ContactManager.Instance;

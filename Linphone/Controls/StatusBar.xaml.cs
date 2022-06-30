@@ -43,20 +43,20 @@ namespace Linphone.Controls {
 
             if (state == RegistrationState.Ok) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_connected.png"));
-                StatusText.Text = "شماره ثبت شده است";
+                StatusText.Text = "تلفن :  متصل است ";
             } else if (state == RegistrationState.Progress) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_inprogress.png"));
-                StatusText.Text = "درحال ثبت شماره";
+                StatusText.Text = "تلفن :  در حال اتصال ";
             } else if (state == RegistrationState.Failed) {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_error.png"));
                 if (LinphoneManager.Instance.Core.DefaultProxyConfig.Error == Reason.Forbidden) {
-                    StatusText.Text = "منع در ثبت شماره";
+                    StatusText.Text = "تلفن : درخواست اتصال رد شد ";
                 } else {
-                    StatusText.Text = "شکست در ثبت شماره";
+                    StatusText.Text = "تلفن : شکست در برقراری ارتباط ";
                 }
             } else {
                 StatusLed.Source = new BitmapImage(new Uri(this.BaseUri, "/Assets/led_disconnected.png"));
-                StatusText.Text = "عدم اتصال";
+                StatusText.Text = "تلفن:  عدم اتصال ";
             }
 
         }

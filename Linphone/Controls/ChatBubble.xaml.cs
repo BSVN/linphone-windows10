@@ -14,6 +14,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using Linphone;
 using Linphone.Model;
 using System;
@@ -51,7 +52,7 @@ namespace Linphone.Controls
         {
             get
             {
-                return Utils.FormatText(ChatMessage.TextContent);
+                return Utility.FormatText(ChatMessage.TextContent);
             }
         }
 
@@ -62,7 +63,7 @@ namespace Linphone.Controls
         {
             get
             {
-                return Utils.FormatDate(ChatMessage.Time);
+                return Utility.FormatDate(ChatMessage.Time);
             }
         }
 

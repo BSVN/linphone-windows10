@@ -14,6 +14,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+using BelledonneCommunications.Linphone.Commons;
 using Linphone;
 using Linphone.Model;
 using System;
@@ -113,7 +114,7 @@ namespace Linphone {
         /// </summary>
         /// <param name="callerNumber"></param>
         public void NewCallStarted(string callerNumber) {
-            this.Page.Frame.Navigate(typeof(Views.Chats), new Uri("/Views/InCall.xaml?sip=" + Utils.ReplacePlusInUri(callerNumber), UriKind.RelativeOrAbsolute));
+            this.Page.Frame.Navigate(typeof(Views.Chats), new Uri("/Views/InCall.xaml?sip=" + Utility.ReplacePlusInUri(callerNumber), UriKind.RelativeOrAbsolute));
         }
 
         /// <summary>
