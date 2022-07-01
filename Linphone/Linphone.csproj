@@ -197,6 +197,9 @@
       <DependentUpon>TextBoxChatBubble.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\CoreHttpClient.cs" />
+    <Compile Include="Dialogs\ContinueCallbackAnsweringDialog.xaml.cs">
+      <DependentUpon>ContinueCallbackAnsweringDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\SettingsPasswordDialog.xaml.cs">
       <DependentUpon>SettingsPasswordDialog.xaml</DependentUpon>
     </Compile>
@@ -372,6 +375,10 @@
     <Page Include="Controls\TextBoxChatBubble.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialogs\ContinueCallbackAnsweringDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\SettingsPasswordDialog.xaml">
       <SubType>Designer</SubType>

@@ -125,25 +125,9 @@ namespace Linphone.Views
 
             WeakReferenceMessenger.Default.Register<ContinueCallbackAnsweringRequestMessage>(this, (r, message) =>
             {
-                var continueCallbackAnsweringDialog = new MessageDialog("آیا مایل به ادامه پاسخ‌دهی به تماس‌های درخواستی هستید؟");
-                TaskCompletionSource<CancellationToken> tcs = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
-                continueCallbackAnsweringDialog.Commands.Add(new UICommand(
-                    "بلی",
-                    new UICommandInvokedHandler((IUICommand command) =>
-                    {
-                        tcs.SetResult(new CancellationToken(false));
-                    })));
-                continueCallbackAnsweringDialog.Commands.Add(new UICommand(
-                    "خیر",
-                    new UICommandInvokedHandler((IUICommand command) =>
-					{
-                        tcs.SetResult(new CancellationToken(true));
-					})));
-                continueCallbackAnsweringDialog.DefaultCommandIndex = 0;
-                continueCallbackAnsweringDialog.CancelCommandIndex = 1;
+                var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
                 continueCallbackAnsweringDialog.ShowAsync();
-
-                message.Reply(tcs.Task);
+                message.Reply(continueCallbackAnsweringDialog.ResultAsync);
             });
 
             ViewModel.OnNavigatedTo(e);
