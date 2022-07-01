@@ -31,23 +31,28 @@ using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using BelledonneCommunications.Linphone.ViewModels;
+using BSN.Commons.Infrastructure;
 
 namespace Linphone
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
-    sealed partial class App : Application, CallControllerListener
+	/// <summary>
+	/// Provides application-specific behavior to supplement the default Application class.
+	/// </summary>
+	sealed partial class App : Application, CallControllerListener
     {
         Frame rootFrame;
         bool acceptCall;
         String sipAddress;
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
-        public App()
+		/// <summary>
+		/// Initializes the singleton application object.  This is the first line of authored code
+		/// executed, and as such is the logical equivalent of main() or WinMain().
+		/// </summary>
+		public App()
         {
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
@@ -56,10 +61,16 @@ namespace Linphone
             ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
 
             SettingsManager.InstallConfigFile();
+            applicationSettingsManager = new ApplicationSettingsManager();
+            applicationSettingsManager.Load();
+
+			Log.Logger.Error("Here is the usage.");
 
             Logger.ConfigureLogger();
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(App));
+
+            databaseFactory = new DatabaseFactory(applicationSettingsManager.RedisConnectionString);
 
             // TODO: Use this code check current version of WebView.
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
@@ -170,7 +181,7 @@ namespace Linphone
             Initialize(e, null);
         }
 
-        private void Initialize(IActivatedEventArgs e, String args)
+		private void Initialize(IActivatedEventArgs e, String args)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -208,6 +219,8 @@ namespace Linphone
 
             SystemNavigationManager.GetForCurrentView().BackRequested += Back_requested;
 
+            RegisterTypes(rootFrame);
+
             if (rootFrame.Content == null)
             {
                 if (args != null)
@@ -215,6 +228,7 @@ namespace Linphone
                     if (args.StartsWith("chat"))
                     {
                         var sipAddr = args.Split('=')[1];
+                        // TODO: Please replace with Prism equiavalent
                         rootFrame.Navigate(typeof(Views.Chat), sipAddr);
                     }
                     else
@@ -240,7 +254,26 @@ namespace Linphone
             DisableRegisteration();
         }
 
-        protected override void OnActivated(IActivatedEventArgs args)
+		private void RegisterTypes(Frame rootFrame)
+		{
+			var serviceCollection = new ServiceCollection()
+				.AddSingleton<INavigationService>(new NavigationService(rootFrame))
+				.AddSingleton<IDatabaseFactory>(databaseFactory)
+				.AddTransient<DialerViewModel>();
+			if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
+			{
+				serviceCollection
+					.AddSingleton<ICallbackQueue>(new CallbackQueueStub());
+			}
+			else
+			{
+                serviceCollection
+                    .AddSingleton<ICallbackQueue>(new CallbackQueue(databaseFactory));
+			}
+			Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
+		}
+
+		protected override void OnActivated(IActivatedEventArgs args)
         {
             if (args.Kind == ActivationKind.ToastNotification)
             {
@@ -297,9 +330,15 @@ namespace Linphone
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
         private void OnSuspending(object sender, SuspendingEventArgs e)
-        {
+		{
+            var deferral = e.SuspendingOperation.GetDeferral();
+
+            //TODO: Save application state and stop any background activity
+            DisableRegisteration();
+
             _logger.Debug("OnSuspending.");
-        }
+            deferral.Complete();
+		}
 
         private static void DisableRegisteration()
         {
@@ -396,5 +435,7 @@ namespace Linphone
 
         bool CloseApp = false;
         private readonly ILogger _logger;
-    }
+		private readonly ApplicationSettingsManager applicationSettingsManager;
+        private readonly IDatabaseFactory databaseFactory;
+	}
 }

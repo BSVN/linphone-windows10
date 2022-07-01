@@ -4,12 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Linphone"
     xmlns:controls="using:Linphone.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:uwpcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
     xmlns:webui="using:Microsoft.UI.Xaml.Controls"
     Background="{ThemeResource AppBarBackgroundThemeBrush}"
+    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -70,11 +73,12 @@
                         <controls:AddressBox x:Name="addressBox"
                                              Margin="0,0,0,0"
                                              BorderThickness="0"
+                                             Text="{x:Bind ViewModel.AddressBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              FontSize="40"/>
                         <ComboBox x:Name="OutgoingChannel"
                                   FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                                   FlowDirection="RightToLeft" 
-                                  SelectedIndex="0"
+                                  SelectedIndex="{x:Bind ViewModel.OutgoingChannelSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   PlaceholderText="سرویس"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem>
@@ -253,7 +257,7 @@
                     </Grid>
 
                     <Button x:Name="CallButton"
-                            Click="call_Click" 
+                            Command="{x:Bind ViewModel.CallCommand}"
                             Style="{StaticResource AccentLongButtonStyle}">
                         <Button.ContentTemplate>
                             <DataTemplate>
@@ -279,9 +283,8 @@
                         </Button.ContentTemplate>
                     </Button>
                     <Button x:Name="Callback" 
-                            Visibility="Collapsed"
                             Style="{StaticResource AccentLongButtonStyle}" 
-                            Click="Callback_Click">
+                            Command="{x:Bind ViewModel.CallbackCommand}">
                         <Button.Background>
                             <!-- TODO: Please use StaticResouces and Style -->
                             <SolidColorBrush Color="#FF9990D6"/>
@@ -365,8 +368,15 @@
             </CommandBar>
         </Grid>
 
-        <webui:WebView2 x:Name="Browser" Grid.Column="1"                        
-                        NavigationCompleted="Browser_NavigationCompleted" 
-                        Loaded="Browser_Loaded"/>
-    </Grid>
+		<webui:WebView2 x:Name="Browser" 
+                        Grid.Column="1"
+                        NavigationCompleted="Browser_NavigationCompleted"
+						Source="{x:Bind ViewModel.SourceUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+			<interactivity:Interaction.Behaviors>
+				<core:EventTriggerBehavior EventName="Loaded">
+					<core:InvokeCommandAction Command="{x:Bind ViewModel.BrowserLoadedCommand}" />
+				</core:EventTriggerBehavior>
+			</interactivity:Interaction.Behaviors>
+		</webui:WebView2>
+	</Grid>
 </Page>

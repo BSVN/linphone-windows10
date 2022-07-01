@@ -11,13 +11,13 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="Address" Grid.Column="0"                
-                 Text="{Binding Text}"
+        <TextBox x:Name="Address" Grid.Column="0"
+                 Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  FontSize="20"
                  VerticalContentAlignment="Center"
                  HorizontalContentAlignment="Center"
                  FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
-                 PlaceholderText="شماره تماس"  
+                 PlaceholderText="شماره تماس"
                  Padding="5"
                  VerticalAlignment="Center"
                  AcceptsReturn="False"

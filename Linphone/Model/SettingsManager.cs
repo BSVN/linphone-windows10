@@ -24,6 +24,7 @@ using System.IO;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using PCLAppConfig;
+using Linphone.Views;
 
 namespace Linphone.Model {
     /// <summary>
@@ -136,6 +137,9 @@ namespace Linphone.Model {
         private const string VideoActiveWhenGoingToBackgroundKeyName = "VideoActiveWhenGoingToBackground";
         private const string VideoAutoAcceptWhenGoingToBackgroundKeyName = "VideoAutoAcceptWhenGoingToBackground";
 		private const string RedisConnectionStringKeyName = "RedisConnectionString";
+
+		/// Outgoing call settings
+		private const string OutgoingCallEnabledKeyName = "OutgoingCallEnabled";
 		#endregion
 
 		/// <summary>
@@ -157,7 +161,12 @@ namespace Linphone.Model {
             LogLevelSetting = (LogCollectionState)(Config.GetInt(ApplicationSection, LogLevelKeyName, (int)LogCollectionState.Disabled));
             dict[VideoActiveWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoActiveWhenGoingToBackgroundKeyName, 0).ToString();
             dict[VideoAutoAcceptWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoAutoAcceptWhenGoingToBackgroundKeyName, 1).ToString();
-			dict[RedisConnectionStringKeyName] = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
+
+            // TODO: Check why default value in GetString does not work
+			string redisConnectionString = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
+            dict[RedisConnectionStringKeyName] = string.IsNullOrEmpty(redisConnectionString) ? ConfigurationManager.AppSettings[RedisConnectionStringKeyName] : redisConnectionString;
+
+			dict[OutgoingCallEnabledKeyName] = Config.GetBool(ApplicationSection, OutgoingCallEnabledKeyName, Convert.ToBoolean(ConfigurationManager.AppSettings[OutgoingCallEnabledKeyName])).ToString();
 		}
 
         /// <summary>
@@ -184,7 +193,12 @@ namespace Linphone.Model {
 			{
                 Config.SetString(ApplicationSection, RedisConnectionStringKeyName, GetNew(RedisConnectionStringKeyName));
 			}
-        }
+			if (ValueChanged(OutgoingCallEnabledKeyName))
+			{
+                Config.SetBool(ApplicationSection, OutgoingCallEnabledKeyName, Convert.ToBoolean(GetNew(OutgoingCallEnabledKeyName)));
+			}
+
+		}
         #endregion
 
         #region Accessors
@@ -255,8 +269,20 @@ namespace Linphone.Model {
 				Set(RedisConnectionStringKeyName, value);
 			}
 		}
-        #endregion
-    }
+
+		public bool OutgoingCallEnabled
+        {
+            get
+            {
+                return Convert.ToBoolean(Get(OutgoingCallEnabledKeyName));
+            }
+            internal set
+			{
+				Set(OutgoingCallEnabledKeyName, value.ToString());
+			}
+        }
+		#endregion
+	}
 
     /// <summary>
     /// Utility class to handle SIP account settings.

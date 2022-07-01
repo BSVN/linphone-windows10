@@ -7,7 +7,14 @@ namespace BelledonneCommunications.Linphone.Commons
     {
         public static string GetCanonicalPhoneNumber(this Address address)
         {
+
             string phoneNumber = address?.Username ?? throw new ArgumentNullException(nameof(address));
+#if DEBUG
+            if (phoneNumber.Length < 10)
+			{
+                return phoneNumber;
+			}
+#endif
             return "0" + phoneNumber.Substring(phoneNumber.Length - 10);
         }
 

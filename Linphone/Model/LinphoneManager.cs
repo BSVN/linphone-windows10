@@ -50,7 +50,9 @@ namespace Linphone.Model {
             }
         }
 
-        private Core _core;
+
+        private Dictionary<int, BSN.LinphoneSDK.Call> callsTable;
+		private Core _core;
         private CoreListener _coreListener;
         public bool isLinphoneRunning = false;
 
@@ -165,6 +167,7 @@ namespace Linphone.Model {
 
         public LinphoneManager() {
             Init();
+            callsTable = new Dictionary<int, BSN.LinphoneSDK.Call>();
         }
 
         private async void Init() {
@@ -389,11 +392,14 @@ namespace Linphone.Model {
             }
         }
 
-        public async void NewOutgoingCall(String sipAddress) {
+        public async Task<BSN.LinphoneSDK.Call> NewOutgoingCall(String sipAddress) {
             // Workaround to pop the microphone permission window
             await openMicrophonePopup();
 
-            Call call = Core.Invite(sipAddress);
+            BSN.LinphoneSDK.Call call = new BSN.LinphoneSDK.Call(rawCall: Core.Invite(sipAddress));
+
+            callsTable.Add(call.Id, call);
+            return call;
         }
 
         public void EndCurrentCall() {
@@ -407,6 +413,13 @@ namespace Linphone.Model {
                     }
                 }
             }
+        }
+
+        public void CallEnded(Call call)
+        {
+            BSN.LinphoneSDK.Call callEnded = callsTable[BSN.LinphoneSDK.Call.GenerateId(call)];
+            callEnded.Ended();
+            callsTable.Remove(callEnded.Id);
         }
 
         private void ShowCallError(string message) {
@@ -666,6 +679,7 @@ namespace Linphone.Model {
                 Debug.WriteLine(String.Format("[LinphoneManager] Call ended: {0}\r\n", message));
                 if (CallListener != null)
                     CallListener.CallEnded(call);
+                CallEnded(call);
                 string text;
                 switch (call.Reason) {
                     case Reason.None:

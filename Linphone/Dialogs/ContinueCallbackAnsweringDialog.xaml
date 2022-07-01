@@ -1,0 +1,28 @@
+﻿<ContentDialog
+    x:Class="BelledonneCommunications.Linphone.Dialogs.ContinueCallbackAnsweringDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BelledonneCommunications.Linphone.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FlowDirection="RightToLeft"
+    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+    PrimaryButtonText="بلی"
+    SecondaryButtonText="خیر"
+    PrimaryButtonClick="ContentDialog_OkButtonClick"
+    SecondaryButtonClick="ContentDialog_NoButtonClick"
+    DefaultButton="Primary"
+	Opened="ContentDialog_Opened"
+	>
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="آیا مایل به ادامه پاسخ‌دهی به تماس‌های درخواستی هستید؟"/>
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+
+    <Grid>
+    </Grid>
+</ContentDialog>

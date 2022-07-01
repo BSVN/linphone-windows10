@@ -20,6 +20,9 @@ using Windows.UI.Xaml.Controls;
 using Linphone;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.Resources;
+using Windows.UI.Xaml;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Linphone.Controls {
 
@@ -27,7 +30,17 @@ namespace Linphone.Controls {
 
         public StatusBar() {
             InitializeComponent();
+
+            RefreshCommand = new RelayCommand(() => { this.RefreshStatus(); });
         }
+
+        public static DependencyProperty RefreshCommandProperty = DependencyProperty.Register("RefreshCommand", typeof(ICommand), typeof(StatusBar), new PropertyMetadata(null));
+
+        public ICommand RefreshCommand
+		{
+            get { return (ICommand)GetValue(RefreshCommandProperty); }
+            set { SetValue(RefreshCommandProperty, value); }
+		}
 
         public void RefreshStatus() {
             RegistrationState state;

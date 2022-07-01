@@ -1,5 +1,6 @@
 ﻿/*
 AddressBox.xaml.cs
+Copyright (C) 2022  Resa Co.
 Copyright (C) 2016  Belledonne Communications, Grenoble, France
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,16 +26,31 @@ namespace Linphone.Controls
         public AddressBox()
         {
             InitializeComponent();
-            DataContext = this;
+            this.DataContext = this;
         }
 
-        public string Text
-        {
-            get { return Address.Text; }
+		/// <summary>
+		/// The <see cref="DependencyProperty"/> backing <see cref="Text"/>.
+		/// </summary>
+		public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
+			nameof(Text),
+			typeof(string),
+			typeof(AddressBox),
+            new PropertyMetadata(default(string)));
+
+
+		/// <summary>
+		/// Gets or sets the <see cref="string"/> representing the text to display.
+		/// </summary>
+		public string Text
+		{
+            get
+            {
+                return (string)GetValue(TextProperty);
+            }
             set
             {
-                Address.Text = value;
-                if (value.Length > 0)
+                if(value.Length > 0)
                 {
                     Backspace.IsEnabled = true;
                 }
@@ -42,28 +58,27 @@ namespace Linphone.Controls
                 {
                     Backspace.IsEnabled = false;
                 }
+                SetValue(TextProperty, value);
             }
-        }
+		}
 
         private void Backspace_Hold(object sender, RoutedEventArgs e)
-        {
-            Address.Text = string.Empty;
-        }
+		{
+            Text = string.Empty;
+		}
 
         private void Backspace_Click(object sender, RoutedEventArgs e)
         {
-            if (Address.Text.Length > 0)
-                Address.Text = Address.Text.Substring(0, Address.Text.Length - 1);
-
+            if (Text.Length > 0)
+                Text = Text.Substring(0, Text.Length - 1);
         }
 
         private void address_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (Address.Text.Length > 0)
+            if(Text.Length > 0)
             {
                 Backspace.IsEnabled = true;
-            }
-            else
+            } else
             {
                 Backspace.IsEnabled = false;
             }

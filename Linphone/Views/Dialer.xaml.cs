@@ -22,6 +22,10 @@ using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone.Model;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
+using Windows.Storage;
+using System.Net.Http;
+using BelledonneCommunications.Linphone.Presentation.Dto;
+using System.Diagnostics;
 using Serilog;
 using StackExchange.Redis;
 using System;
@@ -33,19 +37,39 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.UI.Popups;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using StackExchange.Redis;
+using BelledonneCommunications.Linphone.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using CommunityToolkit.Mvvm.Messaging;
+using BelledonneCommunications.Linphone.Messages;
+using System.Threading;
 
 namespace Linphone.Views
 {
-    public sealed partial class Dialer : Page, INotifyPropertyChanged
+
+    public sealed partial class Dialer : Page
     {
-        public Dialer()
+        public static string CallerId = null;
+
+        public static string CalleeId = null;
+
+        public static bool IsLoggedIn = false;
+
+
+        private readonly HttpClient httpClient;
+
+		public Dialer()
         {
             this.InitializeComponent();
-            DataContext = this;
+            httpClient = new HttpClient();
+
+			DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
+            ViewModel.RefreshCommand = status.RefreshCommand;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
 
@@ -55,7 +79,7 @@ namespace Linphone.Views
             {
                 if (args.Key == Windows.System.VirtualKey.Enter)
                 {
-                    call_Click(null, null);
+                    ViewModel.CallCommand.Execute(null);
                 }
             };
 
@@ -78,121 +102,38 @@ namespace Linphone.Views
             }
         }
 
-        /// <summary>
-        /// Raises right after page unloading 
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
-        {
-            _logger.Debug("OnNavigatingFrom");
+        public DialerViewModel ViewModel => (DialerViewModel)DataContext;
 
-            try
-            {
-                if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
-                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = Browser.Source.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error while updating dialer browser's history.");
-                CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
-            }
+		protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+		{
+			base.OnNavigatingFrom(e);
+            ViewModel.OnNavigatingFrom(e);
+            WeakReferenceMessenger.Default.Unregister<ContinueCallbackAnsweringRequestMessage>(this);
+		}
 
-            base.OnNavigatingFrom(e);
-        }
+		protected override async void OnNavigatedTo(NavigationEventArgs e)
+		{
+			base.OnNavigatedTo(e);
 
-        private int unreadMessageCount;
-        public int UnreadMessageCount
-        {
-            get
+            // TODO: Please remove it (Linphone has it, see LinphoneManager)
+            if (!await Utility.IsMicrophoneAvailable())
             {
-                return unreadMessageCount;
+                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
+                await micrphonePermissionDialog.ShowAsync();
+                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
             }
 
-            set
+            WeakReferenceMessenger.Default.Register<ContinueCallbackAnsweringRequestMessage>(this, (r, message) =>
             {
-                unreadMessageCount = value;
-                if (unreadMessageCount > 0)
-                {
-                    unreadMessageText.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    unreadMessageText.Visibility = Visibility.Collapsed;
-                }
+                var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
+                continueCallbackAnsweringDialog.ShowAsync();
+                message.Reply(continueCallbackAnsweringDialog.ResultAsync);
+            });
 
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs("UnreadMessageCount"));
-                }
-            }
-        }
+            ViewModel.OnNavigatedTo(e);
+		}
 
-        private ConnectionMultiplexer RedisConnectionMultiplexer
-        {
-            get
-            {
-                if (connectionMultiplexer == null)
-                {
-                    _settings.Load();
-                    try
-                    {
-                        connectionMultiplexer = ConnectionMultiplexer.Connect((_settings.RedisConnectionString ?? throw new ArgumentNullException("Redis connection string is null")) == "" ? "localhost" : _settings.RedisConnectionString);
-                    }
-                    catch (RedisConnectionException e)
-                    {
-                        Debug.WriteLine(e.Message);
-                        var messageDialog = new MessageDialog("ارتباط با پایگاه داده ردیس برقرار نگردید، لطفا تنظیمات را مجددا بررسی کنید و یا از ارتباط شبکه مطمئن گردید");
-                        messageDialog.Commands.Add(new UICommand("باشه"));
-                        messageDialog.DefaultCommandIndex = 0;
-                        messageDialog.CancelCommandIndex = 0;
-                        messageDialog.ShowAsync();
-                    }
-                }
-
-                return connectionMultiplexer;
-            }
-        }
-
-        private IDatabase Database
-        {
-            get
-            {
-                if (database == null)
-                {
-                    database = RedisConnectionMultiplexer?.GetDatabase();
-                }
-
-                return database;
-            }
-        }
-
-        private int missedCallCount;
-        public int MissedCallCount
-        {
-            get
-            {
-                return missedCallCount;
-            }
-
-            set
-            {
-                missedCallCount = value;
-                if (missedCallCount > 0)
-                {
-                    MissedCallText.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    MissedCallText.Visibility = Visibility.Collapsed;
-                }
-
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MissedCallCount"));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void LogUploadProgressIndication(int offset, int total)
+		private void LogUploadProgressIndication(int offset, int total)
         {
             /* base.UIDispatcher.BeginInvoke(() =>
              {
@@ -202,192 +143,6 @@ namespace Linphone.Views
                      BugReportUploadProgressBar.Value = offset;
                  }
              });*/
-        }
-
-        private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
-        {
-            status.RefreshStatus();
-        }
-
-        private void MessageReceived(ChatRoom room, ChatMessage message)
-        {
-            UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
-        }
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            if (!await Utility.IsMicrophoneAvailable())
-            {
-                var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
-                await micrphonePermissionDialog.ShowAsync();
-                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
-            }
-
-            LinphoneManager.Instance.CoreDispatcher = Dispatcher;
-            LinphoneManager.Instance.RegistrationChanged += RegistrationChanged;
-            LinphoneManager.Instance.MessageReceived += MessageReceived;
-            LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;
-            status.RefreshStatus();
-
-            /*    LinPhone Developer Comments:
-             *    if (e.NavigationMode == NavigationMode.New)
-                {
-                    if (BugCollector.HasExceptionToReport())
-                    {
-                        // Allow to report exceptions before the creation of the core in case the problem is in there
-                        CustomMessageBox reportIssueDialog = new CustomMessageBox()
-                        {
-                            Caption = AppResources.ReportCrashDialogCaption,
-                            Message = AppResources.ReportCrashDialogMessage,
-                            LeftButtonContent = AppResources.ReportCrash,
-                            RightButtonContent = AppResources.Close
-                        };
-
-                        reportIssueDialog.Dismissed += (s, ev) =>
-                        {
-                            switch (ev.Result)
-                            {
-                                case CustomMessageBoxResult.LeftButton:
-                                    BugReportUploadProgressBar.Minimum = 0;
-                                    BugReportUploadProgressBar.Maximum = 100;
-                                    BugReportUploadPopup.Visibility = Visibility.Visible;
-                                    LinphoneManager.Instance.LogUploadProgressIndicationEH += LogUploadProgressIndication;
-                                    LinphoneManager.Instance.LinphoneCore.UploadLogCollection();
-                                    break;
-                                case CustomMessageBoxResult.RightButton:
-                                    BugCollector.DeleteFile();
-                                    break;
-                            }
-                        };
-
-                        reportIssueDialog.Show();
-                    }
-                    else
-                    {
-                        BugReportUploadPopup.Visibility = Visibility.Collapsed;
-                    }
-                }*/
-
-            if (LinphoneManager.Instance.Core.CallsNb > 0)
-            {
-                Call call = LinphoneManager.Instance.Core.CurrentCall;
-                if (call != null)
-                {
-                    List<String> parameters = new List<String>();
-                    parameters.Add(call.RemoteAddress.AsStringUriOnly());
-                    Frame.Navigate(typeof(Views.InCall), parameters);
-                }
-            }
-
-            if (LinphoneManager.Instance.GetUnreadMessageCount() > 0)
-            {
-                UnreadMessageCount = LinphoneManager.Instance.GetUnreadMessageCount();
-            }
-
-            if (LinphoneManager.Instance.Core.MissedCallsCount > 0)
-            {
-                MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
-            }
-
-            if (e.Parameter is String && (e.Parameter as String)?.Length > 0 && e.NavigationMode != NavigationMode.Back)
-            {
-                String arguments = e.Parameter as String;
-                addressBox.Text = arguments;
-                try
-                {
-                    Address address = LinphoneManager.Instance.Core.InterpretUrl(e.Parameter as String);
-                    String sipAddressToCall = address.AsStringUriOnly();
-                    addressBox.Text = sipAddressToCall;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Linphone raised exception.");
-                }
-            }
-        }
-
-        private void CallStateChanged(Call call, CallState state)
-        {
-            MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs nee)
-        {
-            base.OnNavigatedFrom(nee);
-            // LinPhone Developers Comments:
-            // LinphoneManager.Instance.LogUploadProgressIndicationEH -= LogUploadProgressIndication;
-            // BugReportUploadPopup.Visibility = Visibility.Collapsed;
-        }
-
-        private async void call_Click(object sender, RoutedEventArgs e)
-        {
-            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
-
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
-            {
-                _logger.Information("Cant start a call because of a running command.");
-                return;
-            }
-
-            if (CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
-            {
-                CallFlowControl.Instance.LeaveIncomingCallQueue();
-                TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
-                while (true)
-                {
-                    timeout = timeout - TimeSpan.FromMilliseconds(500);
-                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
-                    {
-                        break;
-                    }
-
-                    await Task.Delay(500);
-                }
-            }
-
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
-            {
-                _logger.Information("Cant start a call because of a still running command.");
-                _logger.Information("Critical Situation.");
-
-                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
-
-                return;
-            }
-
-            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
-            {
-                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
-                return;
-            }
-
-            if (addressBox.Text.Length > 0)
-            {
-                string inboundService;
-                if (OutgoingChannel.SelectedIndex == 0)
-                {
-                    inboundService = HEAD_OF_HOUSEHOLD_SERVICE;
-                }
-                else
-                {
-                    inboundService = SELLERS_SERVICE_PHONENUMBER;
-                }
-
-                string normalizedAddres = addressBox.Text;
-                if (!normalizedAddres.StartsWith("00"))
-                {
-                    if (normalizedAddres.StartsWith('0'))
-                        normalizedAddres = "0" + normalizedAddres;
-                    else
-                        normalizedAddres = "00" + normalizedAddres;
-                }
-
-                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
-
-                LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
-            }
         }
 
         private void numpad_Click(object sender, RoutedEventArgs e)
@@ -473,25 +228,6 @@ namespace Linphone.Views
                 LinphoneManager.Instance.Core.RefreshRegisters();
         }
 
-        private void Browser_Loaded(object sender, RoutedEventArgs e)
-        {
-            // HotPoint #4
-            if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
-                && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
-            {
-                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");
-            }
-            else
-            {
-                Browser.Source = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
-            }
-        }
-
-        public static String StripUnicodeCharactersFromString(string inputValue)
-        {
-            return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
-        }
-
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
         {
             _logger.Information("Browser path: {Path}.", sender.Source.AbsolutePath);
@@ -522,7 +258,7 @@ namespace Linphone.Views
                     Regex regex = new Regex(pattern);
                     MatchCollection matches = regex.Matches(html);
                     Match match = matches.FirstOrDefault();
-                    string a = StripUnicodeCharactersFromString(html);
+                    string a = DialerViewModel.StripUnicodeCharactersFromString(html);
 
                     if (match != null)
                     {
@@ -702,28 +438,6 @@ namespace Linphone.Views
             }
         }
 
-        private void Callback_Click(object sender, RoutedEventArgs e)
-        {
-            const string QUEUE_NAME = "cbq";
-
-            if (Database == null)
-                return;
-
-            while (true)
-            {
-                SortedSetEntry? callback = Database.SortedSetPop(QUEUE_NAME);
-                if (callback == null || !callback.HasValue)
-                    break;
-
-                Database.SortedSetAdd(QUEUE_NAME, callback.Value.Element, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-
-                // Add 0 as a prefix to ensure number starts with 00 (for PSTN call it is mandatory)
-                LinphoneManager.Instance.NewOutgoingCall("0" + callback.Value.Element);
-
-                break;
-            }
-        }
-
         private async void AgentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
@@ -746,14 +460,9 @@ namespace Linphone.Views
         }
 
 
-        private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
-        private const string SELLERS_SERVICE_PHONENUMBER = "99971";
-        private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
         private static int UserInfoRetryLimit = 4;
 
         private readonly ILogger _logger;
-        private ConnectionMultiplexer connectionMultiplexer;
-        private IDatabase database;
         private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
     }
 }
