@@ -6,12 +6,18 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels
 {
 	public class CallbackDto
 	{
-		public CallbackDto(string number)
+		public CallbackDto(string number, double rank)
 		{
 			Number = number;
+			Rank = rank;	
 		}
 
 		public string Number
+		{
+			get;
+		}
+
+		public double Rank
 		{
 			get;
 		}

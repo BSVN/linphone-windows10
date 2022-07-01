@@ -87,7 +87,6 @@ namespace Linphone
             acceptCall = false;
         }
 
-        // TODO: Please replace with Prism equiavalent
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
             _logger.Error(e.Exception, "Application unhandled exception.");
@@ -264,15 +263,17 @@ namespace Linphone
             DisableRegisteration();
         }
 
-        private void RegisterTypes(Frame rootFrame)
+		private void RegisterTypes(Frame rootFrame)
 		{
-            Ioc.Default.ConfigureServices(
-                new ServiceCollection().AddSingleton<INavigationService>(new NavigationService(rootFrame))
-                .AddTransient<DialerViewModel>()
-                .BuildServiceProvider());
+			Ioc.Default.ConfigureServices(
+				new ServiceCollection()
+                .AddSingleton<INavigationService>(new NavigationService(rootFrame))
+                .AddSingleton<ICallbackQueue>(new CallbackQueueStub())
+				.AddTransient<DialerViewModel>()
+				.BuildServiceProvider());
 		}
 
-        protected override void OnActivated(IActivatedEventArgs args)
+		protected override void OnActivated(IActivatedEventArgs args)
         {
             if (args.Kind == ActivationKind.ToastNotification)
             {

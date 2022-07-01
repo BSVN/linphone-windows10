@@ -9,7 +9,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 	{
 		public CallbackDto Pop()
 		{
-			return new CallbackDto(number: "1000");
+			return new CallbackDto(number: "1000", rank: DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 		}
 
 		public void Push(CallbackDto callback)

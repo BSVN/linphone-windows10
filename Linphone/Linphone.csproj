@@ -204,6 +204,7 @@
       <DependentUpon>MicrophonePermissionRequestDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Commons\Logger.cs" />
+    <Compile Include="Messages\ContinueCallbackAnsweringRequestMessage.cs" />
     <Compile Include="Model\AlphaKeyGroup.cs" />
     <Compile Include="Model\ContactItem.cs" />
     <Compile Include="Model\BaseModel.cs" />
@@ -217,7 +218,7 @@
     <Compile Include="Model\InCallModel.cs" />
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
-	<Compile Include="NavigationService.cs" />
+    <Compile Include="Commons\NavigationService.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
@@ -462,6 +463,10 @@
     <PRIResource Include="String\en-US\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BSN.LinphoneSDK\BSN.LinphoneSDK.csproj">
+      <Project>{322c487b-f614-4788-8e31-f75b717474a1}</Project>
+      <Name>BSN.LinphoneSDK</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BSN.Resa.Mci.CallCenter.AgentApp.Data\BSN.Resa.Mci.CallCenter.AgentApp.Data.csproj">
       <Project>{fef53d4b-04b8-44c7-970b-46c0231a1d34}</Project>
       <Name>BSN.Resa.Mci.CallCenter.AgentApp.Data</Name>

@@ -1,7 +1,12 @@
-﻿using BelledonneCommunications.Linphone.Core;
+﻿using BelledonneCommunications.Linphone.Commons;
+using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Messages;
 using BelledonneCommunications.Linphone.Presentation.Dto;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Linphone;
 using Linphone.Model;
 using Linphone.Views;
@@ -11,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.Core;
@@ -22,9 +28,10 @@ namespace BelledonneCommunications.Linphone.ViewModels
 {
 	public class DialerViewModel : ObservableObject
 	{
-        public DialerViewModel(INavigationService navigationService)
+        public DialerViewModel(INavigationService navigationService, ICallbackQueue callbackQueue)
         {
             this.navigationService = navigationService;
+            this.callbackQueue = callbackQueue;
             CallCommand = new RelayCommand(CallClick);
             CallbackCommand = new RelayCommand(CallbackClick);
             BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
@@ -250,9 +257,23 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         private async void CallbackClick()
 		{
-			string normalizedAddres = AddressBoxText;
+            while (true)
+            {
+                CallbackDto callback = callbackQueue.Pop();
+                if (callback is null)
+                    break;
 
-			LinphoneManager.Instance.NewOutgoingCall($"{normalizedAddres}");
+                callbackQueue.Push(new CallbackDto(callback.Number, DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+                string normalizedAddress = callback.Number;
+                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{normalizedAddress}");
+                await outgoingCall.WhenEnded();
+                // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
+				await Task.Delay(1000);
+                Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
+                CancellationToken cancellationToken = await cancellationTokenTask;
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+            }
 		}
 
 		private async void CallClick()
@@ -344,7 +365,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
         private readonly INavigationService navigationService;
-        private readonly HttpClient httpClient;
+		private readonly ICallbackQueue callbackQueue;
+		private readonly HttpClient httpClient;
         private readonly ILogger _logger;
 
         private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";

@@ -45,6 +45,9 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using CommunityToolkit.Mvvm.Messaging;
+using BelledonneCommunications.Linphone.Messages;
+using System.Threading;
 
 namespace Linphone.Views
 {
@@ -105,19 +108,43 @@ namespace Linphone.Views
 		{
 			base.OnNavigatingFrom(e);
             ViewModel.OnNavigatingFrom(e);
+            WeakReferenceMessenger.Default.Unregister<ContinueCallbackAnsweringRequestMessage>(this);
 		}
 
 		protected override async void OnNavigatedTo(NavigationEventArgs e)
 		{
 			base.OnNavigatedTo(e);
 
-            // TODO: Please remove it
+            // TODO: Please remove it (Linphone has it, see LinphoneManager)
             if (!await Utility.IsMicrophoneAvailable())
             {
                 var micrphonePermissionDialog = new MicrophonePermissionRequestDialog();
                 await micrphonePermissionDialog.ShowAsync();
                 await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
             }
+
+            WeakReferenceMessenger.Default.Register<ContinueCallbackAnsweringRequestMessage>(this, (r, message) =>
+            {
+                var continueCallbackAnsweringDialog = new MessageDialog("آیا مایل به ادامه پاسخ‌دهی به تماس‌های درخواستی هستید؟");
+                TaskCompletionSource<CancellationToken> tcs = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+                continueCallbackAnsweringDialog.Commands.Add(new UICommand(
+                    "بلی",
+                    new UICommandInvokedHandler((IUICommand command) =>
+                    {
+                        tcs.SetResult(new CancellationToken(false));
+                    })));
+                continueCallbackAnsweringDialog.Commands.Add(new UICommand(
+                    "خیر",
+                    new UICommandInvokedHandler((IUICommand command) =>
+					{
+                        tcs.SetResult(new CancellationToken(true));
+					})));
+                continueCallbackAnsweringDialog.DefaultCommandIndex = 0;
+                continueCallbackAnsweringDialog.CancelCommandIndex = 1;
+                continueCallbackAnsweringDialog.ShowAsync();
+
+                message.Reply(tcs.Task);
+            });
 
             ViewModel.OnNavigatedTo(e);
 		}

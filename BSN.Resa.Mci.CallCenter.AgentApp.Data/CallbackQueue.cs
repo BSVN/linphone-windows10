@@ -23,8 +23,12 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 		public CallbackDto Pop()
 		{
-			SortedSetEntry? callback = database.SortedSetPop(QUEUE_NAME);
-			return new CallbackDto(number: callback?.Element);
+			SortedSetEntry? callbackHolder = database.SortedSetPop(QUEUE_NAME);
+
+			if (callbackHolder == null)
+				return null;
+			SortedSetEntry callback = callbackHolder.Value;
+			return new CallbackDto(number: callback.Element, rank: callback.Score);
 		}
 
 		public void Push(CallbackDto callback)
