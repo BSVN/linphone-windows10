@@ -19,7 +19,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 		public IDbContext Get()
 		{
-			throw new NotImplementedException();
+			return new RedisContext(Database);
 		}
 
 		private ConnectionMultiplexer RedisConnectionMultiplexer

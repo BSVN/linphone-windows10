@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Linphone;
 using Linphone.Model;
 using Linphone.Views;
+using PCLAppConfig;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -257,6 +258,9 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         private async void CallbackClick()
 		{
+            if (await PreparingOutgoingCall() == false)
+                return;
+
             while (true)
             {
                 CallbackDto callback = callbackQueue.Pop();
@@ -278,45 +282,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
 		private async void CallClick()
         {
-            if (!CallFlowControl.Instance.AgentProfile.IsLoggedIn) return;
-
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
-            {
-                _logger.Information("Cant start a call because of a running command.");
+            if (await PreparingOutgoingCall() == false)
                 return;
-            }
-
-            if (CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
-            {
-                CallFlowControl.Instance.LeaveIncomingCallQueue();
-                TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
-                while (true)
-                {
-                    timeout = timeout - TimeSpan.FromMilliseconds(500);
-                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
-                    {
-                        break;
-                    }
-
-                    await Task.Delay(500);
-                }
-            }
-
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
-            {
-                _logger.Information("Cant start a call because of a still running command.");
-                _logger.Information("Critical Situation.");
-
-                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
-
-                return;
-            }
-
-            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
-            {
-                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
-                return;
-            }
 
             if (AddressBoxText.Length > 0)
             {
@@ -344,6 +311,57 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if prepared for ougoing call, otherwise return false</returns>
+        private async Task<bool> PreparingOutgoingCall()
+		{
+            bool isInHomeTesting = Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]);
+
+            if (!isInHomeTesting && !CallFlowControl.Instance.AgentProfile.IsLoggedIn) return false;
+
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                _logger.Information("Cant start a call because of a running command.");
+                return false;
+            }
+
+            if (!isInHomeTesting && CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
+            {
+                CallFlowControl.Instance.LeaveIncomingCallQueue();
+                TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+                while (true)
+                {
+                    timeout = timeout - TimeSpan.FromMilliseconds(500);
+                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(500);
+                }
+            }
+
+            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            {
+                _logger.Information("Cant start a call because of a still running command.");
+                _logger.Information("Critical Situation.");
+
+                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+
+                return false;
+            }
+
+            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
+            {
+                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
+                return false;
+            }
+
+            return true;
+		}
 
         private void OnLoadedBrowser()
 		{

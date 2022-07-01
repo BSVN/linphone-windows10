@@ -31,30 +31,18 @@ using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Linphone;
-using Linphone.Model;
-using System.Diagnostics;
-using Windows.UI.Core;
-using System.Collections.Generic;
-using Linphone.Views;
-using System.Net.Http;
-using BelledonneCommunications.Linphone.Presentation.Dto;
-using Serilog;
-using PCLAppConfig;
-using System.Threading.Tasks;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data;
-using Windows.ApplicationModel.Resources;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using BelledonneCommunications.Linphone;
 using BelledonneCommunications.Linphone.ViewModels;
+using BSN.Commons.Infrastructure;
 
 namespace Linphone
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
-    sealed partial class App : Application, CallControllerListener
+	/// <summary>
+	/// Provides application-specific behavior to supplement the default Application class.
+	/// </summary>
+	sealed partial class App : Application, CallControllerListener
     {
         Frame rootFrame;
         bool acceptCall;
@@ -73,12 +61,16 @@ namespace Linphone
             ConfigurationManager.Initialise(PCLAppConfig.FileSystemStream.PortableStream.Current);
 
             SettingsManager.InstallConfigFile();
+            applicationSettingsManager = new ApplicationSettingsManager();
+            applicationSettingsManager.Load();
 
 			Log.Logger.Error("Here is the usage.");
 
             Logger.ConfigureLogger();
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(App));
+
+            databaseFactory = new DatabaseFactory(applicationSettingsManager.RedisConnectionString);
 
             // TODO: Use this code check current version of WebView.
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
@@ -94,7 +86,6 @@ namespace Linphone
             e.Handled = true;
         }
 
-        // TODO: Please replace with Prism equiavalent
         private void Back_requested(object sender, BackRequestedEventArgs e)
         {
             if (rootFrame.CanGoBack)
@@ -265,12 +256,21 @@ namespace Linphone
 
 		private void RegisterTypes(Frame rootFrame)
 		{
-			Ioc.Default.ConfigureServices(
-				new ServiceCollection()
-                .AddSingleton<INavigationService>(new NavigationService(rootFrame))
-                .AddSingleton<ICallbackQueue>(new CallbackQueueStub())
-				.AddTransient<DialerViewModel>()
-				.BuildServiceProvider());
+			var serviceCollection = new ServiceCollection()
+				.AddSingleton<INavigationService>(new NavigationService(rootFrame))
+				.AddSingleton<IDatabaseFactory>(databaseFactory)
+				.AddTransient<DialerViewModel>();
+			if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
+			{
+				serviceCollection
+					.AddSingleton<ICallbackQueue>(new CallbackQueueStub());
+			}
+			else
+			{
+                serviceCollection
+                    .AddSingleton<ICallbackQueue>(new CallbackQueue(databaseFactory));
+			}
+			Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
 		}
 
 		protected override void OnActivated(IActivatedEventArgs args)
@@ -435,5 +435,7 @@ namespace Linphone
 
         bool CloseApp = false;
         private readonly ILogger _logger;
-    }
+		private readonly ApplicationSettingsManager applicationSettingsManager;
+        private readonly IDatabaseFactory databaseFactory;
+	}
 }

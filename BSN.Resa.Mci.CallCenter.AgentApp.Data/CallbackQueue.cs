@@ -16,9 +16,10 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 	public class CallbackQueue : ICallbackQueue
 	{
-		public CallbackQueue(DatabaseFactory databaseFactory)
+		public CallbackQueue(IDatabaseFactory databaseFactory)
 		{
-			database = databaseFactory.Database;
+			RedisContext redisContext = (RedisContext)databaseFactory.Get();
+			database = redisContext.Database;
 		}
 
 		public CallbackDto Pop()
