@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BelledonneCommunications.Linphone.Core
 {
     // Mention: Sip login on shayan side, means that "I am ready for accept incoming calls" and does nothing to outgoing calls.
-    // Todo: Draw and double check state transition on the phone events to prevent unpredicted situations.
+    // Todo: Draw required diagrams and double check state transition on the phone events to prevent unpredicted situations.
     internal class CallFlowControl
     {
         private static readonly CallFlowControl _instance = new CallFlowControl();
@@ -83,7 +83,6 @@ namespace BelledonneCommunications.Linphone.Core
         /// <returns></returns>
         public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateOutgoingCallAsync(string calleePhoneNumber, string inboundService)
         {
-            // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
             try
             {
                 _logger.Information("Initiation outgoing call to: {CallePhoneNumber}.", calleePhoneNumber);
@@ -154,14 +153,25 @@ namespace BelledonneCommunications.Linphone.Core
         /// <returns>Task of async actions.</returns>
         public async Task TerminateCall()
         {
+            // Todo: if caller imidiately terminates a call before CallEstablshed report being delivered it may be results in conflicting state on call record in the database.
+            // We can ignore state updates from Missed to Established.
+
             // Call missed by caller departure.
             if (CallContext.CallState == CallState.Ringing && CallContext.Direction == CallDirection.Incoming)
             {
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                if (CallContext.CallId != default)
+                {
+                    _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                }
+                else
+                {
+                    _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                              CallContext.CalleeNumber,
+                                                              CallContext.InboundService);
+                }
+
                 CallContext.Reset();
             }
             // Call missed by agent decline.
@@ -169,12 +179,19 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                if (CallContext.CallId != default)
+                {
+                    _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                }
+                else
+                {
+                    _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                              CallContext.CalleeNumber,
+                                                              CallContext.InboundService);
+                }
+
                 CallContext.Reset();
             }
-
             // Call terminated either by caller hang up or agent hang up during an established call.
             else if (CallContext.Direction == CallDirection.Incoming)
             {
@@ -205,7 +222,16 @@ namespace BelledonneCommunications.Linphone.Core
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.TerminateCallAsync(CallContext.CallId);
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
 
                     CallContext.Reset();
                 }
@@ -220,10 +246,16 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
-                    // Todo: Call should be ignored in this situation.
-                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
-                                                              CallContext.CalleeNumber,
-                                                              CallContext.InboundService);
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
 
                     AgentProfile.BrowsingHistory = "";
 
@@ -246,7 +278,7 @@ namespace BelledonneCommunications.Linphone.Core
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Internal error while delivering missed outgoing call report.");
+                    _logger.Error(ex, "Internal error while delivering terminate outgoing call report.");
                 }
             }
             else

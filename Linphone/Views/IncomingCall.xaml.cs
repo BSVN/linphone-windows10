@@ -130,9 +130,6 @@ namespace Linphone.Views
         {
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
-                // HotPoint #1
-                CallFlowControl.Instance.CallEstablished();
-
                 List<string> parameters = new List<string>();
                 parameters.Add(_callerNumber);
                 parameters.Add("incomingCall");

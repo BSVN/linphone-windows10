@@ -68,4 +68,6 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
     public class CallsCommandServiceTerminateResponse : GenericResponseBase<CallViewModel> { }
 
     public class CallsQueryServiceGetByIdResponse : GenericResponseBase<CallViewModel> { }
+
+    public class CallsCommandServiceSubmitMissedByIdResponse : GenericResponseBase<CallViewModel> { }
 }

@@ -47,7 +47,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
     public enum CallState
     {
         Ringing = 1,
-        Accepted = 2,
+        Established = 2,
         Missed = 3,
         NormalCleared = 5,
         Terminated = 5

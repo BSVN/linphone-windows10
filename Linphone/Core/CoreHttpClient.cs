@@ -162,6 +162,29 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        /// <summary>
+        /// Fire and forget method to submit a missed call.
+        /// </summary>
+        /// <param name="callerPhoneNumber">Caller PhoneNumber.</param>
+        /// <param name="agentPhoneNumber">Callee PhoneNumber</param>
+        public async Task SubmitMissedCallByIdAsync(Guid id)
+        {
+            try
+            {
+                _logger.Information("Attempting to deliver a missed call report using call id: {CallId}.", id.ToString());
+
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Missed/{id}", null);
+
+                CallsCommandServiceSubmitMissedByIdResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedByIdResponse>();
+
+                _logger.Information("Successfully reported the missed call with response payload {Payload}.", result.SerializeToJson());
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to send request for submission of a missed call.");
+            }
+        }
+
         public async Task<CallsCommandServiceTerminateResponse> TerminateCallAsync(Guid callId)
         {
             try
