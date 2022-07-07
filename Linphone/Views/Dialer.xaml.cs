@@ -48,6 +48,7 @@ using Windows.UI.Xaml.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using BelledonneCommunications.Linphone.Messages;
 using System.Threading;
+using PCLAppConfig;
 
 namespace Linphone.Views
 {
@@ -130,7 +131,7 @@ namespace Linphone.Views
 
                 async Task<Task<CancellationToken>> ReceiveAsync(Dialer d)
 				{
-					var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
+			        var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
 					await continueCallbackAnsweringDialog.ShowAsync();
                     return continueCallbackAnsweringDialog.ResultAsync;
 				}
@@ -191,19 +192,26 @@ namespace Linphone.Views
 
         private async void settings_Click(object sender, RoutedEventArgs e)
         {
-            var passwordDialog = new SettingsPasswordDialog();
-            await passwordDialog.ShowAsync();
-            if (passwordDialog.Password == "Noei@Sip#")
-            {
+            if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
+			{
                 Frame.Navigate(typeof(Views.Settings), null);
-            }
+			}
             else
-            {
-                _logger.Information("Unsuccessful attempt to enter settings password with: {Password}", passwordDialog.Password);
-            }
-        }
+			{
+				var passwordDialog = new SettingsPasswordDialog();
+				await passwordDialog.ShowAsync();
+				if (passwordDialog.Password == "Noei@Sip#")
+				{
+					Frame.Navigate(typeof(Views.Settings), null);
+				}
+				else
+				{
+					_logger.Information("Unsuccessful attempt to enter settings password with: {Password}", passwordDialog.Password);
+				}
+			}
+		}
 
-        private void about_Click(object sender, RoutedEventArgs e)
+		private void about_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(Views.About), null);
         }

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -53,11 +55,13 @@ namespace BelledonneCommunications.Linphone.Dialogs
 
 		private void ContentDialog_OkButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
 		{
+			timer.Stop();
 			taskCompletionSource.SetResult(new CancellationToken(false));
 		}
 
 		private void ContentDialog_NoButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
 		{
+			timer.Stop();
 			taskCompletionSource.SetResult(new CancellationToken(true));
 		}
 
@@ -69,6 +73,5 @@ namespace BelledonneCommunications.Linphone.Dialogs
 		private TimeSpan time;
 		private readonly DispatcherTimer timer;
 		private readonly TaskCompletionSource<CancellationToken> taskCompletionSource;
-
 	}
 }

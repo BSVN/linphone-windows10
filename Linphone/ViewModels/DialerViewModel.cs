@@ -229,6 +229,10 @@ namespace BelledonneCommunications.Linphone.ViewModels
 		{
             _logger.Debug("OnNavigatingFrom");
 
+            LinphoneManager.Instance.RegistrationChanged -= RegistrationChanged;
+            LinphoneManager.Instance.MessageReceived -= MessageReceived;
+            LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
+
             try
             {
                 if (SourceUri.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
@@ -272,7 +276,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{normalizedAddress}");
                 await outgoingCall.WhenEnded();
                 // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
-				await Task.Delay(1000);
+				await Task.Delay(500);
                 Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
                 CancellationToken cancellationToken = await cancellationTokenTask;
                 if (cancellationToken.IsCancellationRequested)

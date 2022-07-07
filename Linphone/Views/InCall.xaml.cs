@@ -253,7 +253,7 @@ namespace Linphone.Views
             Frame.BackStack.Clear();
             base.OnNavigatedFrom(nee);
 
-            //LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
+            LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
         }
 
         public void CallStateChanged(Call call, CallState state) {
