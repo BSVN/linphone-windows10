@@ -123,12 +123,20 @@ namespace Linphone.Views
                 await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
             }
 
-            WeakReferenceMessenger.Default.Register<ContinueCallbackAnsweringRequestMessage>(this, (r, message) =>
+            // for more informatin about why doing like below
+            // https://github.com/CommunityToolkit/dotnet/issues/332#issuecomment-1172560617
+            WeakReferenceMessenger.Default.Register<Dialer, ContinueCallbackAnsweringRequestMessage>(this, (r, message) =>
             {
-                var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
-                continueCallbackAnsweringDialog.ShowAsync();
-                message.Reply(continueCallbackAnsweringDialog.ResultAsync);
-            });
+
+                async Task<Task<CancellationToken>> ReceiveAsync(Dialer d)
+				{
+					var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
+					await continueCallbackAnsweringDialog.ShowAsync();
+                    return continueCallbackAnsweringDialog.ResultAsync;
+				}
+
+				message.Reply(ReceiveAsync(r).Unwrap());
+			});
 
             ViewModel.OnNavigatedTo(e);
 		}
