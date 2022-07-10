@@ -291,20 +291,6 @@
     <AppxManifest Include="$(ApplicationManifest)">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="App.config">
-      <TransformOnBuild>true</TransformOnBuild>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="App.Debug.config">
-      <DependentUpon>App.config</DependentUpon>
-      <IsTransformFile>true</IsTransformFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="App.Release.config">
-      <DependentUpon>App.config</DependentUpon>
-      <IsTransformFile>true</IsTransformFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Linphone_StoreKey.pfx" />
     <None Include="Linphone_TemporaryKey.pfx" />
     <None Include="ResaSoftPhone.pfx" />
@@ -503,7 +489,7 @@
       <Version>2.1.13</Version>
     </PackageReference>
     <PackageReference Include="BSN.Common.PCLAppConfig">
-      <Version>1.0.3</Version>
+      <Version>1.0.7</Version>
     </PackageReference>
     <PackageReference Include="BSN.Commons.PresentationInfrastructure">
       <Version>1.7.1</Version>
@@ -567,17 +553,35 @@
   <PropertyGroup>
     <LinphoneSDK-Content>Assets</LinphoneSDK-Content>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <TransformOnBuild>true</TransformOnBuild>
+    </None>
+    <None Include="App.Debug.config">
+      <DependentUpon>App.config</DependentUpon>
+      <IsTransformFile>true</IsTransformFile>
+    </None>
+    <None Include="App.Release.config">
+      <DependentUpon>App.config</DependentUpon>
+      <IsTransformFile>true</IsTransformFile>
+    </None>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <Target Name="BeforeGenerateProjectPriFile">
+    <ItemGroup>
+      <PackagingOutputs Include="$(MSBuildProjectDirectory)\$(OutputPath)$(AssemblyName).exe.config">
+        <OutputGroup>CustomOutputGroupForPackaging</OutputGroup>
+        <TargetPath>$(AssemblyName).exe.config</TargetPath>
+        <ProjectName>$(ProjectName)</ProjectName>
+      </PackagingOutputs>
+    </ItemGroup>
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
