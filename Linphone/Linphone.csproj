@@ -576,7 +576,7 @@
   <Target Name="BeforeGenerateProjectPriFile">
     <ItemGroup>
       <PackagingOutputs Include="$(MSBuildProjectDirectory)\$(OutputPath)$(AssemblyName).exe.config">
-        <OutputGroup>CustomOutputGroupForPackaging</OutputGroup>
+        <OutputGroup>ContentFilesProjectOutputGroup</OutputGroup>
         <TargetPath>$(AssemblyName).exe.config</TargetPath>
         <ProjectName>$(ProjectName)</ProjectName>
       </PackagingOutputs>
