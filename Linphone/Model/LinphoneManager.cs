@@ -396,6 +396,7 @@ namespace Linphone.Model {
             // Workaround to pop the microphone permission window
             await openMicrophonePopup();
 
+            // TODO: Some null point exception apearing here!!!
             BSN.LinphoneSDK.Call call = new BSN.LinphoneSDK.Call(rawCall: Core.Invite(sipAddress));
 
             callsTable.Add(call.Id, call);
