@@ -64,6 +64,7 @@ namespace Linphone.Views {
             mediaEncryption.SelectedItem = _networkSettings.MEncryption;
 
 			RedisConnectionString.Text = _settings.RedisConnectionString;
+			PanelAddress.Text = _settings.PanelAddress;
 
 			ICE.IsOn = LinphoneManager.Instance.Core.NatPolicy.IceEnabled;
 
@@ -112,6 +113,7 @@ namespace Linphone.Views {
             _chatSettings.Save();
 
 			_settings.RedisConnectionString = RedisConnectionString.Text;
+            _settings.PanelAddress = PanelAddress.Text;
             _settings.DebugEnabled = (bool)Debug.IsOn;
             _settings.Save();
 

@@ -27,7 +27,10 @@ namespace BelledonneCommunications.Linphone.Core
 
         private CallFlowControl()
         {
-            string panelBaseUrl = ConfigurationManager.AppSettings["PanelAddress"];
+            ApplicationSettingsManager settings = new ApplicationSettingsManager();
+            settings.Load();
+
+            string panelBaseUrl = settings.PanelAddress;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
