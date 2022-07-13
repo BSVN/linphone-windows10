@@ -479,6 +479,5 @@ namespace Linphone.Views
         private static int UserInfoRetryLimit = 4;
 
         private readonly ILogger _logger;
-        private readonly ApplicationSettingsManager _settings = new ApplicationSettingsManager();
     }
 }

@@ -137,6 +137,7 @@ namespace Linphone.Model {
         private const string VideoActiveWhenGoingToBackgroundKeyName = "VideoActiveWhenGoingToBackground";
         private const string VideoAutoAcceptWhenGoingToBackgroundKeyName = "VideoAutoAcceptWhenGoingToBackground";
 		private const string RedisConnectionStringKeyName = "RedisConnectionString";
+		private const string PanelAddressKeyName = "PanelAddress";
 
 		/// Outgoing call settings
 		private const string OutgoingCallEnabledKeyName = "OutgoingCallEnabled";
@@ -166,6 +167,9 @@ namespace Linphone.Model {
 			string redisConnectionString = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
             dict[RedisConnectionStringKeyName] = string.IsNullOrEmpty(redisConnectionString) ? ConfigurationManager.AppSettings[RedisConnectionStringKeyName] : redisConnectionString;
 
+			string panelAddress = Config.GetString(ApplicationSection, PanelAddressKeyName, "");
+            dict[PanelAddressKeyName] = string.IsNullOrEmpty(panelAddress) ? ConfigurationManager.AppSettings[PanelAddressKeyName] : panelAddress;
+
 			dict[OutgoingCallEnabledKeyName] = Config.GetBool(ApplicationSection, OutgoingCallEnabledKeyName, Convert.ToBoolean(ConfigurationManager.AppSettings[OutgoingCallEnabledKeyName])).ToString();
 		}
 
@@ -193,7 +197,11 @@ namespace Linphone.Model {
 			{
                 Config.SetString(ApplicationSection, RedisConnectionStringKeyName, GetNew(RedisConnectionStringKeyName));
 			}
-			if (ValueChanged(OutgoingCallEnabledKeyName))
+            if (ValueChanged(PanelAddressKeyName))
+            {
+                Config.SetString(ApplicationSection, PanelAddressKeyName, GetNew(PanelAddressKeyName));
+            }
+            if (ValueChanged(OutgoingCallEnabledKeyName))
 			{
                 Config.SetBool(ApplicationSection, OutgoingCallEnabledKeyName, Convert.ToBoolean(GetNew(OutgoingCallEnabledKeyName)));
 			}
@@ -270,7 +278,22 @@ namespace Linphone.Model {
 			}
 		}
 
-		public bool OutgoingCallEnabled
+        /// <summary>
+        /// Specify panel address for accessing to agent and customer information in browser.
+        /// </summary>
+        public string PanelAddress
+        {
+            get
+            {
+                return Get(PanelAddressKeyName);
+            }
+            set
+            {
+                Set(PanelAddressKeyName, value);
+            }
+        }
+
+        public bool OutgoingCallEnabled
         {
             get
             {
