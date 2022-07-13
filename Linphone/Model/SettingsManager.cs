@@ -328,8 +328,6 @@ namespace Linphone.Model {
         private Dictionary<string, TransportType> TransportToEnum;
         #endregion
 
-        private Config Config;
-
         public SIPAccountSettingsManager() {
             EnumToTransport = new Dictionary<TransportType, string>()
              {
@@ -344,15 +342,6 @@ namespace Linphone.Model {
                 { ResourceLoader.GetForCurrentView().GetString("TransportTCP"), TransportType.Tcp },
                 { ResourceLoader.GetForCurrentView().GetString("TransportTLS"), TransportType.Tls }
             };
-
-            if (LinphoneManager.Instance.Core == null)
-            {
-                Config = LinphoneManager.Instance.Core.CreateConfig(LinphoneManager.Instance.GetConfigPath());
-            }
-            else
-            {
-                Config = LinphoneManager.Instance.Core.Config;
-            }
         }
 
         #region Implementation of the ISettingsManager interface
