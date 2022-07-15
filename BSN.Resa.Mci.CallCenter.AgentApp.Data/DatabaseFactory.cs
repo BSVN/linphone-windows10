@@ -1,17 +1,18 @@
 ﻿using BSN.Commons.Infrastructure;
+using Serilog;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 {
-	public class DatabaseFactory : IDatabaseFactory, IDisposable
+    public class DatabaseFactory : IDatabaseFactory, IDisposable
 	{
 		public DatabaseFactory(string connectionString)
 		{
 			_connectionString = connectionString;
+			_logger = Log.Logger.ForContext("SourceContext", nameof(DatabaseFactory));
 		}
+
 		public void Dispose()
 		{
 			throw new NotImplementedException();
@@ -28,7 +29,14 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 			{
 				if (connectionMultiplexer == null)
 				{
-					connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
+                    try
+                    {
+						connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
+                    }
+					catch(Exception ex)
+                    {
+						_logger.Error(ex, "Unable to connect to the Redis server.");
+                    }
 				}
 
 				return connectionMultiplexer;
@@ -50,6 +58,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
         private ConnectionMultiplexer connectionMultiplexer;
 		private IDatabase database;
+		private readonly ILogger _logger;
 
 		private readonly string _connectionString;
 	}

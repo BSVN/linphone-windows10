@@ -24,7 +24,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 		public CallbackDto Pop()
 		{
-			SortedSetEntry? callbackHolder = database.SortedSetPop(QUEUE_NAME);
+			SortedSetEntry? callbackHolder = database?.SortedSetPop(QUEUE_NAME);
 
 			if (callbackHolder == null)
 				return null;
@@ -34,7 +34,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 		public void Push(CallbackDto callback)
 		{
-			database.SortedSetAdd(QUEUE_NAME, callback.Number, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+			database?.SortedSetAdd(QUEUE_NAME, callback.Number, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 		}
 
 		private readonly IDatabase database;
