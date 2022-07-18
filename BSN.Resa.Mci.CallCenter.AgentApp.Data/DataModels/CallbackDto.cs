@@ -1,25 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Text.Json.Serialization;
 
 namespace BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels
 {
-	public class CallbackDto
+    public class CallbackDto
 	{
-		public CallbackDto(string number, double rank)
+		protected CallbackDto() { }
+
+		public CallbackDto(string calleeNumber, string callerNumber, DateTime time)
 		{
-			Number = number;
-			Rank = rank;	
+			CalleeNumber = calleeNumber;
+			CallerNumber = callerNumber;
+			Time = time;
 		}
 
-		public string Number
-		{
-			get;
-		}
+		public string CalleeNumber { get; private set; }
 
-		public double Rank
-		{
-			get;
-		}
+		public string CallerNumber { get; private set; }
+
+		[JsonConverter(typeof(CallbackDateTimeConverter))]
+		public DateTime Time { get; private set; }
 	}
 }

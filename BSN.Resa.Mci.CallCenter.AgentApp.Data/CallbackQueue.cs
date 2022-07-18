@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,13 +30,17 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 
 			if (callbackHolder == null)
 				return null;
+			
 			SortedSetEntry callback = callbackHolder.Value;
-			return new CallbackDto(number: callback.Element, rank: callback.Score);
+			
+			var callbackDto = JsonSerializer.Deserialize<CallbackDto>(callback.Element.ToString());
+			
+			return callbackDto;
 		}
 
 		public void Push(CallbackDto callback)
 		{
-			database?.SortedSetAdd(QUEUE_NAME, callback.Number, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+			database?.SortedSetAdd(QUEUE_NAME, JsonSerializer.Serialize(callback), DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 		}
 
 		private readonly IDatabase database;

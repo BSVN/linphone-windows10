@@ -271,9 +271,9 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 if (callback is null)
                     break;
 
-                callbackQueue.Push(new CallbackDto(callback.Number, DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
-                string normalizedAddress = callback.Number;
-                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{normalizedAddress}");
+                callbackQueue.Push(new CallbackDto(callback.CalleeNumber, callback.CallerNumber, callback.Time));
+                string normalizedAddress = callback.CallerNumber;
+                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.CalleeNumber}*{normalizedAddress}");
                 await outgoingCall.WhenEnded();
                 // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
 				await Task.Delay(500);
