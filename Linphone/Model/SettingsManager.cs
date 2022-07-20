@@ -136,12 +136,13 @@ namespace Linphone.Model {
         private const string VideoActiveWhenGoingToBackgroundKeyName = "VideoActiveWhenGoingToBackground";
         private const string VideoAutoAcceptWhenGoingToBackgroundKeyName = "VideoAutoAcceptWhenGoingToBackground";
 		private const string RedisConnectionStringKeyName = "RedisConnectionString";
-		#endregion
+        private const string PanelAddressKeyName = "PanelAddress";
+        #endregion
 
-		/// <summary>
-		/// Public constructor.
-		/// </summary>
-		public ApplicationSettingsManager() {
+        /// <summary>
+        /// Public constructor.
+        /// </summary>
+        public ApplicationSettingsManager() {
             if (LinphoneManager.Instance.Core == null) {
                 Config = LinphoneManager.Instance.Core.CreateConfig(LinphoneManager.Instance.GetConfigPath());
             } else {
@@ -158,7 +159,10 @@ namespace Linphone.Model {
             dict[VideoActiveWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoActiveWhenGoingToBackgroundKeyName, 0).ToString();
             dict[VideoAutoAcceptWhenGoingToBackgroundKeyName] = Config.GetInt(ApplicationSection, VideoAutoAcceptWhenGoingToBackgroundKeyName, 1).ToString();
 			dict[RedisConnectionStringKeyName] = Config.GetString(ApplicationSection, RedisConnectionStringKeyName, "");
-		}
+
+            string panelAddress = Config.GetString(ApplicationSection, PanelAddressKeyName, "");
+            dict[PanelAddressKeyName] = string.IsNullOrEmpty(panelAddress) ? ConfigurationManager.AppSettings[PanelAddressKeyName] : panelAddress;
+        }
 
         /// <summary>
         /// Save the application settings.
@@ -184,6 +188,10 @@ namespace Linphone.Model {
 			{
                 Config.SetString(ApplicationSection, RedisConnectionStringKeyName, GetNew(RedisConnectionStringKeyName));
 			}
+            if (ValueChanged(PanelAddressKeyName))
+            {
+                Config.SetString(ApplicationSection, PanelAddressKeyName, GetNew(PanelAddressKeyName));
+            }
         }
         #endregion
 
@@ -255,8 +263,24 @@ namespace Linphone.Model {
 				Set(RedisConnectionStringKeyName, value);
 			}
 		}
+
+        /// <summary>
+        /// Specify panel address for accessing to agent and customer information in browser.
+        /// </summary>
+        public string PanelAddress
+        {
+            get
+            {
+                return Get(PanelAddressKeyName);
+            }
+            set
+            {
+                Set(PanelAddressKeyName, value);
+            }
+        }
         #endregion
     }
+
 
     /// <summary>
     /// Utility class to handle SIP account settings.
