@@ -6,19 +6,19 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels
 	{
 		protected CallbackDto() { }
 
-		public CallbackDto(string calleeNumber, string callerNumber, long unixTimeSeconds)
+		public CallbackDto(string callee_number, string caller_number, string time)
 		{
-			CalleeNumber = calleeNumber;
-			CallerNumber = callerNumber;
-			Time = unixTimeSeconds;
+			this.callee_number = callee_number;
+			this.caller_number = caller_number;
+			this.time = time;
 		}
 
-		public string CalleeNumber { get; private set; }
+		public string callee_number { get; private set; }
 
-		public string CallerNumber { get; private set; }
+		public string caller_number { get; private set; }
 
-		public long Time { get; private set; }
+		public string time { get; private set; }
 
-		public DateTime RequestedAt => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Time);
+		public DateTime RequestedAt => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(long.Parse(time));
 	}
 }

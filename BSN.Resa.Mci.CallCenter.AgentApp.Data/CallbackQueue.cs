@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 {
-	using BSN.Commons.Infrastructure;
-	using DataModels;
-	using StackExchange.Redis;
+    using BSN.Commons.Infrastructure;
+    using DataModels;
+    using StackExchange.Redis;
 
-	public interface ICallbackQueue
+    public interface ICallbackQueue
 	{
 		CallbackDto Pop();
 		void Push(CallbackDto callback);

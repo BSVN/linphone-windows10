@@ -202,7 +202,7 @@ namespace BelledonneCommunications.Linphone.Core
             // We can ignore state updates from Missed to Established.
 
             // Call missed by caller departure.
-            if (CallContext.CallState == CallState.Ringing && CallContext.Direction == CallDirection.Incoming)
+            if (CallContext.CallState == CallState.Ringing && CallContext.CallType == CallType.Incoming)
             {
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
@@ -220,7 +220,7 @@ namespace BelledonneCommunications.Linphone.Core
                 CallContext.Reset();
             }
             // Call missed by agent decline.
-            else if (CallContext.CallState == CallState.DeclinedByAgent && CallContext.Direction == CallDirection.Incoming)
+            else if (CallContext.CallState == CallState.DeclinedByAgent && CallContext.CallType == CallType.Incoming)
             {
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
@@ -238,7 +238,7 @@ namespace BelledonneCommunications.Linphone.Core
                 CallContext.Reset();
             }
             // Call terminated either by caller hang up or agent hang up during an established call.
-            else if (CallContext.Direction == CallDirection.Incoming)
+            else if (CallContext.CallType == CallType.Incoming)
             {
                 try
                 {
@@ -260,7 +260,7 @@ namespace BelledonneCommunications.Linphone.Core
                     _logger.Error(ex, "Failed to terminate the call.");
                 }
             }
-            else if (CallContext.Direction == CallDirection.Outgoing &&
+            else if ((CallContext.CallType == CallType.Outgoing || CallContext.CallType == CallType.Callback) &&
                      CallContext.CallState == CallState.DeclinedByAgent)
             {
                 _logger.Information("Agent canceled the call before customer answers the call.");
@@ -285,7 +285,7 @@ namespace BelledonneCommunications.Linphone.Core
                     _logger.Error(ex, "Internal error while delivering call termination report.");
                 }
             }
-            else if (CallContext.Direction == CallDirection.Outgoing &&
+            else if ((CallContext.CallType == CallType.Outgoing || CallContext.CallType == CallType.Callback) &&
                      CallContext.CallState == CallState.Ringing)
             {
                 _logger.Information("Callee canceled the call before call being established.");
@@ -311,7 +311,7 @@ namespace BelledonneCommunications.Linphone.Core
                     _logger.Error(ex, "Internal error while delivering missed outgoing call report.");
                 }
             }
-            else if (CallContext.Direction == CallDirection.Outgoing)
+            else if (CallContext.CallType == CallType.Outgoing || CallContext.CallType == CallType.Callback)
             {
                 _logger.Information("Callee canceled the call before call being established.");
                 try

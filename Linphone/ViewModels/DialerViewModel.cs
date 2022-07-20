@@ -271,13 +271,15 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 if (callback is null)
                     break;
 
-                callbackQueue.Push(new CallbackDto(callback.CalleeNumber, callback.CallerNumber, callback.Time));
-                string normalizedAddress = callback.CallerNumber;
+                callbackQueue.Push(new CallbackDto(callback.callee_number, callback.caller_number, callback.time));
+                string normalizedAddress = callback.caller_number.GetCanonicalPhoneNumber();
 
-                await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: "09102313100", inboundService: callback.CalleeNumber, requestedAt: callback.RequestedAt);
+                await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
 
-                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.CalleeNumber}*{normalizedAddress}");
+                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.callee_number}*0{normalizedAddress}");
+                
                 await outgoingCall.WhenEnded();
+
                 // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
 				await Task.Delay(500);
                 Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
