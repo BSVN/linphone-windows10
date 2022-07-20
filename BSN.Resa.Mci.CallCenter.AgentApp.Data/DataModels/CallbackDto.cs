@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 
 namespace BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels
 {
@@ -7,18 +6,19 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels
 	{
 		protected CallbackDto() { }
 
-		public CallbackDto(string calleeNumber, string callerNumber, DateTime time)
+		public CallbackDto(string calleeNumber, string callerNumber, long unixTimeSeconds)
 		{
 			CalleeNumber = calleeNumber;
 			CallerNumber = callerNumber;
-			Time = time;
+			Time = unixTimeSeconds;
 		}
 
 		public string CalleeNumber { get; private set; }
 
 		public string CallerNumber { get; private set; }
 
-		[JsonConverter(typeof(CallbackDateTimeConverter))]
-		public DateTime Time { get; private set; }
+		public long Time { get; private set; }
+
+		public DateTime RequestedAt => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Time);
 	}
 }

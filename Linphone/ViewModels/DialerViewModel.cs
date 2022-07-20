@@ -273,6 +273,9 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
                 callbackQueue.Push(new CallbackDto(callback.CalleeNumber, callback.CallerNumber, callback.Time));
                 string normalizedAddress = callback.CallerNumber;
+
+                await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: "09102313100", inboundService: callback.CalleeNumber, requestedAt: callback.RequestedAt);
+
                 BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.CalleeNumber}*{normalizedAddress}");
                 await outgoingCall.WhenEnded();
                 // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
@@ -326,7 +329,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
             if (!isInHomeTesting && !CallFlowControl.Instance.AgentProfile.IsLoggedIn) return false;
 
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
             {
                 _logger.Information("Cant start a call because of a running command.");
                 return false;
@@ -339,7 +342,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 while (true)
                 {
                     timeout = timeout - TimeSpan.FromMilliseconds(500);
-                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.CallType != CallType.Command)
                     {
                         break;
                     }
@@ -348,7 +351,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 }
             }
 
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
             {
                 _logger.Information("Cant start a call because of a still running command.");
                 _logger.Information("Critical Situation.");

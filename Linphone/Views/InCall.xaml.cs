@@ -19,6 +19,7 @@ using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Dialogs;
 using Linphone.Model;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +51,7 @@ namespace Linphone.Views
         private DisplayInformation displayInformation;
         private SimpleOrientationSensor orientationSensor;
         private SimpleOrientation deviceOrientation;
+        private readonly ILogger _logger;
 
         private readonly object popupLock = new Object();
 
@@ -89,6 +91,8 @@ namespace Linphone.Views
             buttons.VideoClick += buttons_VideoClick;
             buttons.BluetoothClick += buttons_BluetoothClick;
             buttons.DialpadClick += buttons_DialpadClick;
+
+            _logger = Log.Logger.ForContext("SourceContext", nameof(InCall));
 
             // Handling event when app will be suspended
             Application.Current.Suspending += new SuspendingEventHandler(App_Suspended);
@@ -181,7 +185,7 @@ namespace Linphone.Views
 
         private async void buttons_HangUpClick(object sender) 
         {            
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing 
+            if ((CallFlowControl.Instance.CallContext.CallType == CallType.Outgoing || CallFlowControl.Instance.CallContext.CallType == CallType.Callback)
                 && CallFlowControl.Instance.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
             {
                 CallFlowControl.Instance.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
@@ -256,67 +260,123 @@ namespace Linphone.Views
             LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
         }
 
-        public void CallStateChanged(Call call, CallState state) {
+        // This method is constantly called even if this page completely being leaved.
+        // It causes memory leakage issue and multiple calls for each CallStateChanged triggres. 
+        public void CallStateChanged(Call call, CallState state)
+        {
             if (call == null)
                 return;
 
-            if (state == CallState.Connected && oneSecondTimer == null) {
+            _logger.Information("Call state changed to {CallState} Call Direction: {CallDirection}.", state.ToString("g"), CallFlowControl.Instance.CallContext.CallType.ToString("g"));
+
+            if (CallFlowControl.Instance.CallContext.CallType != CallType.Command)
+            {
+                if (state == CallState.Connected) _connectedStateReached = true;
+                else if (state == CallState.End) _endStateReached = true;
+            }
+
+            if (CallFlowControl.Instance.CallContext.CallType != CallType.Command)
+            {
+                if (!_isEstablishedEventDelivered)
+                {
+                    lock (_lockDeliverEstablished)
+                    {
+                        if (!_isEstablishedEventDelivered)
+                        {
+                            if (_connectedStateReached)
+                            {
+                                _isEstablishedEventDelivered = true;
+                                CallFlowControl.Instance.CallEstablished();
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (state == CallState.Connected && oneSecondTimer == null)
+            {
                 oneSecondTimer = new DispatcherTimer();
                 oneSecondTimer.Interval = TimeSpan.FromSeconds(1);
                 oneSecondTimer.Tick += timerTick;
                 oneSecondTimer.Start();
+
                 statusIcon.Visibility = Visibility.Visible;
                 buttons.enabledVideo(false);
-            } else if (state == CallState.Resuming) {
+            }
+            else if (state == CallState.Resuming)
+            {
                 oneSecondTimer = new DispatcherTimer();
                 oneSecondTimer.Interval = TimeSpan.FromSeconds(1);
                 oneSecondTimer.Tick += timerTick;
                 oneSecondTimer.Start();
-            } else if (state == CallState.StreamsRunning) {
+            }
+            else if (state == CallState.StreamsRunning)
+            {
                 statusIcon.Glyph = "\uE768";
-                if (!call.MediaInProgress()) {
+                if (!call.MediaInProgress())
+                {
                     buttons.enabledPause(true);
-                    if (LinphoneManager.Instance.IsVideoAvailable) {
+                    if (LinphoneManager.Instance.IsVideoAvailable)
+                    {
                         buttons.enabledVideo(true);
                     }
                 }
-                if (call.CurrentParams.VideoEnabled) {
+                if (call.CurrentParams.VideoEnabled)
+                {
                     displayVideo(true);
                     buttons.checkedVideo(true);
-                } else {
+                }
+                else
+                {
                     displayVideo(false);
                 }
-            } else if (state == CallState.PausedByRemote) {
-                if (call.CurrentParams.VideoEnabled) {
+            }
+            else if (state == CallState.PausedByRemote)
+            {
+                if (call.CurrentParams.VideoEnabled)
+                {
                     displayVideo(false);
                 }
                 buttons.enabledVideo(false);
                 statusIcon.Glyph = "\uE769";
-            } else if (state == CallState.Paused) {
-                if (call.CurrentParams.VideoEnabled) {
+            }
+            else if (state == CallState.Paused)
+            {
+                if (call.CurrentParams.VideoEnabled)
+                {
                     displayVideo(false);
                 }
                 buttons.enabledVideo(false);
                 statusIcon.Glyph = "\uE769";
-            } else if (state == CallState.Error || state == CallState.End) {
-                if (oneSecondTimer != null) {
+            }
+            else if (state == CallState.Error || state == CallState.End)
+            {
+                if (oneSecondTimer != null)
+                {
                     oneSecondTimer.Stop();
                 }
-            } else if (state == CallState.UpdatedByRemote) {
-                if (!LinphoneManager.Instance.IsVideoAvailable) {
+            }
+            else if (state == CallState.UpdatedByRemote)
+            {
+                if (!LinphoneManager.Instance.IsVideoAvailable)
+                {
                     CallParams parameters = LinphoneManager.Instance.Core.CreateCallParams(call);
                     call.AcceptUpdate(parameters);
-                } else {
+                }
+                else
+                {
                     bool remoteVideo = call.RemoteParams.VideoEnabled;
                     bool localVideo = call.CurrentParams.VideoEnabled;
                     bool autoAcceptCameraPolicy = LinphoneManager.Instance.Core.VideoActivationPolicy.AutomaticallyAccept;
-                    if (remoteVideo && !localVideo && !autoAcceptCameraPolicy) {
+                    if (remoteVideo && !localVideo && !autoAcceptCameraPolicy)
+                    {
                         //lock (popupLock) {
-                            if (askingVideo) return;
-                            askingVideo = true;
-                            AskVideoPopup(call);
+                        if (askingVideo) return;
+                        askingVideo = true;
+                        AskVideoPopup(call);
                         //}
-                    }else if(!remoteVideo)
+                    }
+                    else if (!remoteVideo)
                         askingVideo = false;
                 }
             }
@@ -692,5 +752,11 @@ namespace Linphone.Views
                 }
             }
         }
+
+        private bool _isEstablishedEventDelivered = false;
+        private bool _connectedStateReached = false;
+        private bool _endStateReached = false;
+
+        private object _lockDeliverEstablished = new object();
     }
 }

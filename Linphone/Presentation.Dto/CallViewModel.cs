@@ -23,22 +23,6 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
     {
         public Guid Id { get; set; }
 
-        public string CallerPhoneNumber { get; set; }
-
-        public string CalleePhoneNumber { get; set; }
-
-        public string OperatorFullName { get; set; }
-
-        public Guid OperatorId { get; set; }
-
-        public CallState State { get; set; }
-
-        public DateTime StartedAt { get; set; }
-
-        public DateTime FinishedAt { get; set; }
-
-        public TimeSpan Duration { get; set; }
-
         public Guid? TicketId { get; set; }
 
         public CallReason? CallReason { get; set; }

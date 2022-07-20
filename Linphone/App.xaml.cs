@@ -97,8 +97,8 @@ namespace Linphone
 
         public async void CallEnded(Call call)
         {
-            bool wasAnOutgoingCall = CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing;
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            bool wasAnOutgoingCallOrCallback = CallFlowControl.Instance.CallContext.CallType == CallType.Outgoing || CallFlowControl.Instance.CallContext.CallType == CallType.Callback;
+            if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
             {
                 _logger.Information("A command call has been ended.");
 
@@ -108,7 +108,7 @@ namespace Linphone
                     Current.Exit();
                 }
 
-                CallFlowControl.Instance.CallContext.Direction = CallDirection.Incoming;
+                CallFlowControl.Instance.CallContext.CallType = CallType.Incoming;
                 return;
             }
             else
@@ -116,7 +116,7 @@ namespace Linphone
                 await CallFlowControl.Instance.TerminateCall();
             }
 
-            if (wasAnOutgoingCall)
+            if (wasAnOutgoingCallOrCallback)
             {
                 if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
                     CallFlowControl.Instance.JoinIntoIncomingCallQueue();
@@ -149,13 +149,9 @@ namespace Linphone
 
         public void NewCallStarted(string callerNumber)
         {
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
             {
                 return;
-            }
-            else if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing)
-            {
-                CallFlowControl.Instance.CallEstablished();
             }
 
             Debug.WriteLine("[CallListener] NewCallStarted " + callerNumber);
@@ -298,7 +294,7 @@ namespace Linphone
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                 await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
 
-            if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+            if (CallFlowControl.Instance.CallContext.CallType != CallType.Command)
             {
                 DisableRegisteration();
 

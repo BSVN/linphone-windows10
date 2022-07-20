@@ -55,7 +55,7 @@ namespace BelledonneCommunications.Linphone.Core
                 CallContext.CallerNumber = callerPhoneNumber;
                 CallContext.InboundService = inboundService;
                 CallContext.CalleeNumber = AgentProfile.SipPhoneNumber;
-                CallContext.Direction = CallDirection.Incoming;
+                CallContext.CallType = CallType.Incoming;
                 CallContext.CallId = default;
 
                 CallsCommandServiceInitiateIncomingResponse response =
@@ -94,7 +94,7 @@ namespace BelledonneCommunications.Linphone.Core
                 CallContext.CallState = CallState.Ringing;
                 CallContext.CallerNumber = AgentProfile.SipPhoneNumber;
                 CallContext.CalleeNumber = calleePhoneNumber;
-                CallContext.Direction = CallDirection.Outgoing;
+                CallContext.CallType = CallType.Outgoing;
                 CallContext.CallId = default;
 
                 CallsCommandServiceInitiateOutgoingResponse response =
@@ -107,6 +107,47 @@ namespace BelledonneCommunications.Linphone.Core
                 }
 
                 _logger.Information("Outgoing call initiation successfully done with call id: {CallId}.", CallContext.CallId.ToString());
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error during call initation.");
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Initiate an callback by submitting a record.
+        /// </summary>
+        /// <param name="calleePhoneNumber">Either a customer phonenumber or inter-callcenter phonenumber.</param>
+        /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
+        /// <returns></returns>
+        public async Task<CallsCommandServiceInitiateCallbackResponse> InitiateCallbackAsync(string calleePhoneNumber, string inboundService, DateTime requestedAt)
+        {
+            // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
+            try
+            {
+                _logger.Information("Initiation callback to: {CalleePhoneNumber}.", calleePhoneNumber);
+
+                CallContext.CallState = CallState.Ringing;
+                CallContext.CallerNumber = AgentProfile.SipPhoneNumber;
+                CallContext.CalleeNumber = calleePhoneNumber;
+                CallContext.CallType = CallType.Callback;
+                CallContext.CallId = default;
+
+                CallsCommandServiceInitiateCallbackResponse response =
+                    await _coreClient.InitiateCallbackAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                            calleePhoneNumber: calleePhoneNumber,
+                                                            inboundService: inboundService,
+                                                            requestedAt: requestedAt);
+                if (response != null)
+                {
+                    CallContext.CallId = response.Data.Id;
+                }
+
+                _logger.Information("Callback initiation successfully done with call id: {CallId}.", CallContext.CallId.ToString());
 
                 return response;
             }
@@ -157,14 +198,25 @@ namespace BelledonneCommunications.Linphone.Core
         /// <returns>Task of async actions.</returns>
         public async Task TerminateCall()
         {
+            // Todo: if caller imidiately terminates a call before CallEstablshed report being delivered it may be results in conflicting state on call record in the database.
+            // We can ignore state updates from Missed to Established.
+
             // Call missed by caller departure.
             if (CallContext.CallState == CallState.Ringing && CallContext.Direction == CallDirection.Incoming)
             {
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                if (CallContext.CallId != default)
+                {
+                    _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                }
+                else
+                {
+                    _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                              CallContext.CalleeNumber,
+                                                              CallContext.InboundService);
+                }
+
                 CallContext.Reset();
             }
             // Call missed by agent decline.
@@ -172,12 +224,19 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                if (CallContext.CallId != default)
+                {
+                    _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                }
+                else
+                {
+                    _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                              CallContext.CalleeNumber,
+                                                              CallContext.InboundService);
+                }
+
                 CallContext.Reset();
             }
-
             // Call terminated either by caller hang up or agent hang up during an established call.
             else if (CallContext.Direction == CallDirection.Incoming)
             {
@@ -208,7 +267,16 @@ namespace BelledonneCommunications.Linphone.Core
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.TerminateCallAsync(CallContext.CallId);
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
 
                     CallContext.Reset();
                 }
@@ -223,10 +291,16 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
-                    // Todo: Call should be ignored in this situation.
-                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
-                                                              CallContext.CalleeNumber,
-                                                              CallContext.InboundService);
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
 
                     AgentProfile.BrowsingHistory = "";
 
@@ -249,7 +323,7 @@ namespace BelledonneCommunications.Linphone.Core
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Internal error while delivering missed outgoing call report.");
+                    _logger.Error(ex, "Internal error while delivering terminate outgoing call report.");
                 }
             }
             else
@@ -316,7 +390,7 @@ namespace BelledonneCommunications.Linphone.Core
                         LeaveIncomingCallQueue();
                         break;
                     case AgentStatus.Offline:
-                        CallContext.Direction = CallDirection.Command;
+                        CallContext.CallType = CallType.Command;
                         LinphoneManager.Instance.NewOutgoingCall("agent-logoff");
                         AgentProfile.JoinedIntoIncomingCallQueue = false;
                         break;
@@ -335,14 +409,14 @@ namespace BelledonneCommunications.Linphone.Core
 
         public void LeaveIncomingCallQueue()
         {
-            CallContext.Direction = CallDirection.Command;
+            CallContext.CallType = CallType.Command;
             LinphoneManager.Instance.NewOutgoingCall("agent-on-break");
             AgentProfile.JoinedIntoIncomingCallQueue = false;
         }
 
         public void JoinIntoIncomingCallQueue()
         {
-            CallContext.Direction = CallDirection.Command;
+            CallContext.CallType = CallType.Command;
             LinphoneManager.Instance.NewOutgoingCall("agent-login");
             AgentProfile.JoinedIntoIncomingCallQueue = true;
         }
@@ -399,7 +473,7 @@ namespace BelledonneCommunications.Linphone.Core
 
         public CallState CallState { get; set; }
 
-        public CallDirection Direction { get; set; }
+        public CallType CallType { get; set; }
 
         public CallContext()
         {
@@ -415,10 +489,11 @@ namespace BelledonneCommunications.Linphone.Core
         }
     }
 
-    internal enum CallDirection
+    internal enum CallType
     {
         Incoming = 1,
         Outgoing = 2,
+        Callback = 4,
         Command = 3
     }
 
