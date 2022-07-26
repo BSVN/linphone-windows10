@@ -1,5 +1,9 @@
 ﻿using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Presentation.Dto;
+using BSN.Commons.Infrastructure;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Linphone.Model;
 using PCLAppConfig;
 using Serilog;
@@ -34,7 +38,8 @@ namespace BelledonneCommunications.Linphone.Core
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
-
+            _callbackQueue =  Ioc.Default.GetService<ICallbackQueue>();
+            
             CallContext = new CallContext();
             AgentProfile = new PhoneProfile(panelBaseUrl);
         }
@@ -266,16 +271,10 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Agent canceled the call before customer answers the call.");
                 try
                 {
-                    // Todo: Call should be ignored in this situation.
-                    if (CallContext.CallId != default)
+                    CallContext.CallbackRequest.try_count++; 
+                    if (CallContext.CallbackRequest.try_count < 3)
                     {
-                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
-                    }
-                    else
-                    {
-                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
-                                                                  CallContext.CalleeNumber,
-                                                                  CallContext.InboundService);
+                        _callbackQueue.Push(CallContext.CallbackRequest);
                     }
 
                     CallContext.Reset();
@@ -291,15 +290,10 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
-                    if (CallContext.CallId != default)
+                    CallContext.CallbackRequest.try_count++;
+                    if (CallContext.CallbackRequest.try_count < 3)
                     {
-                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
-                    }
-                    else
-                    {
-                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
-                                                                  CallContext.CalleeNumber,
-                                                                  CallContext.InboundService);
+                        _callbackQueue.Push(CallContext.CallbackRequest);
                     }
 
                     AgentProfile.BrowsingHistory = "";
@@ -313,10 +307,14 @@ namespace BelledonneCommunications.Linphone.Core
             }
             else if (CallContext.CallType == CallType.Outgoing || CallContext.CallType == CallType.Callback)
             {
-                _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
-                    // Todo: Call should be ignored in this situation.
+                    CallContext.CallbackRequest.try_count++;
+                    if (CallContext.CallbackRequest.try_count < 3)
+                    {
+                        _callbackQueue.Push(CallContext.CallbackRequest);
+                    }
+
                     _coreClient.TerminateCallAsync(CallContext.CallId);
 
                     CallContext.Reset();
@@ -435,6 +433,7 @@ namespace BelledonneCommunications.Linphone.Core
         }
 
         private readonly CoreHttpClient _coreClient;
+        private readonly ICallbackQueue _callbackQueue;
         private readonly ILogger _logger;
     }
 
@@ -475,9 +474,12 @@ namespace BelledonneCommunications.Linphone.Core
 
         public CallType CallType { get; set; }
 
+        public CallbackDto CallbackRequest { get; set; }
+
         public CallContext()
         {
             CallState = CallState.Ready;
+            CallbackRequest = null;
         }
 
         internal void Reset()
@@ -486,6 +488,7 @@ namespace BelledonneCommunications.Linphone.Core
             CalleeNumber = string.Empty;
             CallId = default;
             CallState = CallState.Ready;
+            CallbackRequest = null;
         }
     }
 

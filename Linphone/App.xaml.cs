@@ -97,7 +97,7 @@ namespace Linphone
 
         public async void CallEnded(Call call)
         {
-            bool wasAnOutgoingCallOrCallback = CallFlowControl.Instance.CallContext.CallType == CallType.Outgoing || CallFlowControl.Instance.CallContext.CallType == CallType.Callback;
+            bool wasAnOutgoingCall = CallFlowControl.Instance.CallContext.CallType == CallType.Outgoing;
             if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
             {
                 _logger.Information("A command call has been ended.");
@@ -116,7 +116,7 @@ namespace Linphone
                 await CallFlowControl.Instance.TerminateCall();
             }
 
-            if (wasAnOutgoingCallOrCallback)
+            if (wasAnOutgoingCall)
             {
                 if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
                     CallFlowControl.Instance.JoinIntoIncomingCallQueue();

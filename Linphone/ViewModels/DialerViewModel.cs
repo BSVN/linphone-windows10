@@ -262,6 +262,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         private async void CallbackClick()
 		{
+            bool joinedCallQueue = CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue;
             if (await PreparingOutgoingCall() == false)
                 return;
 
@@ -271,7 +272,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 if (callback is null)
                     break;
 
-                callbackQueue.Push(new CallbackDto(callback.callee_number, callback.caller_number, callback.time));
+                CallFlowControl.Instance.CallContext.CallbackRequest = callback;
+
                 string normalizedAddress = callback.caller_number.GetCanonicalPhoneNumber();
 
                 await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
@@ -287,9 +289,12 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 if (cancellationToken.IsCancellationRequested)
                     break;
             }
-		}
 
-		private async void CallClick()
+            if (joinedCallQueue)
+                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+        }
+
+        private async void CallClick()
         {
             if (await PreparingOutgoingCall() == false)
                 return;
