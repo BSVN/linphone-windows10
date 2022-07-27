@@ -271,6 +271,18 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Agent canceled the call before customer answers the call.");
                 try
                 {
+                    // Todo: Call should be ignored in this situation.
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
+
                     CallContext.CallbackRequest.try_count++; 
                     if (CallContext.CallbackRequest.try_count < 3)
                     {
@@ -290,6 +302,17 @@ namespace BelledonneCommunications.Linphone.Core
                 _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
+                    if (CallContext.CallId != default)
+                    {
+                        _coreClient.SubmitMissedCallByIdAsync(CallContext.CallId);
+                    }
+                    else
+                    {
+                        _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                  CallContext.CalleeNumber,
+                                                                  CallContext.InboundService);
+                    }
+
                     CallContext.CallbackRequest.try_count++;
                     if (CallContext.CallbackRequest.try_count < 3)
                     {
