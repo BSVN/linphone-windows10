@@ -284,10 +284,7 @@ namespace BelledonneCommunications.Linphone.Core
                     }
 
                     CallContext.CallbackRequest.try_count++; 
-                    if (CallContext.CallbackRequest.try_count < 3)
-                    {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
-                    }
+                    _callbackQueue.Push(CallContext.CallbackRequest);
 
                     CallContext.Reset();
                 }
@@ -314,10 +311,7 @@ namespace BelledonneCommunications.Linphone.Core
                     }
 
                     CallContext.CallbackRequest.try_count++;
-                    if (CallContext.CallbackRequest.try_count < 3)
-                    {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
-                    }
+                    _callbackQueue.Push(CallContext.CallbackRequest);
 
                     AgentProfile.BrowsingHistory = "";
 
@@ -333,10 +327,7 @@ namespace BelledonneCommunications.Linphone.Core
                 try
                 {
                     CallContext.CallbackRequest.try_count++;
-                    if (CallContext.CallbackRequest.try_count < 3)
-                    {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
-                    }
+                    _callbackQueue.Push(CallContext.CallbackRequest);
 
                     _coreClient.TerminateCallAsync(CallContext.CallId);
 
