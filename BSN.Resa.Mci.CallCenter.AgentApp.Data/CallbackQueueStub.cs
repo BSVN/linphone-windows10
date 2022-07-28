@@ -7,7 +7,7 @@ namespace BSN.Resa.Mci.CallCenter.AgentApp.Data
 	{
 		public CallbackDto Pop()
 		{
-			return new CallbackDto(callee_number: "99970", caller_number: "009357277978", time: ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString());
+			return new CallbackDto(callee_number: "99970", caller_number: "009357277978");
 		}
 
 		public void Push(CallbackDto callback)
