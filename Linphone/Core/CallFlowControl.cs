@@ -5,10 +5,12 @@ using BSN.Resa.Mci.CallCenter.AgentApp.Data;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Linphone.Model;
+using Microsoft.UI.Xaml.Controls;
 using PCLAppConfig;
 using Serilog;
 using System;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 
 namespace BelledonneCommunications.Linphone.Core
 {
@@ -38,8 +40,8 @@ namespace BelledonneCommunications.Linphone.Core
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
             _coreClient = new CoreHttpClient(panelBaseUrl);
-            _callbackQueue =  Ioc.Default.GetService<ICallbackQueue>();
-            
+            _callbackQueue = Ioc.Default.GetService<ICallbackQueue>();
+
             CallContext = new CallContext();
             AgentProfile = new PhoneProfile(panelBaseUrl);
         }
@@ -222,6 +224,8 @@ namespace BelledonneCommunications.Linphone.Core
                                                               CallContext.InboundService);
                 }
 
+                AgentProfile.Browser.Source = new Uri(AgentProfile.PanelBaseUrl);
+
                 CallContext.Reset();
             }
             // Call missed by agent decline.
@@ -240,6 +244,8 @@ namespace BelledonneCommunications.Linphone.Core
                                                               CallContext.InboundService);
                 }
 
+                AgentProfile.Browser.Source = new Uri(AgentProfile.PanelBaseUrl);
+
                 CallContext.Reset();
             }
             // Call terminated either by caller hang up or agent hang up during an established call.
@@ -253,10 +259,6 @@ namespace BelledonneCommunications.Linphone.Core
                         return;
 
                     CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
-                    if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
-                    {
-                        AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
-                    }
 
                     CallContext.Reset();
                 }
@@ -283,11 +285,16 @@ namespace BelledonneCommunications.Linphone.Core
                                                                   CallContext.InboundService);
                     }
 
-                    CallContext.CallbackRequest.try_count++; 
-                    if (CallContext.CallbackRequest.try_count < 3)
+                    if (CallContext.CallType == CallType.Callback)
                     {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
+                        CallContext.CallbackRequest.try_count++;
+                        if (CallContext.CallbackRequest.try_count < 3)
+                        {
+                            _callbackQueue.Push(CallContext.CallbackRequest);
+                        }
                     }
+
+                    AgentProfile.Browser.Source = new Uri(AgentProfile.PanelBaseUrl);
 
                     CallContext.Reset();
                 }
@@ -313,13 +320,16 @@ namespace BelledonneCommunications.Linphone.Core
                                                                   CallContext.InboundService);
                     }
 
-                    CallContext.CallbackRequest.try_count++;
-                    if (CallContext.CallbackRequest.try_count < 3)
+                    if (CallContext.CallType == CallType.Callback)
                     {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
+                        CallContext.CallbackRequest.try_count++;
+                        if (CallContext.CallbackRequest.try_count < 3)
+                        {
+                            _callbackQueue.Push(CallContext.CallbackRequest);
+                        }
                     }
 
-                    AgentProfile.BrowsingHistory = "";
+                    AgentProfile.Browser.Source = new Uri(AgentProfile.PanelBaseUrl);
 
                     CallContext.Reset();
                 }
@@ -332,10 +342,13 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 try
                 {
-                    CallContext.CallbackRequest.try_count++;
-                    if (CallContext.CallbackRequest.try_count < 3)
+                    if (CallContext.CallType == CallType.Callback)
                     {
-                        _callbackQueue.Push(CallContext.CallbackRequest);
+                        CallContext.CallbackRequest.try_count++;
+                        if (CallContext.CallbackRequest.try_count < 3)
+                        {
+                            _callbackQueue.Push(CallContext.CallbackRequest);
+                        }
                     }
 
                     _coreClient.TerminateCallAsync(CallContext.CallId);
@@ -481,6 +494,8 @@ namespace BelledonneCommunications.Linphone.Core
         public bool IsLoggedIn { get; set; }
 
         public AgentStatus Status { get; set; }
+
+        public WebView2 Browser { get; set; }
     }
 
     internal class CallContext

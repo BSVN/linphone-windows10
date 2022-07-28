@@ -101,20 +101,46 @@ namespace Linphone.Views
 
                 AgentStatus.SelectionChanged += AgentStatus_SelectionChanged;
             }
+
+            CallFlowControl.Instance.AgentProfile.Browser = Browser;
+            Browser.Loaded += Browser_Loaded;
+
+            Browser.NavigationCompleted += Browser_NavigationCompleted;
         }
 
         public DialerViewModel ViewModel => (DialerViewModel)DataContext;
 
 		protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
 		{
-			base.OnNavigatingFrom(e);
+            //try
+            //{
+            //    if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
+            //        CallFlowControl.Instance.AgentProfile.BrowsingHistory = Browser.Source.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.Error(ex, "Error while updating dialer browser's history.");
+            //    CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
+            //}
+
+            Browser.NavigationCompleted -= Browser_NavigationCompleted;
+            MainGrid.Children.Remove(Browser);
+
+            base.OnNavigatingFrom(e);
             ViewModel.OnNavigatingFrom(e);
             WeakReferenceMessenger.Default.Unregister<ContinueCallbackAnsweringRequestMessage>(this);
 		}
 
-		protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
 		{
-			base.OnNavigatedTo(e);
+            if (CallFlowControl.Instance.AgentProfile.Browser != null)
+            {
+                MainGrid.Children.Remove(Browser);
+                Browser = CallFlowControl.Instance.AgentProfile.Browser;
+                MainGrid.Children.Add(Browser);
+            }
+
+            base.OnNavigatedTo(e);
 
             // TODO: Please remove it (Linphone has it, see LinphoneManager)
             if (!await Utility.IsMicrophoneAvailable())
@@ -242,6 +268,14 @@ namespace Linphone.Views
         {
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
                 LinphoneManager.Instance.Core.RefreshRegisters();
+        }
+
+        private void Browser_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
+            {
+                Browser.Source = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
+            }
         }
 
         private async void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)

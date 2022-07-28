@@ -98,6 +98,10 @@ namespace Linphone.Views
             Application.Current.Suspending += new SuspendingEventHandler(App_Suspended);
             Application.Current.Resuming += new EventHandler<object>(App_Resumed);
             pausedCall = null;
+
+            MainGrid.Children.Remove(Browser);
+            Browser = CallFlowControl.Instance.AgentProfile.Browser;
+            MainGrid.Children.Add(Browser);
         }
         //----------------------------------------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------------------------
@@ -241,6 +245,9 @@ namespace Linphone.Views
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs nee) {
+
+            MainGrid.Children.Remove(Browser);
+
             StopVideoStream();
             if (oneSecondTimer != null) {
                 oneSecondTimer.Start();

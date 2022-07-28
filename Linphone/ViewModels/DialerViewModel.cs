@@ -35,7 +35,6 @@ namespace BelledonneCommunications.Linphone.ViewModels
             this.callbackQueue = callbackQueue;
             CallCommand = new RelayCommand(CallClick);
             CallbackCommand = new RelayCommand(CallbackClick);
-            BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
             httpClient = new HttpClient();
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }
@@ -232,17 +231,6 @@ namespace BelledonneCommunications.Linphone.ViewModels
             LinphoneManager.Instance.RegistrationChanged -= RegistrationChanged;
             LinphoneManager.Instance.MessageReceived -= MessageReceived;
             LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
-
-            try
-            {
-                if (SourceUri.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
-                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error while updating dialer browser's history.");
-                CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
-            }
 		}
 
         private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
@@ -375,20 +363,6 @@ namespace BelledonneCommunications.Linphone.ViewModels
             }
 
             return true;
-		}
-
-        private void OnLoadedBrowser()
-		{
-            // HotPoint #4
-            if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
-                && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
-            {
-                SourceUri = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");
-            }
-            else
-            {
-                SourceUri = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
-            }
 		}
 
         public static String StripUnicodeCharactersFromString(string inputValue)
