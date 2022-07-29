@@ -25,6 +25,7 @@ using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using PCLAppConfig;
 using Linphone.Views;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace Linphone.Model {
     /// <summary>
@@ -53,7 +54,7 @@ namespace Linphone.Model {
         /// <summary>
         /// Public constructor.
         /// </summary>
-        public SettingsManager() {
+        public SettingsManager() {            
             dict = new Dictionary<String, String>();
             changesDict = new Dictionary<String, String>();
         }
@@ -477,7 +478,7 @@ namespace Linphone.Model {
                     LinphoneManager.Instance.AddPushInformationsToContactParams();
                     cfg.AvpfMode = (avpf) ? AVPFMode.Enabled : AVPFMode.Disabled;
                     
-                    if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
+                    if (_callFlowControl.AgentProfile.IsLoggedIn)
                         cfg.RegisterEnabled = true;
                     
                     cfg.Done();
@@ -627,6 +628,8 @@ namespace Linphone.Model {
             }
         }
         #endregion
+
+        private readonly CallFlowControl _callFlowControl;
     }
 
     /// <summary>

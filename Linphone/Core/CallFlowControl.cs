@@ -10,34 +10,22 @@ namespace BelledonneCommunications.Linphone.Core
 {
     // Mention: Sip login on shayan side, means that "I am ready for accept incoming calls" and does nothing to outgoing calls.
     // Todo: Draw and double check state transition on the phone events to prevent unpredicted situations.
-    internal class CallFlowControl
+    public class CallFlowControl
     {
-        private static readonly CallFlowControl _instance = new CallFlowControl();
-        public static CallFlowControl Instance
+        public CallFlowControl(ICoreHttpClient coreHttpClient, 
+                               CallContext callContext, 
+                               AgentProfile agentProfile)
         {
-            get
-            {
-                return _instance;
-            }
-        }
+            CallContext = callContext;
+            AgentProfile = agentProfile;
 
-        public PhoneProfile AgentProfile { get; private set; }
-
-        public CallContext CallContext { get; private set; }
-
-        private CallFlowControl()
-        {
-            ApplicationSettingsManager settings = new ApplicationSettingsManager();
-            settings.Load();
-
-            string panelBaseUrl = settings.PanelAddress;
-
+            _coreClient = coreHttpClient;
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
-            _coreClient = new CoreHttpClient(panelBaseUrl);
-
-            CallContext = new CallContext();
-            AgentProfile = new PhoneProfile(panelBaseUrl);
         }
+
+        public AgentProfile AgentProfile { get; private set; }
+        
+        public CallContext CallContext { get; private set; }
 
         /// <summary>
         /// Initiate an incoming call by submitting a record.
@@ -267,7 +255,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             try
             {
-                return await _coreClient.GetAgentInfo(AgentProfile.SipPhoneNumber);
+                return await _coreClient.GetAgentInfoAsync(AgentProfile.SipPhoneNumber);
             }
             catch (Exception ex)
             {
@@ -351,7 +339,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             try
             {
-                return await _coreClient.GetAgentInfoByUserId(userId);
+                return await _coreClient.GetAgentInfoByUserIdAsync(userId);
             }
             catch (Exception ex)
             {
@@ -360,21 +348,16 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        private readonly CoreHttpClient _coreClient;
+        private readonly ICoreHttpClient _coreClient;
         private readonly ILogger _logger;
     }
 
-    internal class PhoneProfile
+    public class AgentProfile
     {
-        public PhoneProfile(string panelBaseUrl)
+        public AgentProfile()
         {
-            PanelBaseUrl = panelBaseUrl;
             JoinedIntoIncomingCallQueue = false;
         }
-
-        public string OutgoingCallChannelName { get; set; }
-
-        public string PanelBaseUrl { get; private set; }
 
         public string SipPhoneNumber { get; set; }
 
@@ -387,7 +370,7 @@ namespace BelledonneCommunications.Linphone.Core
         public AgentStatus Status { get; set; }
     }
 
-    internal class CallContext
+    public class CallContext
     {
         public string CallerNumber { get; set; }
 
@@ -415,14 +398,14 @@ namespace BelledonneCommunications.Linphone.Core
         }
     }
 
-    internal enum CallDirection
+    public enum CallDirection
     {
         Incoming = 1,
         Outgoing = 2,
         Command = 3
     }
 
-    internal enum CallState
+    public enum CallState
     {
         Ready = 1,
         Ringing = 2,

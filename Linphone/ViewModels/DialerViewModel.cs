@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Linphone;
 using Linphone.Model;
 using Linphone.Views;
+using Microsoft.Extensions.Options;
 using PCLAppConfig;
 using Serilog;
 using System;
@@ -29,7 +30,10 @@ namespace BelledonneCommunications.Linphone.ViewModels
 {
 	public class DialerViewModel : ObservableObject
 	{
-        public DialerViewModel(INavigationService navigationService, ICallbackQueue callbackQueue)
+        public DialerViewModel(INavigationService navigationService,
+                               ICallbackQueue callbackQueue, 
+                               CallFlowControl callFlowControl,
+                               IOptions<PanelOptions> options)
         {
             this.navigationService = navigationService;
             this.callbackQueue = callbackQueue;
@@ -37,6 +41,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
             CallbackCommand = new RelayCommand(CallbackClick);
             BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
             httpClient = new HttpClient();
+
+            _panelOptions = options.Value;
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }
 
@@ -235,13 +241,13 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
             try
             {
-                if (SourceUri.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
-                    CallFlowControl.Instance.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length);
+                if (SourceUri.OriginalString.Length > _panelOptions.Address.Length)
+                    _callFlowControl.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(_panelOptions.Address.Length);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error while updating dialer browser's history.");
-                CallFlowControl.Instance.AgentProfile.BrowsingHistory = "";
+                _callFlowControl.AgentProfile.BrowsingHistory = "";
             }
 		}
 
@@ -310,7 +316,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-				await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
+				await _callFlowControl.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
 
                 LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
@@ -324,22 +330,22 @@ namespace BelledonneCommunications.Linphone.ViewModels
 		{
             bool isInHomeTesting = Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]);
 
-            if (!isInHomeTesting && !CallFlowControl.Instance.AgentProfile.IsLoggedIn) return false;
+            if (!isInHomeTesting && !_callFlowControl.AgentProfile.IsLoggedIn) return false;
 
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (_callFlowControl.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("Cant start a call because of a running command.");
                 return false;
             }
 
-            if (!isInHomeTesting && CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue)
+            if (!isInHomeTesting && _callFlowControl.AgentProfile.JoinedIntoIncomingCallQueue)
             {
-                CallFlowControl.Instance.LeaveIncomingCallQueue();
+                _callFlowControl.LeaveIncomingCallQueue();
                 TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
                 while (true)
                 {
                     timeout = timeout - TimeSpan.FromMilliseconds(500);
-                    if (timeout.TotalMilliseconds <= 0 || CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+                    if (timeout.TotalMilliseconds <= 0 || _callFlowControl.CallContext.Direction != CallDirection.Command)
                     {
                         break;
                     }
@@ -348,19 +354,19 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 }
             }
 
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (_callFlowControl.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("Cant start a call because of a still running command.");
                 _logger.Information("Critical Situation.");
 
-                CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+                _callFlowControl.JoinIntoIncomingCallQueue();
 
                 return false;
             }
 
-            if (CallFlowControl.Instance.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
+            if (_callFlowControl.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
             {
-                _logger.Information("Cant start a call, phone is in {State} state.", CallFlowControl.Instance.CallContext.CallState.ToString("g"));
+                _logger.Information("Cant start a call, phone is in {State} state.", _callFlowControl.CallContext.CallState.ToString("g"));
                 return false;
             }
 
@@ -370,14 +376,14 @@ namespace BelledonneCommunications.Linphone.ViewModels
         private void OnLoadedBrowser()
 		{
             // HotPoint #4
-            if (!string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.BrowsingHistory)
-                && !CallFlowControl.Instance.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
+            if (!string.IsNullOrWhiteSpace(_callFlowControl.AgentProfile.BrowsingHistory)
+                && !_callFlowControl.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
             {
-                SourceUri = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}{CallFlowControl.Instance.AgentProfile.BrowsingHistory}");
+                SourceUri = new Uri($"{_panelOptions.Address}{_callFlowControl.AgentProfile.BrowsingHistory}");
             }
             else
             {
-                SourceUri = new Uri(CallFlowControl.Instance.AgentProfile.PanelBaseUrl);
+                SourceUri = new Uri(_panelOptions.Address);
             }
 		}
 
@@ -386,6 +392,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
             return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
         }
 
+        private readonly PanelOptions _panelOptions;
+        private readonly CallFlowControl _callFlowControl;
         private readonly INavigationService navigationService;
 		private readonly ICallbackQueue callbackQueue;
 		private readonly HttpClient httpClient;

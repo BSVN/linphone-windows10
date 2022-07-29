@@ -18,7 +18,9 @@ using BelledonneCommunications.Linphone;
 using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Dialogs;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Linphone.Model;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -57,6 +59,9 @@ namespace Linphone.Views
         public InCall() {
             this.InitializeComponent();
             this.DataContext = new InCallModel();
+            _callFlowControl = Ioc.Default.GetRequiredService<CallFlowControl>();
+            _panelOptions = Ioc.Default.GetRequiredService<IOptions<PanelOptions>>().Value;
+            
             askingVideo = false;
             //------------------------------------------------------------------------
             Loaded += OnPageLoaded;
@@ -181,10 +186,10 @@ namespace Linphone.Views
 
         private async void buttons_HangUpClick(object sender) 
         {            
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing 
-                && CallFlowControl.Instance.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
+            if (_callFlowControl.CallContext.Direction == CallDirection.Outgoing 
+                && _callFlowControl.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
             {
-                CallFlowControl.Instance.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
+                _callFlowControl.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
             }
 
             LinphoneManager.Instance.EndCurrentCall();
@@ -217,7 +222,7 @@ namespace Linphone.Views
                 Contact.Text = address.GetCanonicalPhoneNumber();
 
                 // HotPoint #3
-                Browser.Source = new Uri($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/CallRespondingAgents/Dashboard?CallId={CallFlowControl.Instance.CallContext.CallId}");
+                Browser.Source = new Uri($"{_panelOptions.Address}/CallRespondingAgents/Dashboard?CallId={_callFlowControl.CallContext.CallId}");
 
                 if (calledNumber != null && calledNumber.Length > 0) {
                     // ContactManager cm = ContactManager.Instance;
@@ -692,5 +697,8 @@ namespace Linphone.Views
                 }
             }
         }
+
+        private readonly PanelOptions _panelOptions;
+        private readonly CallFlowControl _callFlowControl;
     }
 }

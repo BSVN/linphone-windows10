@@ -1,6 +1,7 @@
 ﻿using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using BSN.Resa.Vns.Commons.Responses;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Net.Http;
@@ -8,14 +9,11 @@ using System.Threading.Tasks;
 
 namespace BelledonneCommunications.Linphone.Core
 {
-    internal class CoreHttpClient
+    public class CoreHttpClient: ICoreHttpClient
     {
-        internal CoreHttpClient(string baseUrl)
+        public CoreHttpClient(HttpClient httpClient)
         {
-            _httpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(baseUrl)
-            };
+            _httpClient = httpClient;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(CoreHttpClient));
         }
@@ -184,7 +182,7 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentInfoByUserId(string userId)
+        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentInfoByUserIdAsync(string userId)
         {
             try
             {
@@ -205,7 +203,7 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentInfo(string sipUsername)
+        public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentInfoAsync(string sipUsername)
         {
             try
             {
