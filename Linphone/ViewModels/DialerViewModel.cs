@@ -42,6 +42,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             BrowserLoadedCommand = new RelayCommand(OnLoadedBrowser);
             httpClient = new HttpClient();
 
+            _callFlowControl = callFlowControl;
             _panelOptions = options.Value;
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }

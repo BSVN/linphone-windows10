@@ -120,6 +120,15 @@ namespace Linphone.Views
 		{
 			base.OnNavigatedTo(e);
 
+            if (_callFlowControl.AgentProfile.CallbackQueueConnectionEstablished)
+            {
+                Callback.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Callback.Visibility = Visibility.Collapsed;
+            }
+
             // TODO: Please remove it (Linphone has it, see LinphoneManager)
             if (!await Utility.IsMicrophoneAvailable())
             {

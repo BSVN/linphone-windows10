@@ -365,6 +365,8 @@ namespace BelledonneCommunications.Linphone.Core
 
         public bool JoinedIntoIncomingCallQueue { get; set; }
 
+        public bool CallbackQueueConnectionEstablished { get; set; }
+
         public bool IsLoggedIn { get; set; }
 
         public AgentStatus Status { get; set; }

@@ -71,6 +71,7 @@ namespace Linphone
             _logger = Log.Logger.ForContext("SourceContext", nameof(App));
 
             databaseFactory = new DatabaseFactory(applicationSettingsManager.RedisConnectionString);
+            databaseFactory.OnConnectionEstablished += P => Ioc.Default.GetRequiredService<CallFlowControl>().AgentProfile.CallbackQueueConnectionEstablished = true;
 
             // TODO: Use this code check current version of WebView.
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
@@ -259,10 +260,12 @@ namespace Linphone
             var serviceCollection = new ServiceCollection()
                 .AddSingleton<INavigationService>(new NavigationService(rootFrame))
                 .Configure<PanelOptions>(P => P.Address = applicationSettingsManager.PanelAddress)
+                .AddSingleton<AgentProfile>()
                 .AddSingleton<CallContext>()
                 .AddSingleton<CallFlowControl>()
 				.AddSingleton<IDatabaseFactory>(databaseFactory)
 				.AddTransient<DialerViewModel>();
+
             if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
 			{
 				serviceCollection
@@ -447,6 +450,6 @@ namespace Linphone
         private CallFlowControl _callFlowControl;
 
         private readonly ILogger _logger;
-        private readonly IDatabaseFactory databaseFactory;
+        private readonly DatabaseFactory databaseFactory;
 	}
 }
