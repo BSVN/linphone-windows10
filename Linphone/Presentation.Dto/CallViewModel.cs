@@ -33,8 +33,8 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         Ringing = 1,
         Established = 2,
         Missed = 3,
-        NormalCleared = 5,
-        Terminated = 5
+        Terminated = 4,
+        CustomerNotAnswered = 5
     }
 
     public enum CallReason
