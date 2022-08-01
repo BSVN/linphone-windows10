@@ -418,9 +418,17 @@ namespace Linphone.Model {
 
         public void CallEnded(Call call)
         {
-            BSN.LinphoneSDK.Call callEnded = callsTable[BSN.LinphoneSDK.Call.GenerateId(call)];
-            callEnded.Ended();
-            callsTable.Remove(callEnded.Id);
+            BSN.LinphoneSDK.Call callEnded;
+            try
+            {
+                callEnded = callsTable[BSN.LinphoneSDK.Call.GenerateId(call)];
+                callEnded.Ended();
+                callsTable.Remove(callEnded.Id);
+            }
+            catch(Exception ex)
+            {
+                // [Reza] Try clause works correctly on Outgoing calls, but i dont know why :)
+            }
         }
 
         private void ShowCallError(string message) {
