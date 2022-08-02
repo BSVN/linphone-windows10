@@ -60,8 +60,12 @@ namespace Linphone.Views
             this.InitializeComponent();
             this.DataContext = new InCallModel();
             _callFlowControl = Ioc.Default.GetRequiredService<CallFlowControl>();
-            _panelOptions = Ioc.Default.GetRequiredService<IOptions<PanelOptions>>().Value;
-            
+
+            var applicationSettingsManager = new ApplicationSettingsManager();
+            applicationSettingsManager.Load();
+
+            _panelAddress = applicationSettingsManager.PanelAddress;
+
             askingVideo = false;
             //------------------------------------------------------------------------
             Loaded += OnPageLoaded;
@@ -187,9 +191,9 @@ namespace Linphone.Views
         private async void buttons_HangUpClick(object sender) 
         {            
             if (_callFlowControl.CallContext.Direction == CallDirection.Outgoing 
-                && _callFlowControl.CallContext.CallState == BelledonneCommunications.Linphone.Core.CallState.Ringing)
+                && _callFlowControl.CallContext.PhoneState == BelledonneCommunications.Linphone.Core.PhoneState.Ringing)
             {
-                _callFlowControl.CallContext.CallState = BelledonneCommunications.Linphone.Core.CallState.DeclinedByAgent;
+                _callFlowControl.CallContext.PhoneState = BelledonneCommunications.Linphone.Core.PhoneState.CallDeclinedByAgent;
             }
 
             LinphoneManager.Instance.EndCurrentCall();
@@ -222,7 +226,7 @@ namespace Linphone.Views
                 Contact.Text = address.GetCanonicalPhoneNumber();
 
                 // HotPoint #3
-                Browser.Source = new Uri($"{_panelOptions.Address}/CallRespondingAgents/Dashboard?CallId={_callFlowControl.CallContext.CallId}");
+                Browser.Source = new Uri($"{_panelAddress}/CallRespondingAgents/Dashboard?CallId={_callFlowControl.CallContext.CallId}");
 
                 if (calledNumber != null && calledNumber.Length > 0) {
                     // ContactManager cm = ContactManager.Instance;
@@ -698,7 +702,7 @@ namespace Linphone.Views
             }
         }
 
-        private readonly PanelOptions _panelOptions;
+        private readonly string _panelAddress;
         private readonly CallFlowControl _callFlowControl;
     }
 }

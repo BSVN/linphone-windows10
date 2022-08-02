@@ -1,10 +1,11 @@
-﻿using BelledonneCommunications.Linphone.Commons;
-using BelledonneCommunications.Linphone.Presentation.Dto;
+﻿using BSN.Resa.Mci.CallCenter.Presentation.Dto;
 using Linphone.Model;
 using PCLAppConfig;
 using Serilog;
 using System;
 using System.Threading.Tasks;
+using BSN.Resa.Mci.CallCenter.AgentApp.Data;
+using BSN.Resa.Vns.Commons.Extensions;
 
 namespace BelledonneCommunications.Linphone.Core
 {
@@ -12,14 +13,17 @@ namespace BelledonneCommunications.Linphone.Core
     // Todo: Draw and double check state transition on the phone events to prevent unpredicted situations.
     public class CallFlowControl
     {
-        public CallFlowControl(ICoreHttpClient coreHttpClient, 
+        public CallFlowControl(ICallEventsReportHttpClient allEventsReportHttpClient, 
+                               IAgentInformationHttpClient agentInformationHttpClient,                                
                                CallContext callContext, 
                                AgentProfile agentProfile)
         {
             CallContext = callContext;
             AgentProfile = agentProfile;
 
-            _coreClient = coreHttpClient;
+            _agentInformationHttpClient = agentInformationHttpClient;
+            _callEventsReportHttpClient = _callEventsReportHttpClient;
+
             _logger = Log.Logger.ForContext("SourceContext", nameof(CallFlowControl));
         }
 
@@ -39,7 +43,7 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Initiation incoming call from: {CallerNumber}.", callerPhoneNumber);
 
-                CallContext.CallState = CallState.Ringing;
+                CallContext.PhoneState = PhoneState.Ringing;
                 CallContext.CallerNumber = callerPhoneNumber;
                 CallContext.InboundService = inboundService;
                 CallContext.CalleeNumber = AgentProfile.SipPhoneNumber;
@@ -47,9 +51,9 @@ namespace BelledonneCommunications.Linphone.Core
                 CallContext.CallId = default;
 
                 CallsCommandServiceInitiateIncomingResponse response =
-                    await _coreClient.InitiateIncomingCallAsync(callerPhoneNumber: callerPhoneNumber,
-                                                                agentPhoneNumber: AgentProfile.SipPhoneNumber,
-                                                                inboundService: inboundService);
+                    await _callEventsReportHttpClient.InitiateIncomingCallAsync(callerPhoneNumber: callerPhoneNumber,
+                                                                                agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                                                inboundService: inboundService);
                 if (response != null)
                 {
                     CallContext.CallId = response.Data.Id;
@@ -79,16 +83,16 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Initiation outgoing call to: {CallePhoneNumber}.", calleePhoneNumber);
 
-                CallContext.CallState = CallState.Ringing;
+                CallContext.PhoneState = PhoneState.Ringing;
                 CallContext.CallerNumber = AgentProfile.SipPhoneNumber;
                 CallContext.CalleeNumber = calleePhoneNumber;
                 CallContext.Direction = CallDirection.Outgoing;
                 CallContext.CallId = default;
 
                 CallsCommandServiceInitiateOutgoingResponse response =
-                    await _coreClient.InitiateOutgoingCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
-                                                                calleePhoneNumber: calleePhoneNumber,
-                                                                inboundService: inboundService);
+                    await _callEventsReportHttpClient.InitiateOutgoingCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                                                calleePhoneNumber: calleePhoneNumber,
+                                                                                inboundService: inboundService);
                 if (response != null)
                 {
                     CallContext.CallId = response.Data.Id;
@@ -113,7 +117,7 @@ namespace BelledonneCommunications.Linphone.Core
             try
             {
                 // Todo: Call state transition check should be implemented.
-                CallContext.CallState = CallState.Established;
+                CallContext.PhoneState = PhoneState.CallEstablished;
 
                 if (CallContext.CallId == default)
                 {
@@ -121,7 +125,7 @@ namespace BelledonneCommunications.Linphone.Core
                     return;
                 }
 
-                _coreClient.CallEstablishedAsync(CallContext.CallId);
+                _callEventsReportHttpClient.CallEstablishedAsync(CallContext.CallId);
             }
             catch (Exception ex)
             {
@@ -136,7 +140,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             _logger.Information("Incoming call declined by agent.");
 
-            CallContext.CallState = CallState.DeclinedByAgent;
+            CallContext.PhoneState = PhoneState.CallDeclinedByAgent;
         }
 
         /// <summary>
@@ -146,23 +150,23 @@ namespace BelledonneCommunications.Linphone.Core
         public async Task TerminateCall()
         {
             // Call missed by caller departure.
-            if (CallContext.CallState == CallState.Ringing && CallContext.Direction == CallDirection.Incoming)
+            if (CallContext.PhoneState == PhoneState.Ringing && CallContext.Direction == CallDirection.Incoming)
             {
                 _logger.Information("Missed call caused by caller hangup in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                _callEventsReportHttpClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                                          CallContext.CalleeNumber,
+                                                                          CallContext.InboundService);
                 CallContext.Reset();
             }
             // Call missed by agent decline.
-            else if (CallContext.CallState == CallState.DeclinedByAgent && CallContext.Direction == CallDirection.Incoming)
+            else if (CallContext.PhoneState == PhoneState.CallDeclinedByAgent && CallContext.Direction == CallDirection.Incoming)
             {
                 _logger.Information("Missed call caused by agent declining in ringing phase.");
 
-                _coreClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
-                                                          CallContext.CalleeNumber,
-                                                          CallContext.InboundService);
+                _callEventsReportHttpClient.SubmitMissedIncomingCallAsync(CallContext.CallerNumber,
+                                                                          CallContext.CalleeNumber,
+                                                                          CallContext.InboundService);
                 CallContext.Reset();
             }
 
@@ -176,7 +180,7 @@ namespace BelledonneCommunications.Linphone.Core
                     if (CallContext.CallId == default)
                         return;
 
-                    CallsCommandServiceTerminateResponse callTerminationResponse = await _coreClient.TerminateCallAsync(CallContext.CallId);
+                    CallsCommandServiceTerminateResponse callTerminationResponse = await _callEventsReportHttpClient.TerminateCallAsync(CallContext.CallId);
                     if (!callTerminationResponse.Data.CallReason.HasValue && !callTerminationResponse.Data.TicketId.HasValue)
                     {
                         AgentProfile.BrowsingHistory = $"/CallRespondingAgents/Dashboard?CallId={CallContext.CallId}";
@@ -190,13 +194,13 @@ namespace BelledonneCommunications.Linphone.Core
                 }
             }
             else if (CallContext.Direction == CallDirection.Outgoing &&
-                     CallContext.CallState == CallState.DeclinedByAgent)
+                     CallContext.PhoneState == PhoneState.CallDeclinedByAgent)
             {
                 _logger.Information("Agent canceled the call before customer answers the call.");
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.TerminateCallAsync(CallContext.CallId);
+                    _callEventsReportHttpClient.TerminateCallAsync(CallContext.CallId);
 
                     CallContext.Reset();
                 }
@@ -206,15 +210,15 @@ namespace BelledonneCommunications.Linphone.Core
                 }
             }
             else if (CallContext.Direction == CallDirection.Outgoing &&
-                     CallContext.CallState == CallState.Ringing)
+                     CallContext.PhoneState == PhoneState.Ringing)
             {
                 _logger.Information("Callee canceled the call before call being established.");
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
-                                                              CallContext.CalleeNumber,
-                                                              CallContext.InboundService);
+                    _callEventsReportHttpClient.SubmitMissedOutgoingCallAsync(AgentProfile.SipPhoneNumber,
+                                                                              CallContext.CalleeNumber,
+                                                                              CallContext.InboundService);
 
                     AgentProfile.BrowsingHistory = "";
 
@@ -231,7 +235,7 @@ namespace BelledonneCommunications.Linphone.Core
                 try
                 {
                     // Todo: Call should be ignored in this situation.
-                    _coreClient.TerminateCallAsync(CallContext.CallId);
+                    _callEventsReportHttpClient.TerminateCallAsync(CallContext.CallId);
 
                     CallContext.Reset();
                 }
@@ -255,7 +259,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             try
             {
-                return await _coreClient.GetAgentInfoAsync(AgentProfile.SipPhoneNumber);
+                return await _agentInformationHttpClient.GetAgentInfoAsync(AgentProfile.SipPhoneNumber);
             }
             catch (Exception ex)
             {
@@ -288,7 +292,7 @@ namespace BelledonneCommunications.Linphone.Core
                         break;
                 }
 
-                bool response = await _coreClient.UpdateAgentStatusAsync(AgentProfile.SipPhoneNumber, status);
+                bool response = await _agentInformationHttpClient.UpdateAgentStatusAsync(AgentProfile.SipPhoneNumber, status);
 
                 if (response)
                 {
@@ -339,7 +343,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             try
             {
-                return await _coreClient.GetAgentInfoByUserIdAsync(userId);
+                return await _agentInformationHttpClient.GetAgentInfoByUserIdAsync(userId);
             }
             catch (Exception ex)
             {
@@ -348,7 +352,8 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        private readonly ICoreHttpClient _coreClient;
+        private readonly IAgentInformationHttpClient _agentInformationHttpClient;
+        private readonly ICallEventsReportHttpClient _callEventsReportHttpClient;
         private readonly ILogger _logger;
     }
 
@@ -382,13 +387,13 @@ namespace BelledonneCommunications.Linphone.Core
 
         public Guid CallId { get; set; }
 
-        public CallState CallState { get; set; }
+        public PhoneState PhoneState { get; set; }
 
         public CallDirection Direction { get; set; }
 
         public CallContext()
         {
-            CallState = CallState.Ready;
+            PhoneState = PhoneState.Ready;
         }
 
         internal void Reset()
@@ -396,7 +401,7 @@ namespace BelledonneCommunications.Linphone.Core
             CallerNumber = string.Empty;
             CalleeNumber = string.Empty;
             CallId = default;
-            CallState = CallState.Ready;
+            PhoneState = PhoneState.Ready;
         }
     }
 
@@ -407,12 +412,12 @@ namespace BelledonneCommunications.Linphone.Core
         Command = 3
     }
 
-    public enum CallState
+    public enum PhoneState
     {
         Ready = 1,
         Ringing = 2,
-        Established = 3,
-        DeclinedByAgent = 4,
+        CallEstablished = 3,
+        CallDeclinedByAgent = 4,
         InCall = 5
     }
 }

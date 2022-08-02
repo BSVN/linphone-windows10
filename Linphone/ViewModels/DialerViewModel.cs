@@ -1,7 +1,6 @@
 ﻿using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Messages;
-using BelledonneCommunications.Linphone.Presentation.Dto;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data.DataModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,8 +31,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
 	{
         public DialerViewModel(INavigationService navigationService,
                                ICallbackQueue callbackQueue, 
-                               CallFlowControl callFlowControl,
-                               IOptions<PanelOptions> options)
+                               CallFlowControl callFlowControl)
         {
             this.navigationService = navigationService;
             this.callbackQueue = callbackQueue;
@@ -43,7 +41,12 @@ namespace BelledonneCommunications.Linphone.ViewModels
             httpClient = new HttpClient();
 
             _callFlowControl = callFlowControl;
-            _panelOptions = options.Value;
+            
+            var applicationSettingsManager = new ApplicationSettingsManager();
+            applicationSettingsManager.Load();
+
+            _panelAddress = applicationSettingsManager.PanelAddress;
+
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }
 
@@ -242,8 +245,8 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
             try
             {
-                if (SourceUri.OriginalString.Length > _panelOptions.Address.Length)
-                    _callFlowControl.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(_panelOptions.Address.Length);
+                if (SourceUri.OriginalString.Length > _panelAddress.Length)
+                    _callFlowControl.AgentProfile.BrowsingHistory = SourceUri.OriginalString.Substring(_panelAddress.Length);
             }
             catch (Exception ex)
             {
@@ -365,9 +368,9 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 return false;
             }
 
-            if (_callFlowControl.CallContext.CallState != BelledonneCommunications.Linphone.Core.CallState.Ready)
+            if (_callFlowControl.CallContext.PhoneState != BelledonneCommunications.Linphone.Core.PhoneState.Ready)
             {
-                _logger.Information("Cant start a call, phone is in {State} state.", _callFlowControl.CallContext.CallState.ToString("g"));
+                _logger.Information("Cant start a call, phone is in {State} state.", _callFlowControl.CallContext.PhoneState.ToString("g"));
                 return false;
             }
 
@@ -380,11 +383,11 @@ namespace BelledonneCommunications.Linphone.ViewModels
             if (!string.IsNullOrWhiteSpace(_callFlowControl.AgentProfile.BrowsingHistory)
                 && !_callFlowControl.AgentProfile.BrowsingHistory.StartsWith("/Account/Login"))
             {
-                SourceUri = new Uri($"{_panelOptions.Address}{_callFlowControl.AgentProfile.BrowsingHistory}");
+                SourceUri = new Uri($"{_panelAddress}{_callFlowControl.AgentProfile.BrowsingHistory}");
             }
             else
             {
-                SourceUri = new Uri(_panelOptions.Address);
+                SourceUri = new Uri(_panelAddress);
             }
 		}
 
@@ -393,7 +396,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
         }
 
-        private readonly PanelOptions _panelOptions;
+        private readonly string _panelAddress;
         private readonly CallFlowControl _callFlowControl;
         private readonly INavigationService navigationService;
 		private readonly ICallbackQueue callbackQueue;

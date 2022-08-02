@@ -36,6 +36,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using BelledonneCommunications.Linphone.ViewModels;
 using BSN.Commons.Infrastructure;
+using BSN.Resa.Mci.CallCenter.Presentation.Dto;
 
 namespace Linphone
 {
@@ -119,7 +120,7 @@ namespace Linphone
 
             if (wasAnOutgoingCall)
             {
-                if (_callFlowControl.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                if (_callFlowControl.AgentProfile.Status == BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Ready)
                     _callFlowControl.JoinIntoIncomingCallQueue();
             }
 
@@ -259,7 +260,6 @@ namespace Linphone
 		{
             var serviceCollection = new ServiceCollection()
                 .AddSingleton<INavigationService>(new NavigationService(rootFrame))
-                .Configure<PanelOptions>(P => P.Address = applicationSettingsManager.PanelAddress)
                 .AddSingleton<AgentProfile>()
                 .AddSingleton<CallContext>()
                 .AddSingleton<CallFlowControl>()
@@ -277,7 +277,8 @@ namespace Linphone
                     .AddSingleton<ICallbackQueue>(new CallbackQueue(databaseFactory));
 			}
 
-            serviceCollection.AddHttpClient<ICoreHttpClient, CoreHttpClient>(P => P.BaseAddress = new Uri(applicationSettingsManager.PanelAddress));
+            serviceCollection.AddHttpClient<ICallEventsReportHttpClient, CallEventsReportHttpClient >(P => P.BaseAddress = new Uri(applicationSettingsManager.PanelAddress));
+            serviceCollection.AddHttpClient<ICallEventsReportHttpClient, CallEventsReportHttpClient >(P => P.BaseAddress = new Uri(applicationSettingsManager.PanelAddress));
 
             Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
 
@@ -307,7 +308,7 @@ namespace Linphone
             _closeApp = true;
 
             if (_callFlowControl.AgentProfile.IsLoggedIn)
-                await _callFlowControl.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
+                await _callFlowControl.UpdateAgentStatusAsync(AgentStatus.Offline);
 
             if (_callFlowControl.CallContext.Direction != CallDirection.Command)
             {
