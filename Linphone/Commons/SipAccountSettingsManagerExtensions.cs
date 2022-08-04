@@ -1,4 +1,4 @@
-﻿using BelledonneCommunications.Linphone.Presentation.Dto;
+﻿using BSN.Resa.Mci.CallCenter.Presentation.Dto;
 using Linphone.Model;
 
 namespace BelledonneCommunications.Linphone.Commons

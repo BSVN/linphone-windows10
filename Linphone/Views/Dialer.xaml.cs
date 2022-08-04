@@ -18,27 +18,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone.Dialogs;
-using BelledonneCommunications.Linphone.Presentation.Dto;
 using Linphone.Model;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
-using Windows.Storage;
 using System.Net.Http;
-using BelledonneCommunications.Linphone.Presentation.Dto;
 using System.Diagnostics;
 using Serilog;
-using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Windows.UI.Popups;
-using BSN.Resa.Mci.CallCenter.AgentApp.Data;
-using StackExchange.Redis;
 using BelledonneCommunications.Linphone.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Windows.UI.Xaml;
@@ -49,6 +38,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using BelledonneCommunications.Linphone.Messages;
 using System.Threading;
 using PCLAppConfig;
+using Microsoft.Extensions.Options;
+using BSN.Resa.Mci.CallCenter.Presentation.Dto;
 
 namespace Linphone.Views
 {
@@ -70,6 +61,13 @@ namespace Linphone.Views
             httpClient = new HttpClient();
 
 			DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
+            _callFlowControl = Ioc.Default.GetRequiredService<CallFlowControl>();
+
+            var applicationSettingsManager = new ApplicationSettingsManager();
+            applicationSettingsManager.Load();
+
+            _panelAddress = applicationSettingsManager.PanelAddress;
+
             ViewModel.RefreshCommand = status.RefreshCommand;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
@@ -85,16 +83,16 @@ namespace Linphone.Views
             };
 
 
-            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
+            if (_callFlowControl.AgentProfile.IsLoggedIn)
             {
                 AgentStatus.SelectionChanged -= AgentStatus_SelectionChanged;
                 AgentStatus.IsEnabled = true;
 
-                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                if (_callFlowControl.AgentProfile.Status == BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Ready)
                 {
                     AgentStatus.SelectedValue = OnlineAgentComboItem;
                 }
-                else if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break)
+                else if (_callFlowControl.AgentProfile.Status == BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Break)
                 {
                     AgentStatus.SelectedValue = OnBreakAgentComboItem;
                 }
@@ -115,6 +113,15 @@ namespace Linphone.Views
 		protected override async void OnNavigatedTo(NavigationEventArgs e)
 		{
 			base.OnNavigatedTo(e);
+
+            if (_callFlowControl.AgentProfile.CallbackQueueConnectionEstablished)
+            {
+                Callback.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Callback.Visibility = Visibility.Collapsed;
+            }
 
             // TODO: Please remove it (Linphone has it, see LinphoneManager)
             if (!await Utility.IsMicrophoneAvailable())
@@ -240,7 +247,7 @@ namespace Linphone.Views
 
         private void status_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
+            if (_callFlowControl.AgentProfile.IsLoggedIn)
                 LinphoneManager.Instance.Core.RefreshRegisters();
         }
 
@@ -251,20 +258,20 @@ namespace Linphone.Views
             // HotPoint #5
             if (sender.Source.AbsolutePath == "/Account/Login")
             {
-                CallFlowControl.Instance.AgentProfile.IsLoggedIn = false;
+                _callFlowControl.AgentProfile.IsLoggedIn = false;
                 DisableRegisteration();
             }
-            else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == false)
+            else if (sender.Source.AbsolutePath.Contains("Dashboard") && _callFlowControl.AgentProfile.IsLoggedIn == false)
             {
-                CallFlowControl.Instance.AgentProfile.IsLoggedIn = true;
+                _callFlowControl.AgentProfile.IsLoggedIn = true;
 
                 EnableRegister(true);
 
-                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+                Browser.CoreWebView2.Navigate($"{_panelAddress}/api/Operators/UserInfo");
             }
-            else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == true)
+            else if (sender.Source.AbsolutePath.Contains("Dashboard") && _callFlowControl.AgentProfile.IsLoggedIn == true)
             {
-                if (string.IsNullOrWhiteSpace(CallFlowControl.Instance.AgentProfile.SipPhoneNumber))
+                if (string.IsNullOrWhiteSpace(_callFlowControl.AgentProfile.SipPhoneNumber))
                 {
                     _logger.Information("Backup solution for loading sip settings.");
 
@@ -291,8 +298,8 @@ namespace Linphone.Views
                             _logger.Error(ex, "Backup solution for loading sip setting is not working at all !.");
                         }
 
-                        var userSettings = await CallFlowControl.Instance.GetAgentSettingByUserId(matchedValue);
-                        CallFlowControl.Instance.AgentProfile.SipPhoneNumber = userSettings.Data.SipProfile.Username;
+                        var userSettings = await _callFlowControl.GetAgentSettingByUserId(matchedValue);
+                        _callFlowControl.AgentProfile.SipPhoneNumber = userSettings.Data.SipProfile.Username;
 
                         LoadSipSettings(userSettings.Data.SipProfile);
 
@@ -319,7 +326,7 @@ namespace Linphone.Views
                 {
                     if (UserInfoRetryLimit == 0)
                     {
-                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+                        Browser.CoreWebView2.Navigate($"{_panelAddress}");
                         return;
                     }
 
@@ -341,11 +348,11 @@ namespace Linphone.Views
                         _logger.Error("Loaded Html content: {Html}", html);
 
                         UserInfoRetryLimit -= 1;
-                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+                        Browser.CoreWebView2.Navigate($"{_panelAddress}/api/Operators/UserInfo");
                         return;
                     }
 
-                    CallFlowControl.Instance.AgentProfile.SipPhoneNumber = sipPhoneNumber;
+                    _callFlowControl.AgentProfile.SipPhoneNumber = sipPhoneNumber;
 
                     LoadSipSettings();
 
@@ -361,7 +368,7 @@ namespace Linphone.Views
                     _logger.Error(ex, "Error while reading sip phonenumber.");
                 }
 
-                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+                Browser.CoreWebView2.Navigate($"{_panelAddress}");
             }
         }
 
@@ -403,7 +410,7 @@ namespace Linphone.Views
             {
                 _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
                 {
-                    OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
+                    OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await _callFlowControl.GetAgentSettings();
                     SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
 
                     settings.Load();
@@ -460,14 +467,14 @@ namespace Linphone.Views
             {
                 if (AgentStatus.SelectedIndex == 0)
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
+                    await _callFlowControl.UpdateAgentStatusAsync(BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Ready);
                 }
                 else
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
+                    await _callFlowControl.UpdateAgentStatusAsync(BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Break);
                 }
 
-                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");
+                Browser.CoreWebView2.Navigate($"{_panelAddress}");
             }
             catch (Exception ex)
             {
@@ -478,6 +485,8 @@ namespace Linphone.Views
 
         private static int UserInfoRetryLimit = 4;
 
+        private readonly string _panelAddress;
+        private readonly CallFlowControl _callFlowControl;
         private readonly ILogger _logger;
     }
 }

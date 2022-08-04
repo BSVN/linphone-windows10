@@ -25,6 +25,7 @@ using BelledonneCommunications.Linphone.Core;
 using BelledonneCommunications.Linphone;
 using BelledonneCommunications.Linphone.Dialogs;
 using BelledonneCommunications.Linphone.Commons;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace Linphone.Views
 {
@@ -36,6 +37,8 @@ namespace Linphone.Views
         public IncomingCall()
         {
             this.InitializeComponent();
+
+            _callFlowControl = Ioc.Default.GetRequiredService<CallFlowControl>();
 
             SystemNavigationManager.GetForCurrentView().BackRequested += Back_requested;
             if (!LinphoneManager.Instance.Core.VideoSupported() || !LinphoneManager.Instance.Core.VideoCaptureEnabled)
@@ -131,7 +134,7 @@ namespace Linphone.Views
             if (LinphoneManager.Instance.Core.CurrentCall != null)
             {
                 // HotPoint #1
-                CallFlowControl.Instance.CallEstablished();
+                _callFlowControl.CallEstablished();
 
                 List<string> parameters = new List<string>();
                 parameters.Add(_callerNumber);
@@ -146,7 +149,7 @@ namespace Linphone.Views
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
-            CallFlowControl.Instance.IncomingCallDeclined();
+            _callFlowControl.IncomingCallDeclined();
             LinphoneManager.Instance.EndCurrentCall();
             
             if (Frame.CanGoBack)
@@ -154,5 +157,7 @@ namespace Linphone.Views
                 Frame.GoBack();
             }
         }
+
+        private readonly CallFlowControl _callFlowControl;
     }
 }

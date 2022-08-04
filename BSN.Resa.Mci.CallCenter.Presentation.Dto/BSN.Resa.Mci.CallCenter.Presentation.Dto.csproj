@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BSN.Resa.Vns.Commons\BSN.Resa.Vns.Commons.csproj" />
+    <ProjectReference Include="..\BSN.Resa.Vns.Locale\BSN.Resa.Vns.Locale.csproj" />
+  </ItemGroup>
+
+</Project>
