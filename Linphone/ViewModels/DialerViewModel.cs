@@ -27,8 +27,8 @@ using Windows.UI.Xaml.Navigation;
 
 namespace BelledonneCommunications.Linphone.ViewModels
 {
-	public class DialerViewModel : ObservableObject
-	{
+    public class DialerViewModel : ObservableObject
+    {
         public DialerViewModel(INavigationService navigationService, ICallbackQueue callbackQueue)
         {
             this.navigationService = navigationService;
@@ -40,23 +40,23 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
         private Uri sourceUri;
-		public Uri SourceUri
+        public Uri SourceUri
         {
             get => sourceUri;
             set => SetProperty(ref this.sourceUri, value);
         }
 
         private int outgoingChannelSelectedIndex;
-		public int OutgoingChannelSelectedIndex
+        public int OutgoingChannelSelectedIndex
         {
             get => outgoingChannelSelectedIndex;
             set => SetProperty(ref this.outgoingChannelSelectedIndex, value);
         }
 
-		// TODO: Please remove it, and use _settings
-		ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+        // TODO: Please remove it, and use _settings
+        ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
 
-		// TODO: Please remove all static variable
+        // TODO: Please remove all static variable
         public static string BrowserCurrentUrlOffset = null;
         public static string BrowserBaseUrl = null;
         public static bool HasUnfinishedCall = false;
@@ -70,10 +70,10 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         // FIXME
         public ICommand RefreshCommand
-		{
+        {
             get;
             set;
-		}
+        }
 
         private int unreadMessageCount;
         public int UnreadMessageCount
@@ -101,12 +101,12 @@ namespace BelledonneCommunications.Linphone.ViewModels
             }
         }
 
-		private int missedCallCount;
-		public int MissedCallCount
-		{
-			get
-			{
-				return missedCallCount;
+        private int missedCallCount;
+        public int MissedCallCount
+        {
+            get
+            {
+                return missedCallCount;
             }
 
             set
@@ -128,7 +128,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
         private string addressBoxText;
-		public string AddressBoxText
+        public string AddressBoxText
         {
             get { return addressBoxText; }
             set
@@ -138,9 +138,11 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
 
-		public void OnNavigatedTo(NavigationEventArgs e)
-		{
-			LinphoneManager.Instance.CoreDispatcher = CoreApplication.GetCurrentView().CoreWindow.Dispatcher;
+        public async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            addressBoxText = "";
+
+            LinphoneManager.Instance.CoreDispatcher = CoreApplication.GetCurrentView().CoreWindow.Dispatcher;
             LinphoneManager.Instance.RegistrationChanged += RegistrationChanged;
             LinphoneManager.Instance.MessageReceived += MessageReceived;
             LinphoneManager.Instance.CallStateChangedEvent += CallStateChanged;
@@ -186,10 +188,25 @@ namespace BelledonneCommunications.Linphone.ViewModels
             if (LinphoneManager.Instance.Core.CallsNb > 0)
             {
                 Call call = LinphoneManager.Instance.Core.CurrentCall;
-                if( call != null){
-                    List<String> parameters = new List<String>();
-                    parameters.Add(call.RemoteAddress.AsStringUriOnly());
-                    navigationService.Navigate<global::Linphone.Views.InCall>(parameters);
+                if (call != null)
+                {
+                    if (CallFlowControl.Instance.CallContext.CallType == CallType.Command)
+                    {
+                        _logger.Information("Inprogress command call on behind.");
+                        await Task.Delay(300);
+                        while (true)
+                        {
+                            call = LinphoneManager.Instance.Core.CurrentCall;
+                            if (call == null) break;
+                            await Task.Delay(300);
+                        }
+                    }
+                    else
+                    {
+                        List<String> parameters = new List<String>();
+                        parameters.Add(call.RemoteAddress.AsStringUriOnly());
+                        navigationService.Navigate<global::Linphone.Views.InCall>(parameters);
+                    }
                 }
             }
 
@@ -218,20 +235,20 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 }
             }
 
-		}
+        }
 
-		/// <summary>
-		/// Raises right after page unloading
-		/// </summary>
-		/// <param name="e"></param>
-		public void OnNavigatingFrom(NavigatingCancelEventArgs e)
-		{
+        /// <summary>
+        /// Raises right after page unloading
+        /// </summary>
+        /// <param name="e"></param>
+        public void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
             _logger.Debug("OnNavigatingFrom");
 
             LinphoneManager.Instance.RegistrationChanged -= RegistrationChanged;
             LinphoneManager.Instance.MessageReceived -= MessageReceived;
             LinphoneManager.Instance.CallStateChangedEvent -= CallStateChanged;
-		}
+        }
 
         private void RegistrationChanged(ProxyConfig config, RegistrationState state, string message)
         {
@@ -249,7 +266,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
         private async void CallbackClick()
-		{
+        {
             bool joinedCallQueue = CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue;
             if (await PreparingOutgoingCall() == false)
                 return;
@@ -267,11 +284,11 @@ namespace BelledonneCommunications.Linphone.ViewModels
                 await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
 
                 BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.callee_number}*0{normalizedAddress}");
-                
+
                 await outgoingCall.WhenEnded();
 
                 // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
-				await Task.Delay(500);
+                await Task.Delay(500);
                 Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
                 CancellationToken cancellationToken = await cancellationTokenTask;
                 if (cancellationToken.IsCancellationRequested)
@@ -308,7 +325,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
                         normalizedAddres = "00" + normalizedAddres;
                 }
 
-				await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
+                await CallFlowControl.Instance.InitiateOutgoingCallAsync(normalizedAddres.Substring(EXTRA_ZERO_CORRECTION_INDEX), inboundService);
 
                 LinphoneManager.Instance.NewOutgoingCall($"{inboundService}*{normalizedAddres}");
             }
@@ -319,7 +336,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
         /// </summary>
         /// <returns>True if prepared for ougoing call, otherwise return false</returns>
         private async Task<bool> PreparingOutgoingCall()
-		{
+        {
             bool isInHomeTesting = Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]);
 
             if (!isInHomeTesting && !CallFlowControl.Instance.AgentProfile.IsLoggedIn) return false;
@@ -363,7 +380,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             }
 
             return true;
-		}
+        }
 
         public static String StripUnicodeCharactersFromString(string inputValue)
         {
@@ -371,12 +388,12 @@ namespace BelledonneCommunications.Linphone.ViewModels
         }
 
         private readonly INavigationService navigationService;
-		private readonly ICallbackQueue callbackQueue;
-		private readonly HttpClient httpClient;
+        private readonly ICallbackQueue callbackQueue;
+        private readonly HttpClient httpClient;
         private readonly ILogger _logger;
 
         private const string HEAD_OF_HOUSEHOLD_SERVICE = "99970";
         private const string SELLERS_SERVICE_PHONENUMBER = "99971";
         private const int EXTRA_ZERO_CORRECTION_INDEX = 1;
-	}
+    }
 }

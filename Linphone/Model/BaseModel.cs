@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using BelledonneCommunications.Linphone.Commons;
 using Linphone;
 using Linphone.Model;
+using Serilog;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -61,6 +62,7 @@ namespace Linphone {
     /// Model view for each page implementing the call controller listener to adjust displayed page depending on call events.
     /// </summary>
     public class BaseModel : INotifyPropertyChanged, CallControllerListener {
+
         /// <summary>
         /// Specific listener for any view which want to be notified when the mute state changes.
         /// </summary>
@@ -86,7 +88,7 @@ namespace Linphone {
         /// Public constructor.
         /// </summary>
         public BaseModel() {
-
+            _logger = Log.Logger.ForContext("SourceContext", nameof(BaseModel));
         }
 
         /// <summary>
@@ -114,6 +116,7 @@ namespace Linphone {
         /// </summary>
         /// <param name="callerNumber"></param>
         public void NewCallStarted(string callerNumber) {
+            _logger.Information("Redirect to incall BaseModel #2");
             this.Page.Frame.Navigate(typeof(Views.Chats), new Uri("/Views/InCall.xaml?sip=" + Utility.ReplacePlusInUri(callerNumber), UriKind.RelativeOrAbsolute));
         }
 
@@ -127,6 +130,7 @@ namespace Linphone {
             if (this.Page.Frame.CanGoBack) {
                 this.Page.Frame.GoBack();
             } else {
+                _logger.Information("Redirect to incall BaseModel #1");
                 // Launch the Dialer and remove the incall view from the backstack
                 this.Page.Frame.Navigate(typeof(Views.InCall), null);
                 //this.Page.Frame.RemoveBackEntry();
@@ -175,6 +179,9 @@ namespace Linphone {
         public virtual void OnNavigatedFrom(NavigationEventArgs nea) {
             LinphoneManager.Instance.CallListener = null;
         }
+
+
+        private readonly ILogger _logger;
 
         #region INotifyPropertyChanged Members
 

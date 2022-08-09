@@ -336,12 +336,6 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 try
                 {
-                    if (CallContext.CallType == CallType.Callback)
-                    {
-                        CallContext.CallbackRequest.try_count++;
-                        _callbackQueue.Push(CallContext.CallbackRequest);
-                    }
-
                     _coreClient.TerminateCallAsync(CallContext.CallId);
 
                     CallContext.Reset();

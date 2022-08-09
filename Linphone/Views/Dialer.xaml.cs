@@ -133,6 +133,7 @@ namespace Linphone.Views
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
 		{
+            addressBox.Text = "";
             if (CallFlowControl.Instance.AgentProfile.Browser != null)
             {
                 MainGrid.Children.Remove(Browser);
