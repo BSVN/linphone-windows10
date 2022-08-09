@@ -24,7 +24,7 @@
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
     <PackageCertificateThumbprint>9102B0C958B8DDD711E1CF5CC93A5E3C058E5633</PackageCertificateThumbprint>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -33,6 +33,7 @@
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <ExcludeGeneratedDebugSymbol>False</ExcludeGeneratedDebugSymbol>
+    <AppInstallerUri>https://localhost:44338/packages/Linphone.appinstaller</AppInstallerUri>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -496,6 +497,9 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm">
       <Version>8.0.0-preview4</Version>
+    </PackageReference>
+    <PackageReference Include="Dwrandaz.AutoUpdateComponent">
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="LinphoneSDK">
       <Version>5.1.46</Version>

@@ -36,6 +36,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using BelledonneCommunications.Linphone.ViewModels;
 using BSN.Commons.Infrastructure;
+using Dwrandaz.AutoUpdateComponent;
 
 namespace Linphone
 {
@@ -76,7 +77,36 @@ namespace Linphone
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
             IsWebView2Installed();
 
+            CheckForUpdate();
             acceptCall = false;
+        }
+
+        private async Task CheckForUpdate()
+        {
+            var path = "https://localhost:44338/packages/Linphone.appinstaller";
+            var info = await AutoUpdateManager.CheckForUpdatesAsync(path);
+            if (!info.Succeeded)
+            {
+                // There was an error in getting the update information from the server
+                // use info.ErrorMessage to get the error message
+                return;
+            }
+
+            if (!info.ShouldUpdate)
+            {
+                // The app is already up-to-date :)
+                return;
+            }
+
+            // You can use info.MainBundleVersion to get the update version
+
+            var result = await AutoUpdateManager.TryToUpdateAsync(info);
+            if (!result.Succeeded)
+            {
+                // There was an error in updating the app
+                // use result.ErrorMessage to get the error message
+                return;
+            }
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
