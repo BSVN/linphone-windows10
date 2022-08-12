@@ -196,7 +196,6 @@
     <Compile Include="Controls\TextBoxChatBubble.xaml.cs">
       <DependentUpon>TextBoxChatBubble.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\CoreHttpClient.cs" />
     <Compile Include="Dialogs\ContinueCallbackAnsweringDialog.xaml.cs">
       <DependentUpon>ContinueCallbackAnsweringDialog.xaml</DependentUpon>
     </Compile>
@@ -222,13 +221,6 @@
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
     <Compile Include="Commons\NavigationService.cs" />
-    <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
-    <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
-    <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
-    <Compile Include="Presentation.Dto\CallViewModel.cs" />
-    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetByExternalIdResponse.cs" />
-    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
-    <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
     <Compile Include="Commons\Utility.cs" />
     <Compile Include="ViewModels\DialerViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">
@@ -475,6 +467,10 @@
       <Project>{fef53d4b-04b8-44c7-970b-46c0231a1d34}</Project>
       <Name>BSN.Resa.Mci.CallCenter.AgentApp.Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BSN.Resa.Mci.CallCenter.Presentation.Dto\BSN.Resa.Mci.CallCenter.Presentation.Dto.csproj">
+      <Project>{bba6ae6d-443a-4d05-9e3f-2925f8eb3c10}</Project>
+      <Name>BSN.Resa.Mci.CallCenter.Presentation.Dto</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BSN.Resa.Vns.Commons\BSN.Resa.Vns.Commons.csproj">
       <Project>{59B6FC97-351C-4800-8C53-D19FA5DB1C95}</Project>
       <Name>BSN.Resa.Vns.Commons</Name>
@@ -501,6 +497,9 @@
       <Version>5.1.56</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
+      <Version>6.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Http">
       <Version>6.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">

@@ -36,6 +36,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using BelledonneCommunications.Linphone.ViewModels;
 using BSN.Commons.Infrastructure;
+using BSN.Resa.Mci.CallCenter.Presentation.Dto;
 
 namespace Linphone
 {
@@ -71,6 +72,7 @@ namespace Linphone
             _logger = Log.Logger.ForContext("SourceContext", nameof(App));
 
             databaseFactory = new DatabaseFactory(applicationSettingsManager.RedisConnectionString);
+            databaseFactory.OnConnectionEstablished += P => Ioc.Default.GetRequiredService<CallFlowControl>().AgentProfile.CallbackQueueConnectionEstablished = true;
 
             // TODO: Use this code check current version of WebView.
             // This line of code might be counted as deprecated as soon as we use fixed runtime instaed.
@@ -97,29 +99,29 @@ namespace Linphone
 
         public async void CallEnded(Call call)
         {
-            bool wasAnOutgoingCall = CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing;
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            bool wasAnOutgoingCall = _callFlowControl.CallContext.Direction == CallDirection.Outgoing;
+            if (_callFlowControl.CallContext.Direction == CallDirection.Command)
             {
                 _logger.Information("A command call has been ended.");
 
-                if (CloseApp)
+                if (_closeApp)
                 {
                     DisableRegisteration();
                     Current.Exit();
                 }
 
-                CallFlowControl.Instance.CallContext.Direction = CallDirection.Incoming;
+                _callFlowControl.CallContext.Direction = CallDirection.Incoming;
                 return;
             }
             else
             {
-                await CallFlowControl.Instance.TerminateCall();
+                await _callFlowControl.TerminateCall();
             }
 
             if (wasAnOutgoingCall)
             {
-                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
-                    CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+                if (_callFlowControl.AgentProfile.Status == BSN.Resa.Mci.CallCenter.Presentation.Dto.AgentStatus.Ready)
+                    _callFlowControl.JoinIntoIncomingCallQueue();
             }
 
             if (rootFrame.CanGoBack)
@@ -149,13 +151,13 @@ namespace Linphone
 
         public void NewCallStarted(string callerNumber)
         {
-            if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Command)
+            if (_callFlowControl.CallContext.Direction == CallDirection.Command)
             {
                 return;
             }
-            else if (CallFlowControl.Instance.CallContext.Direction == CallDirection.Outgoing)
+            else if (_callFlowControl.CallContext.Direction == CallDirection.Outgoing)
             {
-                CallFlowControl.Instance.CallEstablished();
+                _callFlowControl.CallEstablished();
             }
 
             Debug.WriteLine("[CallListener] NewCallStarted " + callerNumber);
@@ -256,11 +258,15 @@ namespace Linphone
 
 		private void RegisterTypes(Frame rootFrame)
 		{
-			var serviceCollection = new ServiceCollection()
-				.AddSingleton<INavigationService>(new NavigationService(rootFrame))
+            var serviceCollection = new ServiceCollection()
+                .AddSingleton<INavigationService>(new NavigationService(rootFrame))
+                .AddSingleton<AgentProfile>()
+                .AddSingleton<CallContext>()
+                .AddSingleton<CallFlowControl>()
 				.AddSingleton<IDatabaseFactory>(databaseFactory)
 				.AddTransient<DialerViewModel>();
-			if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
+
+            if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
 			{
 				serviceCollection
 					.AddSingleton<ICallbackQueue>(new CallbackQueueStub());
@@ -270,7 +276,13 @@ namespace Linphone
                 serviceCollection
                     .AddSingleton<ICallbackQueue>(new CallbackQueue(databaseFactory));
 			}
-			Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
+
+            serviceCollection.AddHttpClient<ICallEventsReportHttpClient, CallEventsReportHttpClient >(P => P.BaseAddress = new Uri(applicationSettingsManager.PanelAddress));
+            serviceCollection.AddHttpClient<ICallEventsReportHttpClient, CallEventsReportHttpClient >(P => P.BaseAddress = new Uri(applicationSettingsManager.PanelAddress));
+
+            Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
+
+            _callFlowControl = Ioc.Default.GetRequiredService<CallFlowControl>();
 		}
 
 		protected override void OnActivated(IActivatedEventArgs args)
@@ -285,7 +297,7 @@ namespace Linphone
 
         private async void App_CloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
         {
-            if (CloseApp) return;
+            if (_closeApp) return;
 
             _logger.Information("App_CloseRequested raised omg !!");
 
@@ -293,12 +305,12 @@ namespace Linphone
 
             e.Handled = true;
 
-            CloseApp = true;
+            _closeApp = true;
 
-            if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
-                await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
+            if (_callFlowControl.AgentProfile.IsLoggedIn)
+                await _callFlowControl.UpdateAgentStatusAsync(AgentStatus.Offline);
 
-            if (CallFlowControl.Instance.CallContext.Direction != CallDirection.Command)
+            if (_callFlowControl.CallContext.Direction != CallDirection.Command)
             {
                 DisableRegisteration();
 
@@ -387,7 +399,7 @@ namespace Linphone
             {
                 // HotPoint #0
                 Address address = LinphoneManager.Instance.Core.InterpretUrl(call.RemoteAddress.AsString());
-                await CallFlowControl.Instance.InitiateIncomingCallAsync(address.GetCanonicalPhoneNumber(), call.RemoteAddress.DisplayName);
+                await _callFlowControl.InitiateIncomingCallAsync(address.GetCanonicalPhoneNumber(), call.RemoteAddress.DisplayName);
 
                 rootFrame.Navigate(typeof(Views.IncomingCall), call.RemoteAddress.AsString());
             }
@@ -433,9 +445,12 @@ namespace Linphone
             }
         }
 
-        bool CloseApp = false;
+        private bool _closeApp = false;
+		
+        private readonly ApplicationSettingsManager applicationSettingsManager;
+        private CallFlowControl _callFlowControl;
+
         private readonly ILogger _logger;
-		private readonly ApplicationSettingsManager applicationSettingsManager;
-        private readonly IDatabaseFactory databaseFactory;
+        private readonly DatabaseFactory databaseFactory;
 	}
 }

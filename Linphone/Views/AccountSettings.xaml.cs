@@ -54,8 +54,6 @@ namespace Linphone.Views
             DisplayName.Text = _settings.DisplayName ?? "";
             Expires.Text = _settings.Expires ?? "";
 
-            PanelAddress.Text = ConfigurationManager.AppSettings["PanelAddress"];
-
             List<string> transports = new List<string>
             {
                 ResourceLoader.GetForCurrentView().GetString("TransportUDP"),

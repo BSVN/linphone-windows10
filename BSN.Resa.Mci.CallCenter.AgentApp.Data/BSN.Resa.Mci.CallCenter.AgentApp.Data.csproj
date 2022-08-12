@@ -3,10 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="BSN.Commons" Version="1.7.2" />
+    <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BSN.Resa.Mci.CallCenter.Presentation.Dto\BSN.Resa.Mci.CallCenter.Presentation.Dto.csproj" />
+    <ProjectReference Include="..\BSN.Resa.Vns.Commons\BSN.Resa.Vns.Commons.csproj" />
   </ItemGroup>
 
 </Project>
