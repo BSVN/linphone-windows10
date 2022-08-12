@@ -2,8 +2,6 @@
 {
     public class CallsCountByStateViewModel
     {
-        public CallState State { get; set; }
-
         public string InboundService { get; set; }
 
         public int IncomingCallCount { get; set; }

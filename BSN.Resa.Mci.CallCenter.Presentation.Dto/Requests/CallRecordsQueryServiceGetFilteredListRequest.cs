@@ -22,8 +22,6 @@ namespace BSN.Resa.Mci.CallCenter.Presentation.Dto
 
         public CallReason? CallReason { get; set; }
 
-        public CallState? State { get; set; }
-
         public uint PageNumber { get; set; }
         
         public uint PageSize { get; set; }
