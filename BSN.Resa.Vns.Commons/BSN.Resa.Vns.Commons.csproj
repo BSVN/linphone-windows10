@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BSN.Commons" Version="1.7.1" />
-    <PackageReference Include="BSN.Commons.PresentationInfrastructure" Version="1.7.1" />
+    <PackageReference Include="BSN.Commons" Version="1.7.2" />
+    <PackageReference Include="BSN.Commons.PresentationInfrastructure" Version="1.7.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Sieve" Version="2.4.1" />
