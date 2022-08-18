@@ -83,7 +83,7 @@ namespace Linphone
 
         private async Task CheckForUpdate()
         {
-            var path = "https://localhost:44338/packages/Linphone.appinstaller";
+            var path = "https://localhost:44338/packages/";
             var info = await AutoUpdateManager.CheckForUpdatesAsync(path);
             if (!info.Succeeded)
             {
