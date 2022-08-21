@@ -87,6 +87,7 @@ namespace Linphone
             var info = await AutoUpdateManager.CheckForUpdatesAsync(path);
             if (!info.Succeeded)
             {
+                _logger.Information("Update Information Couldn't be retrieved, {Data}.", info.SerializeToJson());
                 // There was an error in getting the update information from the server
                 // use info.ErrorMessage to get the error message
                 return;
@@ -94,6 +95,7 @@ namespace Linphone
 
             if (!info.ShouldUpdate)
             {
+                _logger.Information("Application is up to date.");
                 // The app is already up-to-date :)
                 return;
             }
@@ -103,6 +105,8 @@ namespace Linphone
             var result = await AutoUpdateManager.TryToUpdateAsync(info);
             if (!result.Succeeded)
             {
+                _logger.Information("Application updated successfully.");
+
                 // There was an error in updating the app
                 // use result.ErrorMessage to get the error message
                 return;
