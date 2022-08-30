@@ -36,23 +36,29 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using BelledonneCommunications.Linphone.ViewModels;
 using BSN.Commons.Infrastructure;
+using System.Collections.ObjectModel;
+using Windows.UI.ViewManagement;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Popups;
+using Linphone.Views;
+using BelledonneCommunications.Linphone.Views;
 
 namespace Linphone
 {
-	/// <summary>
-	/// Provides application-specific behavior to supplement the default Application class.
-	/// </summary>
-	sealed partial class App : Application, CallControllerListener
+    /// <summary>
+    /// Provides application-specific behavior to supplement the default Application class.
+    /// </summary>
+    sealed partial class App : Application, CallControllerListener
     {
         Frame rootFrame;
         bool acceptCall;
         String sipAddress;
-
-		/// <summary>
-		/// Initializes the singleton application object.  This is the first line of authored code
-		/// executed, and as such is the logical equivalent of main() or WinMain().
-		/// </summary>
-		public App()
+        public ObservableCollection<ViewLifetimeControl> SecondaryViews = new ObservableCollection<ViewLifetimeControl>();
+        /// <summary>
+        /// Initializes the singleton application object.  This is the first line of authored code
+        /// executed, and as such is the logical equivalent of main() or WinMain().
+        /// </summary>
+        public App()
         {
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
@@ -64,7 +70,7 @@ namespace Linphone
             applicationSettingsManager = new ApplicationSettingsManager();
             applicationSettingsManager.Load();
 
-			Log.Logger.Error("Here is the usage.");
+            Log.Logger.Error("Here is the usage.");
 
             Logger.ConfigureLogger();
 
@@ -177,7 +183,7 @@ namespace Linphone
             Initialize(e, null);
         }
 
-		private void Initialize(IActivatedEventArgs e, String args)
+        private async void Initialize(IActivatedEventArgs e, String args)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -240,6 +246,33 @@ namespace Linphone
                 else
                 {
                     rootFrame.Navigate(typeof(Views.Dialer), args);
+
+                    var selectedView = await createMainPageAsync();
+                    if (null != selectedView)
+                    {
+                        selectedView.StartViewInUse();
+                        var viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(
+                            selectedView.Id,
+                            ViewSizePreference.Default,
+                            ApplicationView.GetForCurrentView().Id,
+                            ViewSizePreference.Default
+                            );
+
+                        await selectedView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            var currentPage = (CompactOverlayView)((Frame)Window.Current.Content).Content;
+                            Window.Current.Activate();
+                            CompactMode();
+                        });
+
+                        selectedView.StopViewInUse();
+
+
+                    }
+
+
+
+
                 }
             }
 
@@ -250,26 +283,62 @@ namespace Linphone
             DisableRegisteration();
         }
 
-		private void RegisterTypes(Frame rootFrame)
-		{
-			var serviceCollection = new ServiceCollection()
-				.AddSingleton<INavigationService>(new NavigationService(rootFrame))
-				.AddSingleton<IDatabaseFactory>(databaseFactory)
-				.AddTransient<DialerViewModel>();
-			if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
-			{
-				serviceCollection
-					.AddSingleton<ICallbackQueue>(new CallbackQueueStub());
-			}
-			else
-			{
+        private async Task<ViewLifetimeControl> createMainPageAsync()
+        {
+            ViewLifetimeControl viewControl = null;
+            await CoreApplication.CreateNewView().Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                // This object is used to keep track of the views and important
+                // details about the contents of those views across threads
+                // In your app, you would probably want to track information
+                // like the open document or page inside that window
+                viewControl = ViewLifetimeControl.CreateForCurrentView();
+                viewControl.Title = DateTime.Now.ToString();
+                // Increment the ref count because we just created the view and we have a reference to it                
+                viewControl.StartViewInUse();
+
+                var frame = new Frame();
+                frame.Navigate(typeof(CompactOverlayView), viewControl);
+                Window.Current.Content = frame;
+                // This is a change from 8.1: In order for the view to be displayed later it needs to be activated.
+                Window.Current.Activate();
+                ApplicationView.GetForCurrentView().Title = viewControl.Title;
+            });
+
+            ((App)App.Current).SecondaryViews.Add(viewControl);
+
+            return viewControl;
+        }
+
+        private async void CompactMode()
+        {
+            var preferences = ViewModePreferences.CreateDefault(ApplicationViewMode.CompactOverlay);
+            preferences.CustomSize = new Windows.Foundation.Size(100, 100);
+            await ApplicationView.GetForCurrentView()
+                .TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay, preferences);
+
+        }
+
+        private void RegisterTypes(Frame rootFrame)
+        {
+            var serviceCollection = new ServiceCollection()
+                .AddSingleton<INavigationService>(new NavigationService(rootFrame))
+                .AddSingleton<IDatabaseFactory>(databaseFactory)
+                .AddTransient<DialerViewModel>();
+            if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
+            {
+                serviceCollection
+                    .AddSingleton<ICallbackQueue>(new CallbackQueueStub());
+            }
+            else
+            {
                 serviceCollection
                     .AddSingleton<ICallbackQueue>(new CallbackQueue(databaseFactory));
-			}
-			Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
-		}
+            }
+            Ioc.Default.ConfigureServices(serviceCollection.BuildServiceProvider());
+        }
 
-		protected override void OnActivated(IActivatedEventArgs args)
+        protected override void OnActivated(IActivatedEventArgs args)
         {
             if (args.Kind == ActivationKind.ToastNotification)
             {
@@ -300,12 +369,14 @@ namespace Linphone
 
                 differal.Complete();
 
-                Current.Exit();
+                //  Current.Exit();
+                CoreApplication.Exit();
             }
             else
             {
                 differal.Complete();
             }
+
         }
 
         /// <summary>
@@ -326,7 +397,7 @@ namespace Linphone
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
         private void OnSuspending(object sender, SuspendingEventArgs e)
-		{
+        {
             var deferral = e.SuspendingOperation.GetDeferral();
 
             //TODO: Save application state and stop any background activity
@@ -334,7 +405,7 @@ namespace Linphone
 
             _logger.Debug("OnSuspending.");
             deferral.Complete();
-		}
+        }
 
         private static void DisableRegisteration()
         {
@@ -431,7 +502,7 @@ namespace Linphone
 
         bool CloseApp = false;
         private readonly ILogger _logger;
-		private readonly ApplicationSettingsManager applicationSettingsManager;
+        private readonly ApplicationSettingsManager applicationSettingsManager;
         private readonly IDatabaseFactory databaseFactory;
-	}
+    }
 }

@@ -49,6 +49,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using BelledonneCommunications.Linphone.Messages;
 using System.Threading;
 using PCLAppConfig;
+using Windows.UI.Input.Preview.Injection;
+using Windows.System;
 
 namespace Linphone.Views
 {
@@ -64,12 +66,12 @@ namespace Linphone.Views
 
         private readonly HttpClient httpClient;
 
-		public Dialer()
+        public Dialer()
         {
             this.InitializeComponent();
             httpClient = new HttpClient();
 
-			DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
+            DataContext = Ioc.Default.GetRequiredService<DialerViewModel>();
             ViewModel.RefreshCommand = status.RefreshCommand;
 
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
@@ -106,12 +108,42 @@ namespace Linphone.Views
             Browser.Loaded += Browser_Loaded;
 
             Browser.NavigationCompleted += Browser_NavigationCompleted;
+            MaximizeCurrentWindow();
+        }
+        public static void MaximizeCurrentWindow()
+        {
+            var inputInjector = InputInjector.TryCreate();
+
+            var winKeyDown = new InjectedInputKeyboardInfo
+            {
+                VirtualKey = (ushort)VirtualKey.LeftWindows
+            };
+
+            var upArrowKeyDown = new InjectedInputKeyboardInfo
+            {
+                VirtualKey = (ushort)VirtualKey.Up
+            };
+
+            var winKeyUp = new InjectedInputKeyboardInfo
+            {
+                VirtualKey = (ushort)VirtualKey.LeftWindows,
+                KeyOptions = InjectedInputKeyOptions.KeyUp
+            };
+
+            var upArrowKeyUp = new InjectedInputKeyboardInfo
+            {
+                VirtualKey = (ushort)VirtualKey.Up,
+                KeyOptions = InjectedInputKeyOptions.KeyUp
+            };
+
+            InjectedInputKeyboardInfo[] macro = { winKeyDown, upArrowKeyDown, winKeyUp, upArrowKeyUp };
+            inputInjector.InjectKeyboardInput(macro);
         }
 
         public DialerViewModel ViewModel => (DialerViewModel)DataContext;
 
-		protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
-		{
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
             //try
             //{
             //    if (Browser.Source.OriginalString.Length > CallFlowControl.Instance.AgentProfile.PanelBaseUrl.Length)
@@ -129,10 +161,10 @@ namespace Linphone.Views
             base.OnNavigatingFrom(e);
             ViewModel.OnNavigatingFrom(e);
             WeakReferenceMessenger.Default.Unregister<ContinueCallbackAnsweringRequestMessage>(this);
-		}
+        }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
-		{
+        {
             addressBox.Text = "";
             if (CallFlowControl.Instance.AgentProfile.Browser != null)
             {
@@ -157,19 +189,19 @@ namespace Linphone.Views
             {
 
                 async Task<Task<CancellationToken>> ReceiveAsync(Dialer d)
-				{
-			        var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
-					await continueCallbackAnsweringDialog.ShowAsync();
+                {
+                    var continueCallbackAnsweringDialog = new ContinueCallbackAnsweringDialog();
+                    await continueCallbackAnsweringDialog.ShowAsync();
                     return continueCallbackAnsweringDialog.ResultAsync;
-				}
+                }
 
-				message.Reply(ReceiveAsync(r).Unwrap());
-			});
+                message.Reply(ReceiveAsync(r).Unwrap());
+            });
 
             ViewModel.OnNavigatedTo(e);
-		}
+        }
 
-		private void LogUploadProgressIndication(int offset, int total)
+        private void LogUploadProgressIndication(int offset, int total)
         {
             /* base.UIDispatcher.BeginInvoke(() =>
              {
@@ -220,25 +252,25 @@ namespace Linphone.Views
         private async void settings_Click(object sender, RoutedEventArgs e)
         {
             if (Convert.ToBoolean(ConfigurationManager.AppSettings["InHomeTesting"]))
-			{
+            {
                 Frame.Navigate(typeof(Views.Settings), null);
-			}
+            }
             else
-			{
-				var passwordDialog = new SettingsPasswordDialog();
-				await passwordDialog.ShowAsync();
-				if (passwordDialog.Password == "Noei@Sip#")
-				{
-					Frame.Navigate(typeof(Views.Settings), null);
-				}
-				else
-				{
-					_logger.Information("Unsuccessful attempt to enter settings password with: {Password}", passwordDialog.Password);
-				}
-			}
-		}
+            {
+                var passwordDialog = new SettingsPasswordDialog();
+                await passwordDialog.ShowAsync();
+                if (passwordDialog.Password == "Noei@Sip#")
+                {
+                    Frame.Navigate(typeof(Views.Settings), null);
+                }
+                else
+                {
+                    _logger.Information("Unsuccessful attempt to enter settings password with: {Password}", passwordDialog.Password);
+                }
+            }
+        }
 
-		private void about_Click(object sender, RoutedEventArgs e)
+        private void about_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(Views.About), null);
         }

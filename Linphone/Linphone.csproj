@@ -230,6 +230,7 @@
     <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
     <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
     <Compile Include="Commons\Utility.cs" />
+    <Compile Include="ViewLifetimeControl.cs" />
     <Compile Include="ViewModels\DialerViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
@@ -249,6 +250,9 @@
     </Compile>
     <Compile Include="Views\Chats.xaml.cs">
       <DependentUpon>Chats.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CompactOverlayView.xaml.cs">
+      <DependentUpon>CompactOverlayView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ContactDetail.xaml.cs">
       <DependentUpon>ContactDetail.xaml</DependentUpon>
@@ -417,6 +421,10 @@
     <Page Include="Views\Chats.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CompactOverlayView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ContactDetail.xaml">
       <Generator>MSBuild:Compile</Generator>

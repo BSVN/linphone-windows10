@@ -40,6 +40,7 @@
 		<uap3:Capability Name="userNotificationListener"/>
 		<rescap:Capability xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" Name="broadFileSystemAccess"/>
 		<rescap:Capability xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" Name="confirmAppClose" />
+		<rescap:Capability xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" Name="inputInjectionBrokered" />
 		<Capability Name="privateNetworkClientServer"/>
 		<Capability Name="internetClientServer"/>
 		<uap:Capability Name="phoneCall"/>
