@@ -19,5 +19,5 @@ using BSN.Resa.Vns.Commons.Responses;
 
 namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
-    public class OperatorsQueryServiceGetBySoftPhoneNumberResponse : GenericResponseBase<OperatorViewModel> { }
+    public class DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse : GenericResponseBase<DesktopApplicationAgentViewModel> { }
 }

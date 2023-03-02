@@ -16,14 +16,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
 using System;
+using System.Collections.Generic;
 
 namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
-    public class OperatorViewModel
+    public class DesktopApplicationAgentViewModel
     {
         public Guid Id { get; set; }
-
-        public string Username { get; set; }
 
         public string FirstName { get; set; }
 
@@ -31,26 +30,48 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
 
         public string FullName { get; set; }
 
-        public UserRole Role { get; set; }
+        public AgentRole Role { get; set; }
 
-        public AgentStatus? Status { get; set; }
+        public DesktopApplicationAgentStatus Status { get; set; }
 
         public string UserId { get; set; }
 
+        public double AverageCallDuration { get; set; }
+
+        public double TotalBreakDuration { get; set; }
+
         public SipProfileViewModel SipProfile { get; set; }
 
-        //public WorkgroupViewModel Workgroup { get; set; }
+        public WorkgroupShortViewModel Workgroup { get; set; }
+
+        public IEnumerable<DesktopApplicationAgentPermission> Permissions { get; set; }
     }
 
-    public enum UserRole
+    public enum DesktopApplicationAgentPermission
+    {
+        IncomingCall = 1,
+        OutgoingCall = 2,
+        CallCampaign = 3
+    }
+
+    public class WorkgroupShortViewModel
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+    }
+
+    public enum AgentRole
     {
         CallRespondingAgent = 1,
         TicketingExpertAgent = 2,
-        Supervisor = 3,
-        TicketDispatcher = 4
+        SupervisorAgent = 3,
+        TicketDispatcherAgent = 4
     }
 
-    public enum AgentStatus
+    public enum DesktopApplicationAgentStatus
     {
         Ready = 1,
         Break = 2,

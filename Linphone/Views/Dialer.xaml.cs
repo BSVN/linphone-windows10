@@ -90,11 +90,11 @@ namespace Linphone.Views
                 AgentStatus.SelectionChanged -= AgentStatus_SelectionChanged;
                 AgentStatus.IsEnabled = true;
 
-                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                if (CallFlowControl.Instance.AgentProfile.Status == DesktopApplicationAgentStatus.Ready)
                 {
                     AgentStatus.SelectedValue = OnlineAgentComboItem;
                 }
-                else if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break)
+                else if (CallFlowControl.Instance.AgentProfile.Status == DesktopApplicationAgentStatus.Break)
                 {
                     AgentStatus.SelectedValue = OnBreakAgentComboItem;
                 }
@@ -295,7 +295,7 @@ namespace Linphone.Views
 
                 EnableRegister(true);
 
-                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+                Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/v2.0/DesktopApplicationAgents/UserInfo");
             }
             else if (sender.Source.AbsolutePath.Contains("Dashboard") && CallFlowControl.Instance.AgentProfile.IsLoggedIn == true)
             {
@@ -345,7 +345,7 @@ namespace Linphone.Views
                 }
             }
             // TODO: It will never works on first try in production !!! 
-            else if (sender.Source.AbsolutePath.Contains("/api/Operators/UserInfo"))
+            else if (sender.Source.AbsolutePath.Contains("/api/v2.0/DesktopApplicationAgents/UserInfo"))
             {
                 // Literally کثافتکاری
                 // Todo: Interactions with Browser should be revised.
@@ -376,7 +376,7 @@ namespace Linphone.Views
                         _logger.Error("Loaded Html content: {Html}", html);
 
                         UserInfoRetryLimit -= 1;
-                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/Operators/UserInfo");
+                        Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}/api/v2.0/DesktopApplicationAgents/UserInfo");
                         return;
                     }
 

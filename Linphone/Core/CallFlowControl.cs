@@ -165,6 +165,46 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+
+        /// <summary>
+        /// Initiate an callback by submitting a record.
+        /// </summary>
+        /// <param name="calleePhoneNumber">Either a customer phonenumber or inter-callcenter phonenumber.</param>
+        /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
+        /// <returns></returns>
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string calleePhoneNumber, string inboundService, DateTime requestedAt)
+        {
+            // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
+            try
+            {
+                _logger.Information("Initiation callback to: {CalleePhoneNumber}.", calleePhoneNumber);
+
+                CallContext.CallState = CallState.Ringing;
+                CallContext.CallerNumber = AgentProfile.SipPhoneNumber;
+                CallContext.CalleeNumber = calleePhoneNumber;
+                CallContext.CallType = CallType.Campaign;
+                CallContext.CallId = default;
+
+                CallsCommandServiceInitiateOutgoingResponse response =
+                    await _coreClient.InitiateCampaignCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
+                                                                calleePhoneNumber: calleePhoneNumber,
+                                                                inboundService: inboundService);
+                if (response != null)
+                {
+                    CallContext.CallId = response.Data.Id;
+                }
+
+                _logger.Information("Callback initiation successfully done with call id: {CallId}.", CallContext.CallId.ToString());
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error during call initation.");
+                return null;
+            }
+        }
+
         /// <summary>
         /// Send established message of the current call.
         /// </summary>
@@ -356,7 +396,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// Get sip settings of the current agent.
         /// </summary>
         /// <returns>Agent's sip settings.</returns>
-        public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentSettings()
+        public async Task<DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse> GetAgentSettings()
         {
             try
             {
@@ -374,7 +414,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// </summary>
         /// <param name="status">New state of the agent.</param>
         /// <returns>Determines whether the update was successful or not.</returns>
-        public async Task<bool> UpdateAgentStatusAsync(AgentStatus status)
+        public async Task<bool> UpdateAgentStatusAsync(DesktopApplicationAgentStatus status)
         {
             try
             {
@@ -382,14 +422,14 @@ namespace BelledonneCommunications.Linphone.Core
 
                 switch (status)
                 {
-                    case AgentStatus.Ready:
-                        if (AgentProfile.Status == AgentStatus.Ready) return true;
+                    case DesktopApplicationAgentStatus.Ready:
+                        if (AgentProfile.Status == DesktopApplicationAgentStatus.Ready) return true;
                         break;
-                    case AgentStatus.Break:
-                        if (AgentProfile.Status == AgentStatus.Break) return true;
+                    case DesktopApplicationAgentStatus.Break:
+                        if (AgentProfile.Status == DesktopApplicationAgentStatus.Break) return true;
                         break;
-                    case AgentStatus.Offline:
-                        if (AgentProfile.Status == AgentStatus.Offline) return true;
+                    case DesktopApplicationAgentStatus.Offline:
+                        if (AgentProfile.Status == DesktopApplicationAgentStatus.Offline) return true;
                         break;
                 }
 
@@ -402,13 +442,13 @@ namespace BelledonneCommunications.Linphone.Core
 
                 switch (status)
                 {
-                    case AgentStatus.Ready:
+                    case DesktopApplicationAgentStatus.Ready:
                         JoinIntoIncomingCallQueue();
                         break;
-                    case AgentStatus.Break:
+                    case DesktopApplicationAgentStatus.Break:
                         LeaveIncomingCallQueue();
                         break;
-                    case AgentStatus.Offline:
+                    case DesktopApplicationAgentStatus.Offline:
                         CallContext.CallType = CallType.Command;
                         LinphoneManager.Instance.NewOutgoingCall("agent-logoff");
                         AgentProfile.JoinedIntoIncomingCallQueue = false;
@@ -440,7 +480,7 @@ namespace BelledonneCommunications.Linphone.Core
             AgentProfile.JoinedIntoIncomingCallQueue = true;
         }
 
-        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentSettingByUserId(string userId)
+        public async Task<DesktopApplicationAgentsQueryServiceGetByUserIdResponse> GetAgentSettingByUserId(string userId)
         {
             try
             {
@@ -478,7 +518,7 @@ namespace BelledonneCommunications.Linphone.Core
 
         public bool IsLoggedIn { get; set; }
 
-        public AgentStatus Status { get; set; }
+        public DesktopApplicationAgentStatus Status { get; set; }
 
         public WebView2 Browser { get; set; }
     }
@@ -520,6 +560,7 @@ namespace BelledonneCommunications.Linphone.Core
         Incoming = 1,
         Outgoing = 2,
         Callback = 4,
+        Campaign = 5,
         Command = 3
     }
 

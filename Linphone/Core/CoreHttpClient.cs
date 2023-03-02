@@ -33,7 +33,7 @@ namespace BelledonneCommunications.Linphone.Core
                     InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Incoming/Initiate", content);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/Incoming", content);
 
                 CallsCommandServiceInitiateIncomingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateIncomingResponse>();
 
@@ -61,7 +61,7 @@ namespace BelledonneCommunications.Linphone.Core
                     InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Outgoing/Initiate", content);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/Outgoing", content);
 
                 CallsCommandServiceInitiateOutgoingResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateOutgoingResponse>();
 
@@ -90,7 +90,7 @@ namespace BelledonneCommunications.Linphone.Core
                     RequestAt = requestedAt,
                 }), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Callback/Initiate", content);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/Callback", content);
 
                 CallsCommandServiceInitiateCallbackResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateCallbackResponse>();
 
@@ -104,6 +104,39 @@ namespace BelledonneCommunications.Linphone.Core
                 throw ex;
             }
         }
+
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string agentPhoneNumber,
+                                                                                                 string calleePhoneNumber,
+                                                                                                 string callCampaignId,
+                                                                                                 string inboundService)
+        {
+            try
+            {
+                _logger.Information("Attempting to deliver outgoing call initation from {CallerNumber} to {CalleeNumber}.", agentPhoneNumber, calleePhoneNumber);
+
+                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new CallsCommandServiceInitiateCampaignCallRequest
+                {
+                    CallCampaignId = callCampaignId,
+                    AgentPhoneNumber = agentPhoneNumber,
+                    CalleePhoneNumber = calleePhoneNumber,
+                    InboundService = inboundService
+                }), System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/Campaign", content);
+
+                var response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceInitiateOutgoingResponse>();
+
+                _logger.Information("Successfully delivered call initiation message with call id: {CallId}.", response.Data?.Id);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error while delivering outgoing call initiation message.");
+                throw ex;
+            }
+        }
+
 
         /// <summary>
         /// Fire and forget method for updating call's state to accepted.
@@ -120,9 +153,9 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Attemting to deliver call established event, for call id: {CallId}.", callId);
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Establish/{callId}", null);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/{callId}/Establish", null);
 
-                CallsCommandServiceEstablishResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceEstablishResponse>();
+                var response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceEstablishResponse>();
 
                 _logger.Information("Successfully delivered call established event with response payload: {Payload}.", response.SerializeToJson());
             }
@@ -150,9 +183,9 @@ namespace BelledonneCommunications.Linphone.Core
                     InboundService = inboundservice
                 }), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Incoming/Missed", content);
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/v2.0/Calls/Incoming/Missed", content);
 
-                CallsCommandServiceSubmitMissedIncomingResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
+                var result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedIncomingResponse>();
 
                 _logger.Information("Successfully reported the missed call with response payload {Payload}.", result.SerializeToJson());
             }
@@ -173,9 +206,9 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Attempting to deliver a missed call report using call id: {CallId}.", id.ToString());
 
-                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Missed/{id}", null);
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/v2.0/Calls/Missed/{id}", null);
 
-                CallsCommandServiceSubmitMissedByIdResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedByIdResponse>();
+                var result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedByIdResponse>();
 
                 _logger.Information("Successfully reported the missed call with response payload {Payload}.", result.SerializeToJson());
             }
@@ -203,9 +236,9 @@ namespace BelledonneCommunications.Linphone.Core
                     InboundService = inboundService
                 }), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await _httpClient.PostAsync($"/api/Calls/Outgoing/Missed", content);
+                HttpResponseMessage response = await _httpClient.PostAsync($"/api/v2.0/Calls/Outgoing/Missed", content);
 
-                CallsCommandServiceSubmitMissedOutgoingResponse result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedOutgoingResponse>();
+                var result = await response.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceSubmitMissedOutgoingResponse>();
 
                 _logger.Information("Successfully reported the missed outgoing call with response payload {Payload}.", result.SerializeToJson());
             }
@@ -221,9 +254,9 @@ namespace BelledonneCommunications.Linphone.Core
             {
                 _logger.Information("Attemting to deliver call termination event, for call id: {CallId}.", callId);
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/Calls/Terminate/{callId}", null);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/Calls/{callId}/Terminate", null);
 
-                CallsCommandServiceTerminateResponse response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateResponse>();
+                var response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallsCommandServiceTerminateResponse>();
 
                 _logger.Information("Successfully delivered call termination event with payload: {Payload}.", response.SerializeToJson());
 
@@ -236,15 +269,15 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<OperatorsQueryServiceGetByExternalIdResponse> GetAgentInfoByUserId(string userId)
+        public async Task<DesktopApplicationAgentsQueryServiceGetByUserIdResponse> GetAgentInfoByUserId(string userId)
         {
             try
             {
                 _logger.Information("Attemting to query sip settings for agent using user id: {UserId}.", userId);
 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Operators/UserId/{userId}");
+                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/v2.0/DesktopApplicationAgents/UserId/{userId}");
 
-                OperatorsQueryServiceGetByExternalIdResponse deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<OperatorsQueryServiceGetByExternalIdResponse>();
+                var deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<DesktopApplicationAgentsQueryServiceGetByUserIdResponse>();
 
                 _logger.Information("Attemting to retrieved sip settings with payload: {Payload}.", deserializedResponse.SerializeToJson());
 
@@ -257,15 +290,15 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<OperatorsQueryServiceGetBySoftPhoneNumberResponse> GetAgentInfo(string sipUsername)
+        public async Task<DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse> GetAgentInfo(string sipUsername)
         {
             try
             {
                 _logger.Information("Attemting to query sip settings for agent: {SipPhoneNumber}.", sipUsername);
 
-                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/Operators/SoftPhoneNumber/{sipUsername}");
+                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/v2.0/DesktopApplicationAgents/SipPhoneNumber/{sipUsername}");
 
-                OperatorsQueryServiceGetBySoftPhoneNumberResponse deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<OperatorsQueryServiceGetBySoftPhoneNumberResponse>();
+                var deserializedResponse = await responseMessage.Content.ReadAsAsyncCaseInsensitive<DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse>();
 
                 _logger.Information("Attemting to retrieved sip settings with payload: {Payload}.", deserializedResponse.SerializeToJson());
 
@@ -278,20 +311,20 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-        public async Task<bool> UpdateAgentStatusAsync(string sipPhoneNumber, AgentStatus status)
+        public async Task<bool> UpdateAgentStatusAsync(string sipPhoneNumber, DesktopApplicationAgentStatus status)
         {
             try
             {
                 _logger.Information("Attemting to update agent status: {SipPhoneNumber} to {TargetState}.", sipPhoneNumber, status.ToString("g"));
 
-                var request = new AgentsCommandServiceChangeStatusRequest()
+                var request = new DesktopApplicationAgentsCommandServiceUpdateStatusRequest()
                 {
                     Status = status
                 };
 
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/CallRespondingAgents/{sipPhoneNumber}/Status", content);
+                HttpResponseMessage responseMessage = await _httpClient.PostAsync($"/api/v2.0/DesktopApplicationAgents/{sipPhoneNumber}/Status", content);
 
                 Response response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<Response>();
 

@@ -271,33 +271,47 @@ namespace BelledonneCommunications.Linphone.ViewModels
             if (await PreparingOutgoingCall() == false)
                 return;
 
-            while (true)
-            {
-                CallbackDto callback = callbackQueue.Pop();
-                if (callback is null)
-                    break;
+            string normalizedAddress = "989357277978".GetCanonicalPhoneNumber();
 
-                CallFlowControl.Instance.CallContext.CallbackRequest = callback;
-
-                string normalizedAddress = callback.caller_number.GetCanonicalPhoneNumber();
-
-                await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
-
-                BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.callee_number}*0{normalizedAddress}");
-
-                await outgoingCall.WhenEnded();
-
-                // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
-                await Task.Delay(500);
-                Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
-                CancellationToken cancellationToken = await cancellationTokenTask;
-                if (cancellationToken.IsCancellationRequested)
-                    break;
-            }
+            await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
 
             if (joinedCallQueue)
                 CallFlowControl.Instance.JoinIntoIncomingCallQueue();
         }
+
+        //private async void CallbackClick()
+        //{
+        //    bool joinedCallQueue = CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue;
+        //    if (await PreparingOutgoingCall() == false)
+        //        return;
+
+        //    while (true)
+        //    {
+        //        CallbackDto callback = callbackQueue.Pop();
+        //        if (callback is null)
+        //            break;
+
+        //        CallFlowControl.Instance.CallContext.CallbackRequest = callback;
+
+        //        string normalizedAddress = callback.caller_number.GetCanonicalPhoneNumber();
+
+        //        await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
+
+        //        BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.callee_number}*0{normalizedAddress}");
+
+        //        await outgoingCall.WhenEnded();
+
+        //        // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
+        //        await Task.Delay(500);
+        //        Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
+        //        CancellationToken cancellationToken = await cancellationTokenTask;
+        //        if (cancellationToken.IsCancellationRequested)
+        //            break;
+        //    }
+
+        //    if (joinedCallQueue)
+        //        CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+        //}
 
         private async void CallClick()
         {

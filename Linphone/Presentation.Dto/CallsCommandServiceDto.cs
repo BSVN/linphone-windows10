@@ -42,6 +42,17 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         public string InboundService { get; set; }
     }
 
+    public class CallsCommandServiceInitiateCampaignCallRequest
+    {
+        public string CallCampaignId { get; set; }
+
+        public string CalleePhoneNumber { get; set; }
+
+        public string AgentPhoneNumber { get; set; }
+
+        public string InboundService { get; set; }
+    }
+
     public class CallsCommandServiceInitiateCallbackRequest
     {
         public string AgentPhoneNumber { get; set; }

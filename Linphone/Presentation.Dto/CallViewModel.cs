@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 using System;
 
+
 namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
     public class CallViewModel
@@ -34,7 +35,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         Established = 2,
         Missed = 3,
         Terminated = 4,
-        CustomerNotAnswered = 5
+        NotAnswered = 5
     }
 
     public enum CallReason
@@ -43,6 +44,7 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
         Question = 2,
         Objection = 3,
         TicketFollowUp = 4,
-        Other = 5
+        Other = 5,
+        Silence = 6
     }
 }

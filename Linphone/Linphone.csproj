@@ -222,13 +222,13 @@
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
     <Compile Include="Commons\NavigationService.cs" />
-    <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusRequest.cs" />
+    <Compile Include="Presentation.Dto\DesktopApplicationAgentsCommandServiceUpdateStatusRequest.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
     <Compile Include="Presentation.Dto\CallViewModel.cs" />
-    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetByExternalIdResponse.cs" />
-    <Compile Include="Presentation.Dto\OperatorsQueryServiceGetBySoftPhoneNumberResponse.cs" />
-    <Compile Include="Presentation.Dto\OperatorViewModel.cs" />
+    <Compile Include="Presentation.Dto\DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse.cs" />
+    <Compile Include="Presentation.Dto\DesktopApplicationAgentsQueryServiceGetByUserIdResponse.cs" />
+    <Compile Include="Presentation.Dto\DesktopApplicationAgentViewModel.cs" />
     <Compile Include="Commons\Utility.cs" />
     <Compile Include="ViewModels\DialerViewModel.cs" />
     <Compile Include="Views\About.xaml.cs">

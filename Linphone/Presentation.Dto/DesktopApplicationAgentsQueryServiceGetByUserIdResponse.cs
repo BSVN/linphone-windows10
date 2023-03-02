@@ -19,8 +19,5 @@ using BSN.Resa.Vns.Commons.Responses;
 
 namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
-    public class AgentsCommandServiceChangeStatusRequest
-    {
-        public AgentStatus Status { get; set; }
-    }
+    public class DesktopApplicationAgentsQueryServiceGetByUserIdResponse : GenericResponseBase<DesktopApplicationAgentViewModel> { }
 }
