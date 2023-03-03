@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml.Controls;
 using PCLAppConfig;
 using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 
@@ -165,14 +167,15 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
-
         /// <summary>
         /// Initiate an callback by submitting a record.
         /// </summary>
         /// <param name="calleePhoneNumber">Either a customer phonenumber or inter-callcenter phonenumber.</param>
         /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
         /// <returns></returns>
-        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string calleePhoneNumber, string inboundService, DateTime requestedAt)
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string calleePhoneNumber, 
+                                                                                                 string inboundService, 
+                                                                                                 string callCampaignId)
         {
             // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
             try
@@ -188,6 +191,7 @@ namespace BelledonneCommunications.Linphone.Core
                 CallsCommandServiceInitiateOutgoingResponse response =
                     await _coreClient.InitiateCampaignCallAsync(agentPhoneNumber: AgentProfile.SipPhoneNumber,
                                                                 calleePhoneNumber: calleePhoneNumber,
+                                                                callCampaignId: callCampaignId,
                                                                 inboundService: inboundService);
                 if (response != null)
                 {
@@ -504,6 +508,7 @@ namespace BelledonneCommunications.Linphone.Core
         {
             PanelBaseUrl = panelBaseUrl;
             JoinedIntoIncomingCallQueue = false;
+            Permissions = new List<DesktopApplicationAgentPermission>();
         }
 
         public string OutgoingCallChannelName { get; set; }
@@ -519,6 +524,14 @@ namespace BelledonneCommunications.Linphone.Core
         public bool IsLoggedIn { get; set; }
 
         public DesktopApplicationAgentStatus Status { get; set; }
+
+        public IEnumerable<DesktopApplicationAgentPermission> Permissions { get; set; }
+
+        public bool IsIncomingCallPermitted => Permissions.Any(P => P == DesktopApplicationAgentPermission.IncomingCall);
+        
+        public bool IsOutgoingCallPermitted => Permissions.Any(P => P == DesktopApplicationAgentPermission.OutgoingCall);
+
+        public bool IsCampaignCallPermitted => Permissions.Any(P => P == DesktopApplicationAgentPermission.CallCampaign);
 
         public WebView2 Browser { get; set; }
     }

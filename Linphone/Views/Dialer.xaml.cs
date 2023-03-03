@@ -327,7 +327,9 @@ namespace Linphone.Views
                         }
 
                         var userSettings = await CallFlowControl.Instance.GetAgentSettingByUserId(matchedValue);
+
                         CallFlowControl.Instance.AgentProfile.SipPhoneNumber = userSettings.Data.SipProfile.Username;
+                        CallFlowControl.Instance.AgentProfile.Permissions = userSettings.Data.Permissions;
 
                         LoadSipSettings(userSettings.Data.SipProfile);
 
@@ -438,7 +440,7 @@ namespace Linphone.Views
             {
                 _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
                 {
-                    OperatorsQueryServiceGetBySoftPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
+                    DesktopApplicationAgentsQueryServiceGetBySipPhoneNumberResponse agentSettings = await CallFlowControl.Instance.GetAgentSettings();
                     SIPAccountSettingsManager settings = new SIPAccountSettingsManager();
 
                     settings.Load();
@@ -495,11 +497,11 @@ namespace Linphone.Views
             {
                 if (AgentStatus.SelectedIndex == 0)
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready);
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(DesktopApplicationAgentStatus.Ready);
                 }
                 else
                 {
-                    await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Break);
+                    await CallFlowControl.Instance.UpdateAgentStatusAsync(DesktopApplicationAgentStatus.Break);
                 }
 
                 Browser.CoreWebView2.Navigate($"{CallFlowControl.Instance.AgentProfile.PanelBaseUrl}");

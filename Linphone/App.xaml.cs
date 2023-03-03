@@ -118,7 +118,7 @@ namespace Linphone
 
             if (wasAnOutgoingCall)
             {
-                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Ready)
+                if (CallFlowControl.Instance.AgentProfile.Status == BelledonneCommunications.Linphone.Presentation.Dto.DesktopApplicationAgentStatus.Ready)
                     CallFlowControl.Instance.JoinIntoIncomingCallQueue();
             }
 
@@ -292,7 +292,7 @@ namespace Linphone
             CloseApp = true;
 
             if (CallFlowControl.Instance.AgentProfile.IsLoggedIn)
-                await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.AgentStatus.Offline);
+                await CallFlowControl.Instance.UpdateAgentStatusAsync(BelledonneCommunications.Linphone.Presentation.Dto.DesktopApplicationAgentStatus.Offline);
 
             if (CallFlowControl.Instance.CallContext.CallType != CallType.Command)
             {
