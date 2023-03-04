@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 using BSN.Resa.Vns.Commons.Responses;
 using System;
+using System.Collections.Generic;
 
 namespace BelledonneCommunications.Linphone.Presentation.Dto
 {
@@ -98,4 +99,6 @@ namespace BelledonneCommunications.Linphone.Presentation.Dto
     public class CallsQueryServiceGetByIdResponse : GenericResponseBase<CallViewModel> { }
 
     public class CallsCommandServiceSubmitMissedByIdResponse : GenericResponseBase<CallViewModel> { }
+
+    public class CallCampaignsQueryServiceGetListByUserIdResponse : GenericResponseBase<IEnumerable<CallCampaignShortViewModel>> { };
 }

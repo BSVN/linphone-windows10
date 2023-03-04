@@ -1,5 +1,6 @@
 ﻿using BelledonneCommunications.Linphone.Commons;
 using BelledonneCommunications.Linphone.Core;
+using BelledonneCommunications.Linphone.Dialogs;
 using BelledonneCommunications.Linphone.Messages;
 using BelledonneCommunications.Linphone.Presentation.Dto;
 using BSN.Resa.Mci.CallCenter.AgentApp.Data;
@@ -35,6 +36,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
             this.callbackQueue = callbackQueue;
             CallCommand = new RelayCommand(CallClick);
             CallbackCommand = new RelayCommand(CallbackClick);
+            CallCampaignCommand = new RelayCommand(CallCampaignClick);
             httpClient = new HttpClient();
             _logger = Log.Logger.ForContext("SourceContext", nameof(Dialer));
         }
@@ -66,6 +68,7 @@ namespace BelledonneCommunications.Linphone.ViewModels
 
         public ICommand CallCommand { get; }
         public ICommand CallbackCommand { get; }
+        public ICommand CallCampaignCommand { get; }
         public ICommand BrowserLoadedCommand { get; }
 
         // FIXME
@@ -265,19 +268,47 @@ namespace BelledonneCommunications.Linphone.ViewModels
             MissedCallCount = LinphoneManager.Instance.Core.MissedCallsCount;
         }
 
-        //private async void CallbackClick()
-        //{
-        //    bool joinedCallQueue = CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue;
-        //    if (await PreparingOutgoingCall() == false)
-        //        return;
+        private async void CallCampaignClick()
+        {
+            //bool joinedCallQueue = CallFlowControl.Instance.AgentProfile.JoinedIntoIncomingCallQueue;
+            //if (await PreparingOutgoingCall() == false)
+            //    return;
 
-        //    string normalizedAddress = "989357277978".GetCanonicalPhoneNumber();
+            CallCampaignsQueryServiceGetListByUserIdResponse callCampaigns = await CallFlowControl.Instance.GetCallCampaignsAsync();
+            
+            if(callCampaigns.IsSuccess)
+            {
+                var passwordDialog = new SelectCallCampaignDialog(callCampaigns.Data.ToDictionary(P => P.Title, P => P.Id.ToString()));
+                await passwordDialog.ShowAsync();
+            }
 
-        //    await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
+            //while (true)
+            //{
+            //    CallbackDto callback = callbackQueue.Pop();
+            //    if (callback is null)
+            //        break;
 
-        //    if (joinedCallQueue)
-        //        CallFlowControl.Instance.JoinIntoIncomingCallQueue();
-        //}
+            //    CallFlowControl.Instance.CallContext.CallbackRequest = callback;
+
+            //    string normalizedAddress = callback.caller_number.GetCanonicalPhoneNumber();
+
+            //    await CallFlowControl.Instance.InitiateCallbackAsync(calleePhoneNumber: normalizedAddress, inboundService: callback.callee_number, requestedAt: callback.RequestedAt);
+
+            //    BSN.LinphoneSDK.Call outgoingCall = await LinphoneManager.Instance.NewOutgoingCall($"{callback.callee_number}*0{normalizedAddress}");
+
+            //    await outgoingCall.WhenEnded();
+
+            //    // TODO: It is mandatory for backing to Dialer from InCall, but it is very bugous and must fix it
+            //    await Task.Delay(500);
+            //    Task<CancellationToken> cancellationTokenTask = WeakReferenceMessenger.Default.Send<ContinueCallbackAnsweringRequestMessage>();
+            //    CancellationToken cancellationToken = await cancellationTokenTask;
+            //    if (cancellationToken.IsCancellationRequested)
+            //        break;
+            //}
+
+            //if (joinedCallQueue)
+            //    CallFlowControl.Instance.JoinIntoIncomingCallQueue();
+        }
 
         private async void CallbackClick()
         {

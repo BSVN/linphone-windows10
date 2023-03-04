@@ -173,9 +173,7 @@ namespace BelledonneCommunications.Linphone.Core
         /// <param name="calleePhoneNumber">Either a customer phonenumber or inter-callcenter phonenumber.</param>
         /// <param name="inboundService">It's the service phonenumber we want to introduce ourself as it's operator (e.g. 99970, 99971, ...).</param>
         /// <returns></returns>
-        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string calleePhoneNumber, 
-                                                                                                 string inboundService, 
-                                                                                                 string callCampaignId)
+        public async Task<CallsCommandServiceInitiateOutgoingResponse> InitiateCampaignCallAsync(string calleePhoneNumber, string inboundService, string callCampaignId)
         {
             // Todo: We should prevent to submit 2 call record for missed calls. Please check it.
             try
@@ -205,6 +203,25 @@ namespace BelledonneCommunications.Linphone.Core
             catch (Exception ex)
             {
                 _logger.Error(ex, "Internal error during call initation.");
+                return null;
+            }
+        }
+
+        public async Task<CallCampaignsQueryServiceGetListByUserIdResponse> GetCallCampaignsAsync()
+        {
+            try
+            {
+                _logger.Information("Try to get list of call campaigns.");
+
+                var response = await _coreClient.GetCallCampaignsAsync(AgentProfile.SipPhoneNumber);                
+
+                _logger.Information("Successfully retrieved the list of call campaigns");
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error during call campaign retrieval.");
                 return null;
             }
         }

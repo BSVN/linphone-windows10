@@ -200,6 +200,9 @@
     <Compile Include="Dialogs\ContinueCallbackAnsweringDialog.xaml.cs">
       <DependentUpon>ContinueCallbackAnsweringDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\SelectCallCampaignDialog.xaml.cs">
+      <DependentUpon>SelectCallCampaignDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\SettingsPasswordDialog.xaml.cs">
       <DependentUpon>SettingsPasswordDialog.xaml</DependentUpon>
     </Compile>
@@ -222,6 +225,7 @@
     <Compile Include="Model\SettingsManager.cs" />
     <Compile Include="Model\SipUriToUsernameConverter.cs" />
     <Compile Include="Commons\NavigationService.cs" />
+    <Compile Include="Presentation.Dto\CampaignsViewModels.cs" />
     <Compile Include="Presentation.Dto\DesktopApplicationAgentsCommandServiceUpdateStatusRequest.cs" />
     <Compile Include="Presentation.Dto\AgentsCommandServiceChangeStatusResponse.cs" />
     <Compile Include="Presentation.Dto\CallsCommandServiceDto.cs" />
@@ -374,6 +378,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialogs\ContinueCallbackAnsweringDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\SelectCallCampaignDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

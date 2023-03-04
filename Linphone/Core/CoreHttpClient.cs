@@ -137,6 +137,27 @@ namespace BelledonneCommunications.Linphone.Core
             }
         }
 
+        public async Task<CallCampaignsQueryServiceGetListByUserIdResponse> GetCallCampaignsAsync(string sipPhoneNumber)
+        {
+            try
+            {
+                _logger.Information("Attempting to retrieve agents call campaign list, Agent sipPhoneNumber: {UserId}.", sipPhoneNumber);
+
+
+                HttpResponseMessage responseMessage = await _httpClient.GetAsync($"/api/v2.0/DesktopApplicationAgents/SipPhoneNumber/{sipPhoneNumber}/CallCampaigns");
+
+                var response = await responseMessage.Content.ReadAsAsyncCaseInsensitive<CallCampaignsQueryServiceGetListByUserIdResponse>();
+
+                _logger.Information("Successfully retrieved call campaigns for the agent.");
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Internal error while retriving the list of call campaigns.");
+                throw ex;
+            }
+        }
 
         /// <summary>
         /// Fire and forget method for updating call's state to accepted.

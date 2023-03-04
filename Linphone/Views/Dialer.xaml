@@ -282,37 +282,77 @@
                             </DataTemplate>
                         </Button.ContentTemplate>
                     </Button>
-                    <Button x:Name="Callback" 
-                            Style="{StaticResource AccentLongButtonStyle}" 
-                            Command="{x:Bind ViewModel.CallbackCommand}">
-                        <Button.Background>
-                            <!-- TODO: Please use StaticResouces and Style -->
-                            <SolidColorBrush Color="#FF9990D6"/>
-                        </Button.Background>
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
-                                        <FontIcon.RenderTransform>
-                                            <CompositeTransform ScaleX=".75" ScaleY=".75"/>
-                                        </FontIcon.RenderTransform>
-                                    </FontIcon>
-                                    <TextBlock x:Name="call"
-                                           Text="پاسخ گویی به صف درخواست تماس"
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="CallCampaign" 
+                                Grid.Column="0"
+                                Style="{StaticResource AccentLongButtonStyle}" 
+                                Command="{x:Bind ViewModel.CallCampaignCommand}">
+                            <Button.Background>
+                                <!-- TODO: Please use StaticResouces and Style -->
+                                <SolidColorBrush Color="#ffc154"/>
+                            </Button.Background>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
+                                            <FontIcon.RenderTransform>
+                                                <CompositeTransform ScaleX=".75" ScaleY=".75"/>
+                                            </FontIcon.RenderTransform>
+                                        </FontIcon>
+                                        <TextBlock x:Name="call"
+                                           Text="کمپین تماس"
                                            FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
                                            Grid.Row="1"
                                            Margin="0,4,0,0"
                                            LineHeight="14"
                                            Style="{StaticResource TextStyle}"
                                            HorizontalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+                        <Button x:Name="Callback" 
+                                Grid.Column="1"
+                                Style="{StaticResource AccentLongButtonStyle}" 
+                                Command="{x:Bind ViewModel.CallbackCommand}">
+                            <Button.Background>
+                                <!-- TODO: Please use StaticResouces and Style -->
+                                <SolidColorBrush Color="#FF9990D6"/>
+                            </Button.Background>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE717;" RenderTransformOrigin="0.5,0.5">
+                                            <FontIcon.RenderTransform>
+                                                <CompositeTransform ScaleX=".75" ScaleY=".75"/>
+                                            </FontIcon.RenderTransform>
+                                        </FontIcon>
+                                        <TextBlock x:Name="call"
+                                           Text="تماس کالبک"
+                                           FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                                           Grid.Row="1"
+                                           Margin="0,4,0,0"
+                                           LineHeight="14"
+                                           Style="{StaticResource TextStyle}"
+                                           HorizontalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </Grid>
                 </StackPanel>
 
                 <Grid x:Name="BugReportUploadPopup" Grid.Row="2" Margin="0,20,0,20" Visibility="Collapsed">
@@ -368,9 +408,9 @@
             </CommandBar>
         </Grid>
 
-		<webui:WebView2 x:Name="Browser" 
+        <webui:WebView2 x:Name="Browser" 
                         Grid.Column="1"
 						Source="{x:Bind ViewModel.SourceUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-		</webui:WebView2>
-	</Grid>
+        </webui:WebView2>
+    </Grid>
 </Page>

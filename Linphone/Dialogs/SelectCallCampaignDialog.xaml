@@ -1,0 +1,32 @@
+﻿<ContentDialog
+    x:Class="BelledonneCommunications.Linphone.Dialogs.SelectCallCampaignDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BelledonneCommunications.Linphone.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="TITLE"
+    FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+    FlowDirection="RightToLeft"
+    DefaultButton="Primary"
+    PrimaryButtonText="بلی"
+    PrimaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb" Text="لطفاً کمپین مورد نظر را انتخاب کنید:"/>
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+    
+    <Grid>
+        <ComboBox Grid.Column="0"
+                  x:Name="AgentActiveCallCampaigns"
+                  FontFamily="/Assets/Fonts/IRANSansWeb.ttf#IRANSansWeb"
+                  FlowDirection="RightToLeft" 
+                  PlaceholderText="کمپین‌های تماس فعال"
+                  HorizontalAlignment="Stretch">
+        </ComboBox>
+    </Grid>
+</ContentDialog>
